@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: a <a@student.42.fr>                        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/14 11:44:13 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/15 09:08:22 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/15 10:51:58 by a                ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include <sys/socket.h>    //=> Socket fct
 # include <netinet/in.h>    //=> For sockaddr_in
 # include <cstdlib>         //=> exit()
-# include <iostream>
+# include <iostream>        //std lib
 # include <unistd.h>
 
 // struct sockaddr_in {
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
     int bind_fd;
     int listen_fd;
     int connection;
-    char buff[100];
+    char *buff;
 
     sock_fd = socket(AF_INET, SOCK_STREAM, 0); // <<<< SOCKET
     if (sock_fd == -1)
@@ -122,11 +122,16 @@ int main(int argc, char **argv)
         exit (EXIT_FAILURE);
     }
 
-    auto bytesRead = read(connection, buff, 100);
-    std::cout << "The message was : " << buff;
+    while (1)
+    {
+        buff = (char *)malloc (sizeof(char) * 100);
+        auto bytesRead = read(connection, buff, 100);
+        std::cout << "The message was : " << buff;
 
-    std::string response = "Good One \n";
-    send(connection, response.c_str(), response.size(), 0);
+        std::string response = "Good One \n";
+        send(connection, response.c_str(), response.size(), 0);
+        free (buff);
+    }
 
     close (connection);
     close (sock_fd);
