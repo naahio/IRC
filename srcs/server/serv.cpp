@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/16 13:59:40 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/16 15:17:45 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     int rc               = TRUE;
     int on               = TRUE;
     int socket_fd        = F_INIT;
-    int new_sd           = F_INIT;
+    int new_fd           = F_INIT;
     int desc_ready       = FALSE;
     int end_server       = FALSE;
     int compress_array   = FALSE;
@@ -85,6 +85,96 @@ int main(int argc, char **argv)
         exit (EXIT_FAILURE);
     }
 
-    //
+    memset(fds, 0, sizeof(fds)); // init the poll struct
 
+    fds[0].fd[0] = socket_fd;
+    fds[0].events = POLLIN;
+
+    timeout = (3 * 60 * 1000); // set the timeout  to 3 min
+    do
+    {
+        std::cout << "Waiting for a poll . . . " << std::endl;
+        rc = poll(fds, nfds, timeout);
+        if (rc < 0)
+        {
+            std::cout << "FAILED to poll . . . " << std::endl;
+            break;
+        }
+        if (rc == 0)
+        {
+            std::cout << "POLL : time out !" << std::endl;
+            break;
+        }
+        current_size = nfds;
+        i = 0;
+        while (i < current_size)
+        {
+            if (fds[i].revents == 0) // get the fd that listen and check if connected
+                continue;
+            if (fds[i].revents != POLLIN) // unexpected result
+            {
+                std::cout << "Error ! revents = : " << fds[i].revents << std::endl;
+                end_server = TRUE;
+                break; 
+            }
+            if (fds[i].fd == socket_fd)
+            {
+                std::cout << "Socket readable and redy to get msgs . . . " << std::endl;
+                do
+                {
+                    // check if we accept all the connection or not, and check the errno (all connection accepted)
+                    new_fd = accept(socket_fd, NULL, NULL);
+                    if (new_fd < 0)
+                    {
+                        if (errno != EWOULDBLOCK)
+                        {
+                            std::cout << "FAILED at accepting connection ! " << std::endl;
+                            end_server = TRUE; 
+                        }
+                        break;
+                    }
+                    std::cout << "NEW Connection detected . . ." << std::endl;
+                    fds[nfds].fd = new_fd;
+                    fds[nfds].events = POLLIN;
+                    nfds++;
+                }while (new_fd != -1);
+            }
+            else
+            {
+                std::cout << "A new fd (" << fds[i].fd << ") is readdable . . . " <<std::endl;
+                close_conn = FALSE;
+                do
+                {
+                    rc = recv(fds[i].fd, buffer, sizeof(buffer), 0);
+                    if (rc < 0)
+                    {
+                        if (errno != EWOULDBLOCK)
+                        {
+                            std::cout << "FAILED to receive a msg !" << std::endl;
+                            close_conn = TRUE;
+                        }
+                        break;
+                    }
+                    if (rc == 0)
+                    {
+                        std::cout << "Connection Closed . . . " << std::endl;
+                        close_conn = TRUE;
+                        break; 
+                    }
+                    len = rc;
+                    std::cout << len << "bytes received !" << std::endl;
+                    rc = send(fds[i].fd, buffer, len, 0);
+                    if (rc < 0)
+                    {
+                        std::cout << "FAILED to send and answer to the client" << std::cout
+                        close_conn = TRUE;
+                        break;
+                    }
+                } while (TRUE);
+            }
+            
+            i++;
+        }
+    } while (!end_server);
+    
 }
