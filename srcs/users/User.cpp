@@ -1,21 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   msg.cpp                                            :+:      :+:    :+:   */
+/*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/08/15 08:54:42 by a                 #+#    #+#             */
-/*   Updated: 2022/08/18 11:22:26 by mbabela          ###   ########.fr       */
+/*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
+/*   Updated: 2022/08/18 11:58:02 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "msg.hpp"
+# include "User.hpp"
 
-msg::msg()
+User::User()
 {
 }
 
-msg::~msg()
+User::User(fd)
+{
+    this->fd = fd;
+    this->username = NULL;
+    this->nickname = NULL;
+    this->password = NULL;
+    this->is_name  = false;
+    this->is_nick  = false;
+    this->is_pass  = false;
+    this->is_Auth  = false; 
+}
+
+User::~User()
 {
 }
+
