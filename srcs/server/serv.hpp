@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/16 13:55:19 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/18 10:17:05 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@
 # define F_INIT         -1
 # define BUFF_SIZE      100
 # define POLL_SIZE      200
-# define MAX_CONN       20
+# define MAX_CONN       32
 
 
 #endif

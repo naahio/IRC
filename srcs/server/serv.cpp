@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/16 15:17:45 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/18 10:33:49 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     int on               = TRUE;
     int socket_fd        = F_INIT;
     int new_fd           = F_INIT;
-    int desc_ready       = FALSE;
+    int desc_ready;
     int end_server       = FALSE;
     int compress_array   = FALSE;
     int close_conn;
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 
     memset(fds, 0, sizeof(fds)); // init the poll struct
 
-    fds[0].fd[0] = socket_fd;
+    fds[0].fd = socket_fd;
     fds[0].events = POLLIN;
 
     timeout = (3 * 60 * 1000); // set the timeout  to 3 min
@@ -106,8 +106,8 @@ int main(int argc, char **argv)
             break;
         }
         current_size = nfds;
-        i = 0;
-        while (i < current_size)
+        // i = 0;
+        for (i=0; i < current_size; i++)
         {
             if (fds[i].revents == 0) // get the fd that listen and check if connected
                 continue;
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
                         }
                         break;
                     }
-                    std::cout << "NEW Connection detected . . ." << std::endl;
+                    std::cout << "NEW Connection detected "<< new_fd << std::endl;
                     fds[nfds].fd = new_fd;
                     fds[nfds].events = POLLIN;
                     nfds++;
@@ -166,15 +166,48 @@ int main(int argc, char **argv)
                     rc = send(fds[i].fd, buffer, len, 0);
                     if (rc < 0)
                     {
-                        std::cout << "FAILED to send and answer to the client" << std::cout
+                        std::cout << "FAILED to send and answer to the client " << std::endl;
                         close_conn = TRUE;
                         break;
                     }
                 } while (TRUE);
+                if (close_conn)
+                {
+                    close (fds[i].fd);
+                    fds[i].fd = -1;
+                    compress_array = TRUE;
+                }
             }
-            
-            i++;
+            // i++;
         }
-    } while (!end_server);
+        if (compress_array)
+        {
+            compress_array = FALSE;
+            // i = 0;
+            for (i = 0; i < nfds; i++)
+            {
+                if (fds[i].fd == -1)
+                {
+                    // j = i;
+                    for (j = i; j < nfds-1; j++)
+                    {
+                        fds[j].fd = fds[j+1].fd;
+                        // j++;
+                    }
+                    i--;
+                    nfds--;
+                }
+                // i++;
+            }
+        }
+    } while (end_server == FALSE);
     
+    // i = 0;
+    for (i = 0; i < nfds; i++)
+    {
+        if (fds[i].fd >= 0)
+            close (fds[i].fd);
+        // i++;
+    }
+    return (0);
 }
