@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/18 11:58:07 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/18 13:24:07 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,16 +29,17 @@ class User
 
     public:
         User();
-        User(fd);
+        User(int fd);
         ~User();
-        bool        is_Auth()
-        std::string get_username() const;
-        std::string get_nickname() const;
-        std::string get_password() const;
+        std::string get_username() ;
+        std::string get_nickname() ;
+        std::string get_password() ;
 
-        void    set_username();
-        void    set_nickname();
-        void    set_password();
+        void    set_username(std::string user_name);
+        void    set_nickname(std::string nick_name);
+        void    set_password(std::string pass_word);
+
+        bool        check_auth();
 };
 
 

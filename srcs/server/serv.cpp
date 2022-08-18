@@ -6,11 +6,21 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/18 10:33:49 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/18 13:36:42 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "serv.hpp"
+
+
+Serv::Serv(/* args */)
+{
+}
+
+Serv::~Serv()
+{
+}
+
 
 int main(int argc, char **argv)
 {
@@ -32,6 +42,7 @@ int main(int argc, char **argv)
     int     i;
     int     j;
 
+                    Serv ser = Serv();
     // creating socket v6
 
     socket_fd = socket(AF_INET6, SOCK_STREAM, 0);
@@ -134,6 +145,11 @@ int main(int argc, char **argv)
                         break;
                     }
                     std::cout << "NEW Connection detected "<< new_fd << std::endl;
+                    User new_user = User(new_fd);
+                    std::cout << " ---- " << std::endl;
+                    ser.users.insert(std::pair<int, User>(new_fd, new_user));
+
+                    std::cout <<  ser.users.size() << std::endl;
                     fds[nfds].fd = new_fd;
                     fds[nfds].events = POLLIN;
                     nfds++;
