@@ -2,8 +2,8 @@
 
     to run :
         first terminal :
-            g++ ./srcs/server/serv.cpp -o serv
-            ./serv
+            g++ ./srcs/Serverer/Server.cpp -o Server
+            ./Server
         second terminal : 
             use *nc* or any equiv command like
                 nc -c localhost (127.0.0.1) with the assigned port (9999)

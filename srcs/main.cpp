@@ -1,48 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   serv.cpp                                           :+:      :+:    :+:   */
+/*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/18 13:36:42 by mbabela          ###   ########.fr       */
+/*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
+/*   Updated: 2022/08/19 10:45:01 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "serv.hpp"
-
-
-Serv::Serv(/* args */)
-{
-}
-
-Serv::~Serv()
-{
-}
-
+#include "Server.hpp"
 
 int main(int argc, char **argv)
 {
-    int len              = TRUE;
-    int rc               = TRUE;
-    int on               = TRUE;
-    int socket_fd        = F_INIT;
-    int new_fd           = F_INIT;
-    int desc_ready;
-    int end_server       = FALSE;
-    int compress_array   = FALSE;
-    int close_conn;
-    char buffer[BUFF_SIZE];
-    struct sockaddr_in6 addr;
-    int timeout;
-    struct pollfd       fds[POLL_SIZE];
-    int     nfds = TRUE;
-    int     current_size = FALSE;
-    int     i;
-    int     j;
-
-                    Serv ser = Serv();
+   
     // creating socket v6
 
     socket_fd = socket(AF_INET6, SOCK_STREAM, 0);
@@ -77,7 +49,7 @@ int main(int argc, char **argv)
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family = AF_INET6;
     memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-    addr.sin6_port = htons(SERVER_PORT);
+    addr.sin6_port = htons(ServerER_PORT);
     rc = bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr));
     if (rc < 0)
     {
@@ -125,7 +97,7 @@ int main(int argc, char **argv)
             if (fds[i].revents != POLLIN) // unexpected result
             {
                 std::cout << "Error ! revents = : " << fds[i].revents << std::endl;
-                end_server = TRUE;
+                end_Serverer = TRUE;
                 break; 
             }
             if (fds[i].fd == socket_fd)
@@ -140,16 +112,11 @@ int main(int argc, char **argv)
                         if (errno != EWOULDBLOCK)
                         {
                             std::cout << "FAILED at accepting connection ! " << std::endl;
-                            end_server = TRUE; 
+                            end_Serverer = TRUE; 
                         }
                         break;
                     }
                     std::cout << "NEW Connection detected "<< new_fd << std::endl;
-                    User new_user = User(new_fd);
-                    std::cout << " ---- " << std::endl;
-                    ser.users.insert(std::pair<int, User>(new_fd, new_user));
-
-                    std::cout <<  ser.users.size() << std::endl;
                     fds[nfds].fd = new_fd;
                     fds[nfds].events = POLLIN;
                     nfds++;
@@ -216,7 +183,7 @@ int main(int argc, char **argv)
                 // i++;
             }
         }
-    } while (end_server == FALSE);
+    } while (end_Serverer == FALSE);
     
     // i = 0;
     for (i = 0; i < nfds; i++)
