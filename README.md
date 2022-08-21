@@ -10,4 +10,6 @@
                     : nc -c 127.0.0.1 9999
         same command with the third terminal : 
             you will be able to notice that a multiple users created with a different Id
-    
+    21-08-2022:
+    ->  server class + hpp are created and well handled 
+    ->  the basic tests are working creating multiple client send and receive   msgs is working   

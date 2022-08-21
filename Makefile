@@ -3,18 +3,18 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+         #
+#    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/08/21 14:24:29 by mbabela          ###   ########.fr        #
+#    Updated: 2022/08/21 14:45:44 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		=	serv
 
-HEADERS		=	./server/server.hpp ./users/User.hpp
+HEADERS		=	./srcs/server/server.hpp ./srcs/users/User.hpp
 
-SRCS		=	main.cpp ./server/server.cpp ./users/User.cpp
+SRCS		=	srcs/main.cpp ./srcs/server/server.cpp ./srcs/users/User.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 
