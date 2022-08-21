@@ -199,13 +199,70 @@ int    Server::Creat_socket()
 
 int     Server::reusable_socket()
 {
-    this->rc = setsockopt(this->socket_fd, SOL_REUSEADDR, (char *)&this->on, sizeof(this->on));
+    this->rc = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
 
     if (this->rc < 0)
     {
-        std::cout << "Failed at setting socket option ! " << std::endl;
+        std::cout << "Failed at setting socket option ! errno : " << errno << std::endl;
         return (0); 
     }
     std::cout << "setting socket option . . . " << std::endl;
+    std::cout << "Done ! " << std::endl;
     return (1);
+}
+
+int     Server::nonblocking_socket()
+{
+    this->rc = ioctl(this->socket_fd, FIONBIO, (char *)&this->on);
+
+    if (this ->rc < 0)
+    {
+        std::cout << "Failed at making the socket non_blocking ! errno : " << errno << std::endl;
+        return (0);
+    }
+    std::cout << "making socket non blocking . . . " << std::endl;
+    std::cout << "Done !" << std::endl;
+    return (1);
+}
+
+
+int     Server::bind_socket()
+{
+    memset(&this->addr, 0, sizeof(this->addr));
+    this->addr.sin6_family = AF_INET6;
+    memcpy(&this->addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
+    addr.sin6_port = htons(SER_PORT);
+    this->rc = bind(this->socket_fd, (struct sockaddr *)&this->addr, sizeof(addr));
+    if (this->rc < 0)
+    {
+        std::cout << "Failed at binding the socket ! errno : " <<  errno << std::endl;
+        return (0);
+    }
+    std::cout << "getting PORT and IP . . . " << std::endl;
+    std::cout << "Done !" << std::endl;
+    return (1);
+}
+
+int     Server::listen_from_socket()
+{
+    this->rc = listen(this->socket_fd, MAX_CANON);
+
+    if (this->rc < 0)
+    {
+        std::cout << "Failed at listing ! errno : " << errno << std::endl;
+        return (0);
+    }
+    std::cout << "listing . . ." << std::endl;
+    return (1);
+}
+
+void    Server::poll_trait()
+{
+    std::cout << "setting poll structure . . ." << std::endl;
+    memset(this->fds(), 0, sizeof(this->fds()));
+
+    this->fds[0].fd = this->socket_fd;
+    this->fds[0].events = POLLIN;
+
+    std::cout << "Done !" << std::endl;
 }

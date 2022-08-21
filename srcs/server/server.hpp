@@ -37,7 +37,7 @@
 # define BUFF_SIZE      100
 # define POLL_SIZE      200
 # define MAX_CONN       32
-
+# define TIMEOUT        3 * 60 * 1000
 class Server
 {
     private:
@@ -95,9 +95,9 @@ class Server
 
         int     Creat_socket();
         int     reusable_socket();
-        void    nonblocking_socket();
-        void    bind_socket();
-        void    listen_from_socket();
+        int     nonblocking_socket();
+        int     bind_socket();
+        int     listen_from_socket();
         void    poll_trait();
         void    accept_connect();
         void    recv_msg();
