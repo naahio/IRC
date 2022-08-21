@@ -100,8 +100,7 @@ class Server
         int     listen_from_socket();
         void    poll_trait();
         void    accept_connect();
-        void    recv_msg();
-        void    send_msg();
+        void    recv_send_msg();
 
 
 };

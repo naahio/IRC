@@ -266,3 +266,60 @@ void    Server::poll_trait()
 
     std::cout << "Done !" << std::endl;
 }
+
+void     Server::accept_connect()
+{
+    std::cout << "Waiting for connection . . . " << std::endl;
+    do
+    {
+        this->new_fd = accept(this->socket_fd, NULL, NULL);
+        if (this->new_fd < 0)
+        {
+            if (errno != EWOULDBLOCK)
+            {
+                std::cout << "FAILED at accepting connection ! errno : " << errno << std::endl;
+                this->end_Serverer = TRUE; 
+            }
+            break;
+        }
+        std::cout << "NEW Connection detected "<< this->new_fd << std::endl;
+        this->fds[this->nfds].fd = this->new_fd;
+        this->fds[this->nfds].events = POLLIN;
+        this->nfds++;
+    }while (this->new_fd != -1);
+}
+
+void        Server::recv_send_msg(int i)
+{
+    std::cout <<  "receiving . . ." << std::endl;
+    this->close_conn = FALSE;
+    do
+    {
+        this->rc = recv(this->fds[i], this->buffer, sizeof(this->buffer), 0);
+        if (this->rc < 0)
+        {
+            if (errno != EWOULDBLOCK)
+            {
+                std::cout << "FAILED at receiving a msg ! errno : " << errno << std::endl;
+                this->close_conn = TRUE;
+            }
+            break;
+        }
+        if (this->rc == 0)
+        {
+            std::cout << "Connection closed . . . " << std::endl;
+            this->close_conn = TRUE;
+            break;
+        }
+        this->len = this->rc;
+        std::cout << len << "bytes received " << std::endl;
+        this->rc = send(this->fds[i].fd, this->buffer, sizeof(this->buffer), 0);
+        this->rc = send(this->fds[i].fd, "received succ >.<", sizeof("received succ >.<"), 0);
+        if (this->rc < 0)
+        {
+            std::cout << "FAILED to send an answer to the client ! " << std::endl;
+            this->close_conn = TRUE;
+            break;
+        }
+    }while (TRUE);
+}
