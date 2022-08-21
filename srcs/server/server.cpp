@@ -59,10 +59,10 @@ struct pollfd*        Server::get_fds()
     return (this->fds);
 }
 
-void        Server::set_fds(struct pollfd fds[POLL_SIZE])
-{
-    this->fds = fds;
-}
+// void        Server::set_fds(struct pollfd fds[POLL_SIZE])
+// {
+//     this->fds = fds;
+// }
 
 int Server::get_len()
 {
@@ -179,10 +179,10 @@ char*   Server::get_buffer()
     return (this->buffer);
 }
 
-void    Server::set_buffer(char buffer[BUFF_SIZE])
-{
-    this->buffer = buffer;
-}
+// void    Server::set_buffer(char buffer[BUFF_SIZE])
+// {
+//     this->buffer = buffer;
+// }
 
 int    Server::Creat_socket()
 {
@@ -259,7 +259,7 @@ int     Server::listen_from_socket()
 void    Server::poll_trait()
 {
     std::cout << "setting poll structure . . ." << std::endl;
-    memset(this->fds(), 0, sizeof(this->fds()));
+    memset(this->fds, 0, sizeof(this->fds));
 
     this->fds[0].fd = this->socket_fd;
     this->fds[0].events = POLLIN;
@@ -278,7 +278,7 @@ void     Server::accept_connect()
             if (errno != EWOULDBLOCK)
             {
                 std::cout << "FAILED at accepting connection ! errno : " << errno << std::endl;
-                this->end_Serverer = TRUE; 
+                this->end_Server = TRUE; 
             }
             break;
         }
@@ -295,7 +295,8 @@ void        Server::recv_send_msg(int i)
     this->close_conn = FALSE;
     do
     {
-        this->rc = recv(this->fds[i], this->buffer, sizeof(this->buffer), 0);
+        this->rc = recv(this->fds[i].fd, this->buffer, sizeof(this->buffer), 0);
+        std::cout << this->buffer << std::endl;s
         if (this->rc < 0)
         {
             if (errno != EWOULDBLOCK)
@@ -312,9 +313,16 @@ void        Server::recv_send_msg(int i)
             break;
         }
         this->len = this->rc;
-        std::cout << len << "bytes received " << std::endl;
-        this->rc = send(this->fds[i].fd, this->buffer, sizeof(this->buffer), 0);
-        this->rc = send(this->fds[i].fd, "received succ >.<", sizeof("received succ >.<"), 0);
+        std::cout << len << " bytes received " << std::endl;
+        // this->buffer[this->len] = '\0';
+        this->rc = send(this->fds[i].fd, this->buffer, this->rc, 0);
+        if (this->rc < 0)
+        {
+            std::cout << "FAILED to send an answer to the client ! " << std::endl;
+            this->close_conn = TRUE;
+            break;
+        }
+        this->rc = send(this->fds[i].fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
         if (this->rc < 0)
         {
             std::cout << "FAILED to send an answer to the client ! " << std::endl;

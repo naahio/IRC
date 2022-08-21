@@ -40,67 +40,67 @@
 # define TIMEOUT        3 * 60 * 1000
 class Server
 {
-    private:
-        std::map <int, User>    users;
-        struct sockaddr_in6     addr;
-        struct pollfd           fds[POLL_SIZE];
-        int                     len;
-        int                     rc;
-        int                     on;
-        int                     socket_fd;
-        int                     new_fd;
-        int                     desc_ready;
-        int                     end_Server;
-        int                     compress_array;
-        int                     close_conn;
-        char                    buffer[BUFF_SIZE];
-        int                     timeout;
-        int                     nfds;
-        int                     current_size;
+	private:
+		std::map <int, User>    users;
+		struct sockaddr_in6     addr;
+		struct pollfd           fds[POLL_SIZE];
+		int                     len;
+		int                     rc;
+		int                     on;
+		int                     socket_fd;
+		int                     new_fd;
+		int                     desc_ready;
+		int                     end_Server;
+		int                     compress_array;
+		int                     close_conn;
+		char                    buffer[BUFF_SIZE];
+		int                     timeout;
+		int                     nfds;
+		int                     current_size;
 
-    public:
-        Server();
-        ~Server();
+	public:
+		Server();
+		~Server();
 
-        std::map <int, User>    get_users();
-        void                    set_users(std::map <int, User> u_map);
-        struct sockaddr_in6     get_addr();
-        void                    set_addr(struct sockaddr_in6     addr);
-        struct pollfd*          get_fds();
-        void                    set_fds(struct pollfd fds[POLL_SIZE]);
-        int                     get_len();              
-        void                    set_len(int len);              
-        int                     get_rc();
-        void                    set_rc(int rc);
-        int                     get_socket_fd();
-        void                    set_socket_fd(int socket_fd);
-        int                     get_new_fd();
-        void                    set_new_fd(int new_fd);
-        int                     get_desc_ready();
-        void                    set_desc_ready(int fd_ready);
-        int                     get_end_Server();
-        void                    set_end_Server(int end_serv);
-        int                     get_compress_array();
-        void                    set_compress_array(int comp_arr);
-        int                     get_close_conn();
-        void                    set_close_conn(int close_con);
-        int                     get_timeout();
-        void                    set_timeout(int timeout);
-        int                     get_nfds();
-        void                    set_nfds(int nfds);
-        int                     get_current_size();
-        void                    set_current_size(int size);
-        char*                   get_buffer();
-        void                    set_buffer(char buffer[BUFF_SIZE]);
+		std::map <int, User>    get_users();
+		void                    set_users(std::map <int, User> u_map);
+		struct sockaddr_in6     get_addr();
+		void                    set_addr(struct sockaddr_in6     addr);
+		struct pollfd*          get_fds();
+		void                    set_fds(struct pollfd fds[POLL_SIZE]);
+		int                     get_len();              
+		void                    set_len(int len);              
+		int                     get_rc();
+		void                    set_rc(int rc);
+		int                     get_socket_fd();
+		void                    set_socket_fd(int socket_fd);
+		int                     get_new_fd();
+		void                    set_new_fd(int new_fd);
+		int                     get_desc_ready();
+		void                    set_desc_ready(int fd_ready);
+		int                     get_end_Server();
+		void                    set_end_Server(int end_serv);
+		int                     get_compress_array();
+		void                    set_compress_array(int comp_arr);
+		int                     get_close_conn();
+		void                    set_close_conn(int close_con);
+		int                     get_timeout();
+		void                    set_timeout(int timeout);
+		int                     get_nfds();
+		void                    set_nfds(int nfds);
+		int                     get_current_size();
+		void                    set_current_size(int size);
+		char*                   get_buffer();
+		void                    set_buffer(char buffer[BUFF_SIZE]);
 
-        int     Creat_socket();
-        int     reusable_socket();
-        int     nonblocking_socket();
-        int     bind_socket();
-        int     listen_from_socket();
-        void    poll_trait();
-        void    accept_connect();
-        void    recv_send_msg();
+		int     Creat_socket();
+		int     reusable_socket();
+		int     nonblocking_socket();
+		int     bind_socket();
+		int     listen_from_socket();
+		void    poll_trait();
+		void    accept_connect();
+		void    recv_send_msg(int i);
 
 
 };
