@@ -296,7 +296,8 @@ void        Server::recv_send_msg(int i)
     do
     {
         this->rc = recv(this->fds[i].fd, this->buffer, sizeof(this->buffer), 0);
-        std::cout << this->buffer << std::endl;s
+        this->buffer[this->rc] = '\0';
+        std::cout << this->buffer;
         if (this->rc < 0)
         {
             if (errno != EWOULDBLOCK)
@@ -314,7 +315,6 @@ void        Server::recv_send_msg(int i)
         }
         this->len = this->rc;
         std::cout << len << " bytes received " << std::endl;
-        // this->buffer[this->len] = '\0';
         this->rc = send(this->fds[i].fd, this->buffer, this->rc, 0);
         if (this->rc < 0)
         {
