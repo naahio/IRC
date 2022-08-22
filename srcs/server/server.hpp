@@ -25,18 +25,19 @@
 # include <unistd.h>
 # include <iterator>
 # include <map>
+# include <algorithm>
+# include <fcntl.h>
+# include <arpa/inet.h>
 
 # include "../users/User.hpp"
-
-
-# define SER_PORT 9999
+# include "../tools/tool.hpp"
 
 # define TRUE           1
 # define FALSE          0
 # define F_INIT         -1
 # define BUFF_SIZE      100
-# define POLL_SIZE      200
-# define MAX_CONN       32
+# define POLL_SIZE      24
+# define MAX_CONN       2
 # define TIMEOUT        3 * 60 * 1000
 class Server
 {
@@ -57,7 +58,7 @@ class Server
 		int                     timeout;
 		int                     nfds;
 		int                     current_size;
-
+		int						ser_port;
 	public:
 		Server();
 		~Server();
@@ -92,6 +93,9 @@ class Server
 		void                    set_current_size(int size);
 		char*                   get_buffer();
 		void                    set_buffer(char buffer[BUFF_SIZE]);
+		int						get_serv_port();
+		void					set_serv_port(int port);
+
 
 		int     Creat_socket();
 		int     reusable_socket();

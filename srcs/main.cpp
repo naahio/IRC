@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/21 14:18:52 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/22 13:24:58 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,25 @@
 
 int main(int argc, char **argv)
 {
-   (void)argc;
-   (void)argv;
-	Server serv = Server();
 	int    i;
 	int    j;
+	
+	if (argc != 3)
+	{
+		std::cout << "Error : " <<std::endl;
+		std::cout << "Parmater format : ./serv <PORT> <PASSWORD>" <<std::endl;
+		exit (EXIT_FAILURE);
+	}
+	
+	if(!isNumeric(argv[1]))
+	{
+		std::cout << "error : <PORT> must be a <short int>" <<std::endl;
+		exit (EXIT_FAILURE);
+	}
 
+	Server serv = Server();
+	serv.set_serv_port(std::stoi(argv[1]));
+	std::cout << "Log in with : " << argv[2] << std::endl;
 	if (!serv.Creat_socket())
 		exit (EXIT_FAILURE); 
 
@@ -71,8 +84,9 @@ int main(int argc, char **argv)
 			if (serv.get_fds()[i].revents != POLLIN)
 			{
 				std::cout << "Error ! revents = : " << serv.get_fds()[i].revents << std::endl;
-				serv.set_end_Server(TRUE);
-				break; 
+				serv.set_end_Server(FALSE); 
+				close (serv.get_fds()[i].fd); // <-- garb val  returned
+				// break; 
 			}
 			if (serv.get_fds()[i].fd == serv.get_socket_fd())
 				serv.accept_connect();
@@ -81,7 +95,6 @@ int main(int argc, char **argv)
 				serv.recv_send_msg(i);
 				if (serv.get_close_conn())
 				{
-					close (serv.get_fds()[i].fd);
 					serv.get_fds()[i].fd = -1;
 					serv.set_compress_array(TRUE);
 				}

@@ -179,6 +179,16 @@ char*   Server::get_buffer()
     return (this->buffer);
 }
 
+int     Server::get_serv_port()
+{
+    return (this->ser_port);
+}
+
+void    Server::set_serv_port(int port)
+{
+    this->ser_port = port;
+}
+
 // void    Server::set_buffer(char buffer[BUFF_SIZE])
 // {
 //     this->buffer = buffer;
@@ -187,7 +197,7 @@ char*   Server::get_buffer()
 int    Server::Creat_socket()
 {
     this->socket_fd = socket(AF_INET6, SOCK_STREAM, 0);
-
+    std::cout << this->socket_fd << std::endl;
     if (this->socket_fd < 0)
     {
         std::cout << "Failed to create socket, errno : " << errno << std::endl;
@@ -213,8 +223,8 @@ int     Server::reusable_socket()
 
 int     Server::nonblocking_socket()
 {
-    this->rc = ioctl(this->socket_fd, FIONBIO, (char *)&this->on);
-
+    // this->rc = ioctl(this->socket_fd, FIONBIO, (char *)&this->on);
+    this->rc = fcntl(this->socket_fd, F_SETFL, O_NONBLOCK);
     if (this ->rc < 0)
     {
         std::cout << "Failed at making the socket non_blocking ! errno : " << errno << std::endl;
@@ -231,7 +241,7 @@ int     Server::bind_socket()
     memset(&this->addr, 0, sizeof(this->addr));
     this->addr.sin6_family = AF_INET6;
     memcpy(&this->addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-    addr.sin6_port = htons(SER_PORT);
+    addr.sin6_port = htons(this->ser_port);
     this->rc = bind(this->socket_fd, (struct sockaddr *)&this->addr, sizeof(addr));
     if (this->rc < 0)
     {
@@ -245,7 +255,7 @@ int     Server::bind_socket()
 
 int     Server::listen_from_socket()
 {
-    this->rc = listen(this->socket_fd, MAX_CANON);
+    this->rc = listen(this->socket_fd, MAX_CONN);
 
     if (this->rc < 0)
     {
@@ -286,6 +296,7 @@ void     Server::accept_connect()
         this->fds[this->nfds].fd = this->new_fd;
         this->fds[this->nfds].events = POLLIN;
         this->nfds++;
+        // USER  -> fd + IP -> inet_ntoa IPv4
     }while (this->new_fd != -1);
 }
 
@@ -316,13 +327,6 @@ void        Server::recv_send_msg(int i)
         this->len = this->rc;
         std::cout << len << " bytes received " << std::endl;
         this->rc = send(this->fds[i].fd, this->buffer, this->rc, 0);
-        if (this->rc < 0)
-        {
-            std::cout << "FAILED to send an answer to the client ! " << std::endl;
-            this->close_conn = TRUE;
-            break;
-        }
-        this->rc = send(this->fds[i].fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
         if (this->rc < 0)
         {
             std::cout << "FAILED to send an answer to the client ! " << std::endl;

@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/18 13:24:44 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/22 11:46:00 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ User::User()
 
 User::User(int fd)
 {
-    this->fd = fd;
+    // this->fd = fd;
+    this->_IP      = fd;
     this->username = "";
     this->nickname = "";
     this->password = "";
@@ -31,7 +32,6 @@ User::User(int fd)
 
 User::~User()
 {
-    std::cout << "User has been deleted !" <<std::endl;
 }
 
 std::string User::get_username()
