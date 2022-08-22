@@ -30,9 +30,8 @@
 *.exe
 *.out
 *.app
+ircserv
 
 #others
 .history
 .vscode
-
-serv

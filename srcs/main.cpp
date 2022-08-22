@@ -3,110 +3,80 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/21 14:18:52 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/22 20:07:01 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./server/server.hpp"
 
+void	close_server(Server & serv, int exit_status)
+{
+	for (int i = 0; i < serv.get_nfds(); i++)
+	{
+		if (serv.get_fds()[i].fd != 0)
+			close(serv.get_fds()[i].fd);
+	}
+	exit(exit_status);
+}
+
 int main(int argc, char **argv)
 {
-   (void)argc;
-   (void)argv;
-	Server serv = Server();
-	int    i;
-	int    j;
+	(void)	argc;
+	(void)	argv;
+	Server	serv = Server();
 
-	if (!serv.Creat_socket())
-		exit (EXIT_FAILURE); 
-
-	if (!serv.reusable_socket())
-	{
-		close (serv.get_socket_fd());
-		exit (EXIT_FAILURE);
-	}
-
-	if (!serv.nonblocking_socket())
-	{
-		close (serv.get_socket_fd());
-		exit (EXIT_FAILURE);
-	}
-
-	if (!serv.bind_socket())
-	{
-		close (serv.get_socket_fd());
-		exit (EXIT_FAILURE);
-	}
-
-	if (!serv.listen_from_socket())
-	{
-		close (serv.get_socket_fd());
-		exit (EXIT_FAILURE);
-	}
+	if (!serv.Creat_socket()
+		|| !serv.reusable_socket()
+		|| !serv.nonblocking_socket()
+		|| !serv.bind_socket()
+		|| !serv.listen_from_socket())
+		close_server(serv, EXIT_FAILURE);
 
 	serv.poll_trait();
 
 	do
 	{
 		std::cout << "Waiting for a poll . . . " << std::endl;
-		serv.set_rc(poll(serv.get_fds(), serv.get_nfds(), TIMEOUT));
-		if (serv.get_rc() < 0)
+		int	rc = poll(serv.get_fds(), serv.get_nfds(), TIMEOUT);
+		if (rc < 0)
 		{
 			std::cout << "FAILED to poll . . . " << std::endl;
-			break;
+			close_server(serv, EXIT_FAILURE);
 		}
-		if (serv.get_rc() == 0)
+		if (rc == 0)
 		{
 			std::cout << "POLL : time out !" << std::endl;
-			break;
+			close_server(serv, EXIT_FAILURE);
 		}
-		serv.set_current_size(serv.get_nfds());
-		for (i=0; i < serv.get_current_size(); i++)
+		for (int i = 0; i < serv.get_nfds(); i++)
 		{
 			if (serv.get_fds()[i].revents == 0)
 				continue;
 			if (serv.get_fds()[i].revents != POLLIN)
-			{
-				std::cout << "Error ! revents = : " << serv.get_fds()[i].revents << std::endl;
-				serv.set_end_Server(TRUE);
-				break; 
-			}
+				std::cout << "Error ! revents : " << serv.get_fds()[i].revents << std::endl;
 			if (serv.get_fds()[i].fd == serv.get_socket_fd())
-				serv.accept_connect();
+			{
+				if (!serv.accept_connections())
+					close_server(serv, EXIT_FAILURE);
+			}
 			else
 			{
-				serv.recv_send_msg(i);
-				if (serv.get_close_conn())
+				if (!serv.recv_send_msg(serv.get_fds()[i].fd))
 				{
-					close (serv.get_fds()[i].fd);
-					serv.get_fds()[i].fd = -1;
-					serv.set_compress_array(TRUE);
-				}
-			}
-		}
-		if (serv.get_compress_array())
-		{
-			serv.set_compress_array(FALSE);
-			for (i = 0; i < serv.get_nfds(); i++)
-			{
-				if (serv.get_fds()[i].fd == -1)
-				{
-					for (j = i; j < serv.get_nfds() - 1; j++)
-						serv.get_fds()[j].fd = serv.get_fds()[j + 1].fd;
-					i--;
+					close(serv.get_fds()[i].fd);
+					for (int j = i; j < serv.get_nfds() - 1; j++)
+					{
+						memcpy(&serv.get_fds()[j], &serv.get_fds()[j + 1], sizeof(struct pollfd));
+					}
 					serv.set_nfds(serv.get_nfds() - 1);
+					i --;
 				}
 			}
 		}
-	} while (serv.get_end_Server() == FALSE);
+	} while (true);
 	
-	for (i = 0; i < serv.get_nfds(); i++)
-	{
-		if (serv.get_fds()[i].fd >= 0)
-			close (serv.get_fds()[i].fd);
-	}
-	return (0);
+	return (EXIT_SUCCESS);
 }
