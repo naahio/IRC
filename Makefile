@@ -6,11 +6,11 @@
 #    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/08/21 14:45:44 by hel-makh         ###   ########.fr        #
+#    Updated: 2022/08/22 11:52:20 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME		=	serv
+NAME		=	ircserv
 
 HEADERS		=	./srcs/server/server.hpp ./srcs/users/User.hpp
 
@@ -20,22 +20,22 @@ OBJS		=	$(SRCS:.cpp=.o)
 
 FLAGS		=	-Wall -Wextra -Werror -std=c++98
 
-RM		=	rm -f
+RM			=	rm -f
 
 %.o:%.cpp	$(HEADERS)
-		c++ $(FLAGS) -c $< -o $@
+			c++ $(FLAGS) -c $< -o $@
 
 $(NAME):	$(OBJS) $(HEADERS)
-		c++ $(FLAGS) $(OBJS) -o $(NAME)
+			c++ $(FLAGS) $(OBJS) -o $(NAME)
 
 all:		$(NAME)
 
 clean:
-		$(RM) $(OBJS)
+			$(RM) $(OBJS)
 
 fclean:		clean
-		$(RM) $(NAME)
+			$(RM) $(NAME)
 
-re:		fclean all
+re:			fclean all
 
 .PHONY:		all clean fclean re

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/18 13:24:44 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/22 19:16:11 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,53 +18,53 @@ User::User()
 
 User::User(int fd)
 {
-    this->fd = fd;
-    this->username = "";
-    this->nickname = "";
-    this->password = "";
-    this->is_name  = false;
-    this->is_nick  = false;
-    this->is_pass  = false;
+	this->fd = fd;
+	this->username = "";
+	this->nickname = "";
+	this->password = "";
+	this->is_name  = false;
+	this->is_nick  = false;
+	this->is_pass  = false;
 
-    std::cout << "user : " << fd << " added" << std::endl;
+	std::cout << "user : " << fd << " added" << std::endl;
 }
 
 User::~User()
 {
-    std::cout << "User has been deleted !" <<std::endl;
+	std::cout << "User has been deleted !" <<std::endl;
 }
 
-std::string User::get_username()
+std::string	User::get_username()
 {
-    return (this->username);
+	return (this->username);
 }
 
-std::string User::get_nickname()
+std::string	User::get_nickname()
 {
-    return (this->nickname);
+	return (this->nickname);
 }
 
-std::string User::get_password()
+std::string	User::get_password()
 {
-    return (this->password);
+	return (this->password);
 }
 
-void    User::set_username(std::string user_name)
+void	User::set_username(std::string user_name)
 {
-    this->username = user_name;
+	this->username = user_name;
 }
 
-void    User::set_nickname(std::string nick_name)
+void	User::set_nickname(std::string nick_name)
 {
-    this->nickname = nick_name;
+	this->nickname = nick_name;
 }
 
-void    User::set_password(std::string password)
+void	User::set_password(std::string password)
 {
-    this->password = password;
+	this->password = password;
 }
 
-bool User::check_auth()
+bool	User::check_auth()
 {
-    return ( (this->is_name && this->is_nick && this->is_pass));
+	return ((this->is_name && this->is_nick && this->is_pass));
 }
