@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 19:12:18 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/22 20:07:02 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ class Server
 		int		bind_socket();
 		int		listen_from_socket();
 		void	poll_trait();
-		bool	accept_connection();
+		bool	accept_connections();
 		bool	recv_send_msg(int fd);
 };
 

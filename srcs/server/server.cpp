@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 19:15:28 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/22 20:18:59 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ int		Server::listen_from_socket()
 
 void	Server::poll_trait()
 {
-	std::cout << "setting poll structure . . ." << std::endl;
+	std::cout << "setting up poll structure . . ." << std::endl;
 	memset(this->fds, 0, sizeof(this->fds));
 
 	this->fds[0].fd = this->socket_fd;
@@ -144,11 +144,11 @@ void	Server::poll_trait()
 	std::cout << "Done !" << std::endl;
 }
 
-bool	Server::accept_connection()
+bool	Server::accept_connections()
 {
 	int	new_fd = -1;
 
-	std::cout << "Waiting for connection . . . " << std::endl;
+	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
 		new_fd = accept(this->socket_fd, NULL, NULL);

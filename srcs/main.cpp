@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 19:12:37 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/22 20:07:01 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 				std::cout << "Error ! revents : " << serv.get_fds()[i].revents << std::endl;
 			if (serv.get_fds()[i].fd == serv.get_socket_fd())
 			{
-				if (!serv.accept_connection())
+				if (!serv.accept_connections())
 					close_server(serv, EXIT_FAILURE);
 			}
 			else
@@ -69,9 +69,7 @@ int main(int argc, char **argv)
 					close(serv.get_fds()[i].fd);
 					for (int j = i; j < serv.get_nfds() - 1; j++)
 					{
-						serv.get_fds()[j].fd = serv.get_fds()[j + 1].fd;
-						serv.get_fds()[j].events = serv.get_fds()[j + 1].events;
-						serv.get_fds()[j].revents = serv.get_fds()[j + 1].revents;
+						memcpy(&serv.get_fds()[j], &serv.get_fds()[j + 1], sizeof(struct pollfd));
 					}
 					serv.set_nfds(serv.get_nfds() - 1);
 					i --;
