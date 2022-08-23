@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 20:07:01 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/23 09:10:18 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,10 @@ int main(int argc, char **argv)
 	(void)	argv;
 	Server	serv = Server();
 
-	if (!serv.Creat_socket()
-		|| !serv.reusable_socket()
+	if (!serv.Creat_socket())
+		exit(EXIT_FAILURE);
+	
+	if(!serv.reusable_socket()
 		|| !serv.nonblocking_socket()
 		|| !serv.bind_socket()
 		|| !serv.listen_from_socket())
