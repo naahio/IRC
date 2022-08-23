@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 12:35:59 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/23 12:35:40 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,22 +19,25 @@
 class User
 {
     private:
-        // int         fd;
+        int         fd;
         std::string username;
-        std::string nickname; //unique
+        std::string nickname;
         std::string password;
         bool        is_name;
         bool        is_nick;
         bool        is_pass;
-        int         _IP;
+        std::string _IP;
 
     public:
         User();
-        User(int fd);
+        User(std::string ip, int fd);
+        User(const User &user);
         ~User();
         std::string get_username() ;
         std::string get_nickname() ;
         std::string get_password() ;
+        std::string get_ip();
+        int         get_fd();
 
         void    set_username(std::string user_name);
         void    set_nickname(std::string nick_name);
@@ -43,7 +46,6 @@ class User
 
         bool        check_auth();
 };
-
 
 
 
