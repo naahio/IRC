@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 13:08:22 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/23 14:59:56 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void	close_server(Server & serv, int exit_status)
 		if (serv.get_fds()[i].fd != 0)
 			close(serv.get_fds()[i].fd);
 	}
+	std::cout << "Server Closed." << std::endl;
 	exit(exit_status);
 }
 
@@ -28,20 +29,19 @@ int main(int argc, char **argv)
 	{
 		std::cout << "Error : " <<std::endl;
 		std::cout << "Parmater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
-		exit (EXIT_FAILURE);
+		return (EXIT_FAILURE);
 	}
 	
 	if(!isNumeric(argv[1]) && !strcmp(argv[2], PASSWORD))
 	{
 		std::cout << "error : <PORT> must be a <short int>" <<std::endl;
-		exit (EXIT_FAILURE);
+		return (EXIT_FAILURE);
 	}
 
 	Server serv = Server(std::stoi(argv[1]), argv[2]);
-	std::cout << "Log in with : " << serv.get_pass() << std::endl;
 
-	if (!serv.Creat_socket())
-		exit(EXIT_FAILURE);
+	if (!serv.Create_socket())
+		return (EXIT_FAILURE);
 	
 	if(!serv.reusable_socket()
 		|| !serv.nonblocking_socket()
