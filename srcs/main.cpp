@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 09:10:18 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/23 13:08:22 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,21 @@ void	close_server(Server & serv, int exit_status)
 
 int main(int argc, char **argv)
 {
-	(void)	argc;
-	(void)	argv;
-	Server	serv = Server();
+	if (argc != 3)
+	{
+		std::cout << "Error : " <<std::endl;
+		std::cout << "Parmater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
+		exit (EXIT_FAILURE);
+	}
+	
+	if(!isNumeric(argv[1]) && !strcmp(argv[2], PASSWORD))
+	{
+		std::cout << "error : <PORT> must be a <short int>" <<std::endl;
+		exit (EXIT_FAILURE);
+	}
+
+	Server serv = Server(std::stoi(argv[1]), argv[2]);
+	std::cout << "Log in with : " << serv.get_pass() << std::endl;
 
 	if (!serv.Creat_socket())
 		exit(EXIT_FAILURE);

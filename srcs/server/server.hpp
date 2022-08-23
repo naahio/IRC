@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 20:07:02 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/23 13:48:55 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,35 +26,44 @@
 # include <iterator>
 # include <map>
 # include <fcntl.h>
+# include <arpa/inet.h>
 
 # include "../users/User.hpp"
-
-# define SER_PORT		9999
+# include "../tools/tool.hpp"
 
 # define BUFF_SIZE		1024
 # define MAX_CONN		32
 # define TIMEOUT		3 * 60 * 1000
+# define PASSWORD		"PARAPAPAPI"
 
+// template <typename T, class E>  
 class Server
 {
 	private:
-		std::map <int, User>	users;
+		std::map <int, User>			users;
+		// std::map <std::string, Channel>	channels;
 		int						socket_fd;
 		struct pollfd			fds[MAX_CONN];
 		int						nfds;
 		char					buffer[BUFF_SIZE];
 		int						on;
+		int						port;
+		std::string				password;
 
 	public:
-		Server();
+		Server(int port, std::string password);
 		~Server();
 
-		std::map <int, User>	get_users();
+		
+		std::map <int, User> &	get_users();
 		void					set_users(std::map <int, User> u_map);
 		struct pollfd*			get_fds();
 		int						get_socket_fd();
 		int						get_nfds();
 		void					set_nfds(int nfds);
+		int						get_port();
+		void					set_port(int port);
+		std::string				get_pass();
 
 		int		Creat_socket();
 		int		reusable_socket();

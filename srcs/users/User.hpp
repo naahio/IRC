@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 19:16:58 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/23 12:35:40 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,28 +18,35 @@
 
 class User
 {
-	private:
-		int			fd;
-		std::string	username;
-		std::string	nickname;
-		std::string	password;
-		bool		is_name;
-		bool		is_nick;
-		bool		is_pass;
+    private:
+        int         fd;
+        std::string username;
+        std::string nickname;
+        std::string password;
+        bool        is_name;
+        bool        is_nick;
+        bool        is_pass;
+        std::string _IP;
 
-	public:
-		User();
-		User(int fd);
-		~User();
-		std::string	get_username() ;
-		std::string	get_nickname() ;
-		std::string	get_password() ;
+    public:
+        User();
+        User(std::string ip, int fd);
+        User(const User &user);
+        ~User();
+        std::string get_username() ;
+        std::string get_nickname() ;
+        std::string get_password() ;
+        std::string get_ip();
+        int         get_fd();
 
-		void	set_username(std::string user_name);
-		void	set_nickname(std::string nick_name);
-		void	set_password(std::string pass_word);
+        void    set_username(std::string user_name);
+        void    set_nickname(std::string nick_name);
+        void    set_password(std::string pass_word);
+        
 
-		bool	check_auth();
+        bool        check_auth();
 };
+
+
 
 #endif

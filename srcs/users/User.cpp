@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 19:16:11 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/23 11:58:56 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,22 +16,25 @@ User::User()
 {
 }
 
-User::User(int fd)
+User::User(std::string ip, int fd)
 {
-	this->fd = fd;
-	this->username = "";
-	this->nickname = "";
-	this->password = "";
-	this->is_name  = false;
-	this->is_nick  = false;
-	this->is_pass  = false;
+    this->_IP      = ip;
+	this->fd	   = fd;
+    this->username = "";
+    this->nickname = "";
+    this->password = "";
+    this->is_name  = false;
+    this->is_nick  = false;
+    this->is_pass  = false;
+}
 
-	std::cout << "user : " << fd << " added" << std::endl;
+User::User(const User &u)
+{
+	*this = u;
 }
 
 User::~User()
 {
-	std::cout << "User has been deleted !" <<std::endl;
 }
 
 std::string	User::get_username()
@@ -47,6 +50,16 @@ std::string	User::get_nickname()
 std::string	User::get_password()
 {
 	return (this->password);
+}
+
+std::string	User::get_ip()
+{
+	return (this->_IP);
+}
+
+int		User::get_fd()
+{
+	return (this->fd);
 }
 
 void	User::set_username(std::string user_name)

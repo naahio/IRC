@@ -3,20 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 09:17:28 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/23 14:05:55 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "server.hpp"
 
-Server::Server()
+Server::Server(int port, std::string pass)
 {
 	std::cout << "Creating Server . . . " << std::endl;
 	std::cout << "updating parameter . . . " << std::endl;
-
+	this->port = port;
+	this->password = pass;
 	this->nfds = 0;
 }
 
@@ -25,7 +26,7 @@ Server::~Server()
 	std::cout << "Server deleted." << std::endl;
 }
 
-std::map<int, User>	Server::get_users()
+std::map<int, User>	& Server::get_users()
 {
 	return (this->users);
 }
@@ -55,9 +56,14 @@ void	Server::set_nfds(int nfds)
 	this->nfds = nfds;
 }
 
+std::string		Server::get_pass()
+{
+	return (this->password);
+}
+
 int		Server::Creat_socket()
 {
-	this->socket_fd = socket(AF_INET6, SOCK_STREAM, 0);
+	this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 
 	if (this->socket_fd < 0)
 	{
@@ -102,14 +108,14 @@ int		Server::nonblocking_socket()
 
 int		Server::bind_socket()
 {
-	struct sockaddr_in6	addr;
+	struct sockaddr_in	addr;
 	int					rc;
 	
+	std::cout << "Binding Socket . . . " << std::endl;
 	memset(&addr, 0, sizeof(addr));
-	addr.sin6_family = AF_INET6;
-	memcpy(&addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-	addr.sin6_port = htons(SER_PORT);
-	std::cout << "getting PORT and IP . . . " << std::endl;
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(this->port);
 	rc = bind(this->socket_fd, (struct sockaddr *)&addr, sizeof(addr));
 	if (rc < 0)
 	{
@@ -149,10 +155,11 @@ bool	Server::accept_connections()
 {
 	int	new_fd = -1;
 
+	struct sockaddr_in cli;
 	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
-		new_fd = accept(this->socket_fd, NULL, NULL);
+		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)&cli);
 		if (new_fd == -1)
 		{
 			if (errno != EWOULDBLOCK)
@@ -162,7 +169,13 @@ bool	Server::accept_connections()
 			}
 			break;
 		}
-		std::cout << "NEW Connection detected "<< new_fd << std::endl;
+		std::cout << "NEW Connection detected " << new_fd << std::endl;
+		User user = User(inet_ntoa(cli.sin_addr), new_fd);
+		this->get_users().insert(std::pair<int, User>(new_fd, user));
+		std::map<int,User>::iterator itr;;
+		for (itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
+		// std::cout << "map size : " << this->get_users().size() << "\t\tELEMENT : " << std::endl;
+        std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
