@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/22 20:18:59 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/23 09:17:28 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,8 @@ int		Server::Creat_socket()
 		std::cout << "Failed to create socket, errno : " << errno << std::endl;
 		return (0);
 	}
+	this->fds[0].fd = this->socket_fd;
+	this->nfds++;
 	std::cout << "Socket Created successfully." << std::endl;
 	return (1);
 }
@@ -139,7 +141,6 @@ void	Server::poll_trait()
 
 	this->fds[0].fd = this->socket_fd;
 	this->fds[0].events = POLLIN;
-	this->nfds++;
 
 	std::cout << "Done !" << std::endl;
 }
