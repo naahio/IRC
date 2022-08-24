@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 14:05:55 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 08:46:13 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,7 +174,6 @@ bool	Server::accept_connections()
 		this->get_users().insert(std::pair<int, User>(new_fd, user));
 		std::map<int,User>::iterator itr;;
 		for (itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
-		// std::cout << "map size : " << this->get_users().size() << "\t\tELEMENT : " << std::endl;
         std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;

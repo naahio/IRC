@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 13:48:55 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 08:43:54 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@
 # define BUFF_SIZE		1024
 # define MAX_CONN		32
 # define TIMEOUT		3 * 60 * 1000
-# define PASSWORD		"PARAPAPAPI"
+# define PASSWORD		"password"
 
 // template <typename T, class E>  
 class Server

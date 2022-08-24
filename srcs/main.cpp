@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 13:08:22 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 09:19:50 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,15 +30,13 @@ int main(int argc, char **argv)
 		std::cout << "Parmater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
 		exit (EXIT_FAILURE);
 	}
-	
-	if(!isNumeric(argv[1]) && !strcmp(argv[2], PASSWORD))
+	if(!isNumeric(argv[1]) || strcmp(argv[2], PASSWORD))
 	{
-		std::cout << "error : <PORT> must be a <short int>" <<std::endl;
+		std::cout << "error : port or password error !" <<std::endl;
 		exit (EXIT_FAILURE);
 	}
 
 	Server serv = Server(std::stoi(argv[1]), argv[2]);
-	std::cout << "Log in with : " << serv.get_pass() << std::endl;
 
 	if (!serv.Creat_socket())
 		exit(EXIT_FAILURE);
@@ -70,7 +68,15 @@ int main(int argc, char **argv)
 			if (serv.get_fds()[i].revents == 0)
 				continue;
 			if (serv.get_fds()[i].revents != POLLIN)
+			{
 				std::cout << "Error ! revents : " << serv.get_fds()[i].revents << std::endl;
+				std::map<int,User>::iterator itr;;
+				serv.get_users().erase(serv.get_fds()[i].fd);
+				std::cout << "=====> NEW  LIST : " <<std::endl;
+				for (itr = serv.get_users().begin(); itr != serv.get_users().end(); ++itr) {
+      			  std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
+			}
+
 			if (serv.get_fds()[i].fd == serv.get_socket_fd())
 			{
 				if (!serv.accept_connections())
