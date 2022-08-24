@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 09:19:50 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 09:25:56 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void	close_server(Server & serv, int exit_status)
 		if (serv.get_fds()[i].fd != 0)
 			close(serv.get_fds()[i].fd);
 	}
+	std::cout << "Server Closed." << std::endl;
 	exit(exit_status);
 }
 
@@ -28,7 +29,7 @@ int main(int argc, char **argv)
 	{
 		std::cout << "Error : " <<std::endl;
 		std::cout << "Parmater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
-		exit (EXIT_FAILURE);
+		return (EXIT_FAILURE);
 	}
 	if(!isNumeric(argv[1]) || strcmp(argv[2], PASSWORD))
 	{
@@ -38,8 +39,8 @@ int main(int argc, char **argv)
 
 	Server serv = Server(std::stoi(argv[1]), argv[2]);
 
-	if (!serv.Creat_socket())
-		exit(EXIT_FAILURE);
+	if (!serv.Create_socket())
+		return (EXIT_FAILURE);
 	
 	if(!serv.reusable_socket()
 		|| !serv.nonblocking_socket()

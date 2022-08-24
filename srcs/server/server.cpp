@@ -6,27 +6,28 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 08:46:13 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 09:27:28 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "server.hpp"
 
-Server::Server(int port, std::string pass)
+Server::Server(int _port, std::string _password)
 {
 	std::cout << "Creating Server . . . " << std::endl;
 	std::cout << "updating parameter . . . " << std::endl;
-	this->port = port;
-	this->password = pass;
+	this->port = _port;
+	this->password = _password;
 	this->nfds = 0;
+	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
-Server::~Server()
+Server::~Server(void)
 {
 	std::cout << "Server deleted." << std::endl;
 }
 
-std::map<int, User>	& Server::get_users()
+std::map<int, User>	& Server::get_users(void)
 {
 	return (this->users);
 }
@@ -36,17 +37,17 @@ void	Server::set_users(std::map <int, User> u_map)
 	this->users = u_map;
 }
 
-struct pollfd*	Server::get_fds()
-{
-	return (this->fds);
-}
-
-int		Server::get_socket_fd()
+int		Server::get_socket_fd(void) const
 {
 	return (this->socket_fd);
 }
 
-int		Server::get_nfds()
+struct pollfd *	Server::get_fds(void)
+{
+	return (this->fds);
+}
+
+int		Server::get_nfds(void) const
 {
 	return (this->nfds);
 }
@@ -56,62 +57,67 @@ void	Server::set_nfds(int nfds)
 	this->nfds = nfds;
 }
 
-std::string		Server::get_pass()
+int		Server::get_port(void) const
+{
+	return (this->port);
+}
+
+std::string const &	Server::get_pass(void) const
 {
 	return (this->password);
 }
 
-int		Server::Creat_socket()
+int		Server::Create_socket(void)
 {
+	std::cout << "Creating socket . . . ";
 	this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
-
 	if (this->socket_fd < 0)
 	{
-		std::cout << "Failed to create socket, errno : " << errno << std::endl;
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
 		return (0);
 	}
 	this->fds[0].fd = this->socket_fd;
 	this->nfds++;
-	std::cout << "Socket Created successfully." << std::endl;
+	std::cout << "[DONE]" << std::endl;
 	return (1);
 }
 
-int		Server::reusable_socket()
+int		Server::reusable_socket(void)
 {
 	int	rc;
 	
+	std::cout << "Setting up socket options . . . ";
 	rc = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
 	if (rc < 0)
 	{
-		std::cout << "Failed at setting socket option ! errno : " << errno << std::endl;
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
 		return (0); 
 	}
-	std::cout << "setting socket option . . . " << std::endl;
-	std::cout << "Done ! " << std::endl;
+	std::cout << "[DONE]" << std::endl;
 	return (1);
 }
 
-int		Server::nonblocking_socket()
+int		Server::nonblocking_socket(void)
 {
 	int	rc;
 	
+	std::cout << "Making socket non blocking . . . ";
 	rc = fcntl(this->socket_fd, F_SETFL, O_NONBLOCK);
 	if (rc < 0)
 	{
-		std::cout << "Failed at making the socket non_blocking ! errno : " << errno << std::endl;
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
 		return (0);
 	}
-	std::cout << "making socket non blocking . . . " << std::endl;
-	std::cout << "Done !" << std::endl;
+	std::cout << "[DONE]" << std::endl;
 	return (1);
 }
 
-int		Server::bind_socket()
+int		Server::bind_socket(void)
 {
 	struct sockaddr_in	addr;
 	int					rc;
 	
-	std::cout << "Binding Socket . . . " << std::endl;
+	std::cout << "Binding Socket . . . ";
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = INADDR_ANY;
@@ -119,43 +125,41 @@ int		Server::bind_socket()
 	rc = bind(this->socket_fd, (struct sockaddr *)&addr, sizeof(addr));
 	if (rc < 0)
 	{
-		std::cout << "Failed at binding the socket ! errno : " <<  errno << std::endl;
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
 		return (0);
 	}
-	std::cout << "Done !" << std::endl;
+	std::cout << "[DONE]" << std::endl;
 	return (1);
 }
 
-int		Server::listen_from_socket()
+int		Server::listen_from_socket(void)
 {
 	int	rc;
 	
+	std::cout << "Listening . . ." << std::endl;
 	rc = listen(this->socket_fd, MAX_CONN);
 	if (rc < 0)
 	{
-		std::cout << "Failed at listing ! errno : " << errno << std::endl;
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
 		return (0);
 	}
-	std::cout << "listing . . ." << std::endl;
 	return (1);
 }
 
-void	Server::poll_trait()
+void	Server::poll_trait(void)
 {
-	std::cout << "setting up poll structure . . ." << std::endl;
+	std::cout << "Setting up poll structure . . . ";
 	memset(this->fds, 0, sizeof(this->fds));
-
 	this->fds[0].fd = this->socket_fd;
 	this->fds[0].events = POLLIN;
-
-	std::cout << "Done !" << std::endl;
+	std::cout << "[DONE]" << std::endl;
 }
 
-bool	Server::accept_connections()
+bool	Server::accept_connections(void)
 {
-	int	new_fd = -1;
-
-	struct sockaddr_in cli;
+	struct sockaddr_in	cli;
+	int					new_fd = -1;
+	
 	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
@@ -172,7 +176,7 @@ bool	Server::accept_connections()
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
 		User user = User(inet_ntoa(cli.sin_addr), new_fd);
 		this->get_users().insert(std::pair<int, User>(new_fd, user));
-		std::map<int,User>::iterator itr;;
+		std::map<int,User>::iterator itr;
 		for (itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
         std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
 		this->fds[this->nfds].fd = new_fd;

@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 08:43:54 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 09:26:08 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@
 # define TIMEOUT		3 * 60 * 1000
 # define PASSWORD		"password"
 
-// template <typename T, class E>  
+// template <typename T, class E>
 class Server
 {
 	private:
-		std::map <int, User>			users;
+		std::map <int, User>	users;
 		// std::map <std::string, Channel>	channels;
 		int						socket_fd;
 		struct pollfd			fds[MAX_CONN];
@@ -50,28 +50,28 @@ class Server
 		int						port;
 		std::string				password;
 
+		Server(void) {};
+
 	public:
 		Server(int port, std::string password);
-		~Server();
+		~Server(void);
 
-		
-		std::map <int, User> &	get_users();
+		std::map <int, User> &	get_users(void);
 		void					set_users(std::map <int, User> u_map);
-		struct pollfd*			get_fds();
-		int						get_socket_fd();
-		int						get_nfds();
+		int						get_socket_fd(void) const;
+		struct pollfd *			get_fds(void);
+		int						get_nfds(void) const;
 		void					set_nfds(int nfds);
-		int						get_port();
-		void					set_port(int port);
-		std::string				get_pass();
+		int						get_port(void) const;
+		std::string const &		get_pass(void) const;
 
-		int		Creat_socket();
-		int		reusable_socket();
-		int		nonblocking_socket();
-		int		bind_socket();
-		int		listen_from_socket();
-		void	poll_trait();
-		bool	accept_connections();
+		int		Create_socket(void);
+		int		reusable_socket(void);
+		int		nonblocking_socket(void);
+		int		bind_socket(void);
+		int		listen_from_socket(void);
+		void	poll_trait(void);
+		bool	accept_connections(void);
 		bool	recv_send_msg(int fd);
 };
 

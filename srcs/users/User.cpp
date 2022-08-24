@@ -3,78 +3,72 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 11:58:56 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/23 15:23:52 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "User.hpp"
 
-User::User()
+User::User(std::string _ip, int _fd)
 {
-}
-
-User::User(std::string ip, int fd)
-{
-    this->_IP      = ip;
-	this->fd	   = fd;
-    this->username = "";
-    this->nickname = "";
-    this->password = "";
-    this->is_name  = false;
-    this->is_nick  = false;
-    this->is_pass  = false;
-}
-
-User::User(const User &u)
-{
-	*this = u;
+	this->ip		= _ip;
+	this->fd		= _fd;
+	this->username	= "";
+	this->nickname	= "";
+	this->password	= "";
+	this->is_name	= false;
+	this->is_nick	= false;
+	this->is_pass	= false;
 }
 
 User::~User()
 {
 }
 
-std::string	User::get_username()
-{
-	return (this->username);
-}
-
-std::string	User::get_nickname()
-{
-	return (this->nickname);
-}
-
-std::string	User::get_password()
-{
-	return (this->password);
-}
-
-std::string	User::get_ip()
-{
-	return (this->_IP);
-}
-
-int		User::get_fd()
+int		User::get_fd(void) const
 {
 	return (this->fd);
 }
 
-void	User::set_username(std::string user_name)
+std::string	const &	User::get_ip(void) const
 {
-	this->username = user_name;
+	return (this->ip);
 }
 
-void	User::set_nickname(std::string nick_name)
+std::string const &	User::get_username(void) const
 {
-	this->nickname = nick_name;
+	return (this->username);
 }
 
-void	User::set_password(std::string password)
+std::string	const &	User::get_nickname(void) const
 {
-	this->password = password;
+	return (this->nickname);
+}
+
+std::string	const &	User::get_password(void) const
+{
+	return (this->password);
+}
+
+void	User::set_username(std::string _username)
+{
+	this->username = _username;
+	this->is_name = true;
+}
+
+void	User::set_nickname(std::string _nickname)
+{
+	this->nickname = _nickname;
+	this->is_nick = true;
+}
+
+void	User::set_password(std::string _password)
+{
+	this->password = _password;
+	this->is_pass = true;
 }
 
 bool	User::check_auth()
