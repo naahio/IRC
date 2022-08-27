@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 09:26:08 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 13:12:19 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <errno.h>
 # include <iostream>
 # include <unistd.h>
+# include <cstring>
 # include <iterator>
 # include <map>
 # include <fcntl.h>
@@ -30,13 +31,12 @@
 
 # include "../users/User.hpp"
 # include "../tools/tool.hpp"
+# include "../pars/msg.hpp"
 
 # define BUFF_SIZE		1024
 # define MAX_CONN		32
 # define TIMEOUT		3 * 60 * 1000
-# define PASSWORD		"password"
 
-// template <typename T, class E>
 class Server
 {
 	private:
@@ -73,6 +73,8 @@ class Server
 		void	poll_trait(void);
 		bool	accept_connections(void);
 		bool	recv_send_msg(int fd);
+		
+		
 };
 
 #endif

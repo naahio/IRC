@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 09:27:28 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/24 13:15:59 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ bool	Server::accept_connections(void)
 	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
-		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)&cli);
+		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)sizeof(cli));
 		if (new_fd == -1)
 		{
 			if (errno != EWOULDBLOCK)
@@ -178,7 +178,7 @@ bool	Server::accept_connections(void)
 		this->get_users().insert(std::pair<int, User>(new_fd, user));
 		std::map<int,User>::iterator itr;
 		for (itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
-        std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
+		std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
@@ -209,8 +209,8 @@ bool	Server::recv_send_msg(int fd)
 			return (false);
 		}
 		this->buffer[rc] = '\0';
-		std::cout << rc << " bytes received." << std::endl;
-		std::cout << "Message received: " << this->buffer;
+		Msg msg = Msg(buffer, fd);
+		
 		send(fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
 	} while (true);
 	return (true);
