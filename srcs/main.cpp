@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 14:59:56 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/24 11:26:52 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,18 +27,16 @@ int main(int argc, char **argv)
 {
 	if (argc != 3)
 	{
-		std::cout << "Error : " <<std::endl;
-		std::cout << "Parmater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
+		std::cout << "Paramater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
 		return (EXIT_FAILURE);
 	}
-	
-	if(!isNumeric(argv[1]) && !strcmp(argv[2], PASSWORD))
+	if(!isNumeric(argv[1]))
 	{
-		std::cout << "error : <PORT> must be a <short int>" <<std::endl;
-		return (EXIT_FAILURE);
+		std::cout << "Error : Port error !" <<std::endl;
+		exit (EXIT_FAILURE);
 	}
 
-	Server serv = Server(std::stoi(argv[1]), argv[2]);
+	Server serv = Server(atoi(argv[1]), argv[2]);
 
 	if (!serv.Create_socket())
 		return (EXIT_FAILURE);
@@ -81,6 +79,7 @@ int main(int argc, char **argv)
 				if (!serv.recv_send_msg(serv.get_fds()[i].fd))
 				{
 					close(serv.get_fds()[i].fd);
+					serv.get_users().erase(serv.get_fds()[i].fd);
 					for (int j = i; j < serv.get_nfds() - 1; j++)
 					{
 						memcpy(&serv.get_fds()[j], &serv.get_fds()[j + 1], sizeof(struct pollfd));

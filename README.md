@@ -11,5 +11,10 @@
         same command with the third terminal : 
             you will be able to notice that a multiple users created with a different Id
     21-08-2022:
-    ->  server class + hpp are created and well handled 
-    ->  the basic tests are working creating multiple client send and receive   msgs is working   
+        ->  server class + hpp are created and well handled 
+        ->  the basic tests are working creating multiple client send and receive   msgs is working   
+    23-08-2022"
+        ->  create User and user map.
+        ->  insert and erase a user with his ip and fd.
+    24-08-2022:
+        ->  create msg class and add check the syntaxe of the received message.

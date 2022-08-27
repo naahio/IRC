@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 15:25:20 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/24 13:15:59 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ bool	Server::accept_connections(void)
 	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
-		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)&cli);
+		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)sizeof(cli));
 		if (new_fd == -1)
 		{
 			if (errno != EWOULDBLOCK)
@@ -176,10 +176,9 @@ bool	Server::accept_connections(void)
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
 		User user = User(inet_ntoa(cli.sin_addr), new_fd);
 		this->get_users().insert(std::pair<int, User>(new_fd, user));
-		for (std::map<int,User>::iterator itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
-			std::cout << "map size : " << this->get_users().size() << "\t\tELEMENT : " << std::endl;
-			std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';
-		}
+		std::map<int,User>::iterator itr;
+		for (itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
+		std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
@@ -210,8 +209,8 @@ bool	Server::recv_send_msg(int fd)
 			return (false);
 		}
 		this->buffer[rc] = '\0';
-		std::cout << rc << " bytes received." << std::endl;
-		std::cout << "Message received: " << this->buffer;
+		Msg msg = Msg(buffer, fd);
+		
 		send(fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
 	} while (true);
 	return (true);
