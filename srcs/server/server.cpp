@@ -163,7 +163,7 @@ bool	Server::accept_connections(void)
 	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
-		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)&cli);
+		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)sizeof(cli));
 		if (new_fd == -1)
 		{
 			if (errno != EWOULDBLOCK)
@@ -178,7 +178,7 @@ bool	Server::accept_connections(void)
 		this->get_users().insert(std::pair<int, User>(new_fd, user));
 		std::map<int,User>::iterator itr;
 		for (itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
-        std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
+		std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
@@ -190,7 +190,7 @@ bool	Server::recv_send_msg(int fd)
 {
 	int	rc;
 
-	std::cout <<  "Receibing message . . ." << std::endl;
+	std::cout <<  "Receiving message . . ." << std::endl;
 	do
 	{
 		rc = recv(fd, this->buffer, sizeof(this->buffer), 0);

@@ -23,6 +23,7 @@
 # include <errno.h>
 # include <iostream>
 # include <unistd.h>
+# include <cstring>
 # include <iterator>
 # include <map>
 # include <fcntl.h>
@@ -35,7 +36,6 @@
 # define BUFF_SIZE		1024
 # define MAX_CONN		32
 # define TIMEOUT		3 * 60 * 1000
-# define PASSWORD		"password"
 
 class Server
 {

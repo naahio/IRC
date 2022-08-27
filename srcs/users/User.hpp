@@ -47,6 +47,4 @@ class User
 		bool	check_auth();
 };
 
-
-
 #endif

@@ -15,7 +15,7 @@
 
 # include "../server/server.hpp"
 
-bool            isNumeric(std::string const &str);
-std::string*    pre_cmd(std::string full_msg);
+bool			isNumeric(std::string const &str);
+std::string *	pre_cmd(std::string full_msg);
 
 #endif

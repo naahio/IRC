@@ -10,48 +10,47 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "msg.hpp"
 
-Msg::Msg()
+Msg::Msg(void)
 {
-    this->sender    = 0;
-    this->full_msg  = "";
-    this->cmd       = "";
-    this->param_list = "";
+	this->sender    = 0;
+	this->full_msg  = "";
+	this->cmd       = "";
+	this->param_list = "";
 }
 
 Msg::Msg(std::string full_msg, int sender)
 {
-    this->sender = sender;
-    this->full_msg = full_msg;
+	this->sender = sender;
+	this->full_msg = full_msg;
 }
 
-Msg::~Msg()
+Msg::~Msg(void)
 {
 }
 
-std::string Msg::get_full_msg()
+std::string	Msg::get_full_msg(void)
 {
-    return (this->full_msg);
+	return (this->full_msg);
 }
 
-std::string Msg::get_cmd()
+std::string	Msg::get_cmd(void)
 {
-    return (this->cmd);
+	return (this->cmd);
 }
 
-std::string Msg::get_param_list()
+std::string	Msg::get_param_list(void)
 {
-    return (this->param_list);
+	return (this->param_list);
 }
 
-int         Msg::get_sender()
+int	Msg::get_sender(void)
 {
-    return (this->sender);
+	return (this->sender);
 }
 
-bool        Msg::check_sytaxe(std::string full_msg)
-{
-    
-}
+// bool        Msg::check_syntax(std::string full_msg)
+// {
+	
+// }

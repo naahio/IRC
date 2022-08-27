@@ -27,17 +27,16 @@ int main(int argc, char **argv)
 {
 	if (argc != 3)
 	{
-		std::cout << "Error : " <<std::endl;
-		std::cout << "Parmater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
+		std::cout << "Paramater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
 		return (EXIT_FAILURE);
 	}
 	if(!isNumeric(argv[1]))
 	{
-		std::cout << "error : port error !" <<std::endl;
+		std::cout << "Error : Port error !" <<std::endl;
 		exit (EXIT_FAILURE);
 	}
 
-	Server serv = Server(std::stoi(argv[1]), argv[2]);
+	Server serv = Server(atoi(argv[1]), argv[2]);
 
 	if (!serv.Create_socket())
 		return (EXIT_FAILURE);

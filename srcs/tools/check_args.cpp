@@ -13,14 +13,17 @@
 # include "tool.hpp"
 # include "../server/server.hpp"
 
-bool            isNumeric(std::string const &str)
+bool	isNumeric(std::string const &str)
 {
-    return !str.empty() && std::all_of(str.begin(), str.end(), ::isdigit);
+	std::string::const_iterator it = str.begin();
+	while (it != str.end() && std::isdigit(*it))
+		++it;
+	return (!str.empty() && it == str.end());
 }
 
-std::string*    pre_cmd(std::string full_msg)
-{
-    (void)full_msg;
+// std::string *	pre_cmd(std::string full_msg)
+// {
+// 	(void)full_msg;
 
-    
-}
+	
+// }

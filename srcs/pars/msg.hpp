@@ -18,23 +18,23 @@
 
 class Msg
 {
-    private:
-        int         sender; 
-        std::string full_msg;
-        std::string cmd;
-        std::string param_list;
-        
-    public:
-        Msg();
-        Msg(std::string full_msg, int sender);
-        ~Msg();
+	private:
+		int			sender; 
+		std::string	full_msg;
+		std::string	cmd;
+		std::string	param_list;
+		
+	public:
+		Msg(void);
+		Msg(std::string full_msg, int sender);
+		~Msg(void);
 
-        std::string get_full_msg();
-        std::string get_cmd();
-        std::string get_param_list();
-        int         get_sender();
+		std::string get_full_msg(void);
+		std::string get_cmd(void);
+		std::string get_param_list(void);
+		int         get_sender(void);
 
-        bool        check_sytaxe(std::string full_msg);
+		bool        check_syntax(std::string full_msg);
 };
 
 #endif
