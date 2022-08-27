@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 11:26:52 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/27 17:07:22 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 void	close_server(Server & serv, int exit_status)
 {
-	for (int i = 0; i < serv.get_nfds(); i++)
+	for (int i = 0; i < serv.getNfds(); i++)
 	{
-		if (serv.get_fds()[i].fd != 0)
-			close(serv.get_fds()[i].fd);
+		if (serv.getFds()[i].fd != 0)
+			close(serv.getFds()[i].fd);
 	}
 	std::cout << "Server Closed." << std::endl;
 	exit(exit_status);
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 {
 	if (argc != 3)
 	{
-		std::cout << "Paramater format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
+		std::cout << "Parameter format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
 		return (EXIT_FAILURE);
 	}
 	if(!isNumeric(argv[1]))
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	do
 	{
 		std::cout << "Waiting for a poll . . . " << std::endl;
-		int	rc = poll(serv.get_fds(), serv.get_nfds(), TIMEOUT);
+		int	rc = poll(serv.getFds(), serv.getNfds(), TIMEOUT);
 		if (rc < 0)
 		{
 			std::cout << "FAILED to poll . . . " << std::endl;
@@ -63,28 +63,28 @@ int main(int argc, char **argv)
 			std::cout << "POLL : time out !" << std::endl;
 			close_server(serv, EXIT_FAILURE);
 		}
-		for (int i = 0; i < serv.get_nfds(); i++)
+		for (int i = 0; i < serv.getNfds(); i++)
 		{
-			if (serv.get_fds()[i].revents == 0)
+			if (serv.getFds()[i].revents == 0)
 				continue;
-			if (serv.get_fds()[i].revents != POLLIN)
-				std::cout << "Error ! revents : " << serv.get_fds()[i].revents << std::endl;
-			if (serv.get_fds()[i].fd == serv.get_socket_fd())
+			if (serv.getFds()[i].revents != POLLIN)
+				std::cout << "Error ! revents : " << serv.getFds()[i].revents << std::endl;
+			if (serv.getFds()[i].fd == serv.getSocketFd())
 			{
 				if (!serv.accept_connections())
 					close_server(serv, EXIT_FAILURE);
 			}
 			else
 			{
-				if (!serv.recv_send_msg(serv.get_fds()[i].fd))
+				if (!serv.recv_send_msg(serv.getFds()[i].fd))
 				{
-					close(serv.get_fds()[i].fd);
-					serv.get_users().erase(serv.get_fds()[i].fd);
-					for (int j = i; j < serv.get_nfds() - 1; j++)
+					close(serv.getFds()[i].fd);
+					// TODO: Here, we must set user's fd to -1. either guest or user.
+					for (int j = i; j < serv.getNfds() - 1; j++)
 					{
-						memcpy(&serv.get_fds()[j], &serv.get_fds()[j + 1], sizeof(struct pollfd));
+						memcpy(&serv.getFds()[j], &serv.getFds()[j + 1], sizeof(struct pollfd));
 					}
-					serv.set_nfds(serv.get_nfds() - 1);
+					serv.setNfds(serv.getNfds() - 1);
 					i --;
 				}
 			}
