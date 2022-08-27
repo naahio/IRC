@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/27 17:12:13 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/27 18:05:59 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 # include <arpa/inet.h>
 
 # include "../users/User.hpp"
+# include "../channels/Channel.hpp"
 # include "../tools/tool.hpp"
 # include "../pars/msg.hpp"
 
@@ -40,16 +41,17 @@
 class Server
 {
 	private:
-		std::map <std::string, User *>	users;
-		std::map <int, User *>			guests;
-		// std::map <std::string, Channel>	channels;
-		int						socket_fd;
-		struct pollfd			fds[MAX_CONN];
-		int						nfds;
-		char					buffer[BUFF_SIZE];
-		int						on;
-		int						port;
-		std::string				password;
+		std::map <int, User *>				guests;
+		std::map <std::string, User *>		users;
+		std::map <std::string, Channel *>	channels;
+		
+		int				socket_fd;
+		struct pollfd	fds[MAX_CONN];
+		int				nfds;
+		char			buffer[BUFF_SIZE];
+		int				on;
+		int				port;
+		std::string		password;
 
 		Server(void) {};
 

@@ -3,18 +3,27 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+         #
+#    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/08/24 13:50:15 by mbabela          ###   ########.fr        #
+#    Updated: 2022/08/27 14:31:14 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		=	ircserv
 
-HEADERS		=	./srcs/server/server.hpp ./srcs/users/User.hpp ./srcs/tools/tool.hpp ./srcs/pars/msg.hpp
+HEADERS		=	./srcs/tools/tool.hpp\
+				./srcs/server/server.hpp\
+				./srcs/users/User.hpp\
+				./srcs/pars/msg.hpp\
+				./srcs/channels/Channel.hpp
 
-SRCS		=	srcs/main.cpp ./srcs/server/server.cpp ./srcs/users/User.cpp ./srcs/tools/check_args.cpp ./srcs/pars/msg.cpp
+SRCS		=	srcs/main.cpp\
+				./srcs/server/server.cpp\
+				./srcs/users/User.cpp\
+				./srcs/pars/msg.cpp\
+				./srcs/channels/Channel.cpp\
+				./srcs/tools/check_args.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 
