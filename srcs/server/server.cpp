@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 13:15:59 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/27 17:14:14 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,44 +27,79 @@ Server::~Server(void)
 	std::cout << "Server deleted." << std::endl;
 }
 
-std::map<int, User>	& Server::get_users(void)
+std::map<std::string, User *>	& Server::getUsers(void)
 {
 	return (this->users);
 }
 
-void	Server::set_users(std::map <int, User> u_map)
+std::map<int, User *>	& Server::getGuests(void)
 {
-	this->users = u_map;
+	return (this->guests);
 }
 
-int		Server::get_socket_fd(void) const
+int		Server::getSocketFd(void) const
 {
 	return (this->socket_fd);
 }
 
-struct pollfd *	Server::get_fds(void)
+struct pollfd *	Server::getFds(void)
 {
 	return (this->fds);
 }
 
-int		Server::get_nfds(void) const
+int		Server::getNfds(void) const
 {
 	return (this->nfds);
 }
 
-void	Server::set_nfds(int nfds)
+void	Server::setNfds(int nfds)
 {
 	this->nfds = nfds;
 }
 
-int		Server::get_port(void) const
+int		Server::getPort(void) const
 {
 	return (this->port);
 }
 
-std::string const &	Server::get_pass(void) const
+std::string const &	Server::getPass(void) const
 {
 	return (this->password);
+}
+
+void	Server::addGuest(int fd)
+{
+	User *	guest;
+
+	guest = new User(fd);
+	this->guests.insert(std::pair<int, User *>(fd, guest));
+}
+
+void	Server::deleteGuest(int fd)
+{
+	std::map<int, User *>::iterator it;
+
+	it = this->guests.find(fd);
+	if (it != this->guests.end()) {
+		delete it->second;
+		this->guests.erase(it);
+	}
+}
+
+void	Server::addUser(User * user)
+{
+	this->users.insert(std::pair<std::string, User *>(user->getUsername(), user));
+}
+
+void	Server::deleteUser(std::string username)
+{
+	std::map<std::string, User *>::iterator it;
+
+	it = this->users.find(username);
+	if (it != this->users.end()) {
+		delete it->second;
+		this->users.erase(it);
+	}
 }
 
 int		Server::Create_socket(void)
@@ -157,13 +192,12 @@ void	Server::poll_trait(void)
 
 bool	Server::accept_connections(void)
 {
-	struct sockaddr_in	cli;
-	int					new_fd = -1;
+	int	new_fd = -1;
 	
 	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
-		new_fd = accept(this->socket_fd, (struct sockaddr *)&cli, (socklen_t *)sizeof(cli));
+		new_fd = accept(this->socket_fd, NULL, NULL);
 		if (new_fd == -1)
 		{
 			if (errno != EWOULDBLOCK)
@@ -174,11 +208,7 @@ bool	Server::accept_connections(void)
 			break;
 		}
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
-		User user = User(inet_ntoa(cli.sin_addr), new_fd);
-		this->get_users().insert(std::pair<int, User>(new_fd, user));
-		std::map<int,User>::iterator itr;
-		for (itr = this->get_users().begin(); itr != this->get_users().end(); ++itr) {
-		std::cout << itr->first << '\t' << itr->second.get_ip() << "\t" << itr->second.get_fd() << '\n';}
+		this->addGuest(new_fd);
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
