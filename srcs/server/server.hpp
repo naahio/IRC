@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/24 13:12:19 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/08/27 17:12:13 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,8 @@
 class Server
 {
 	private:
-		std::map <int, User>	users;
+		std::map <std::string, User *>	users;
+		std::map <int, User *>			guests;
 		// std::map <std::string, Channel>	channels;
 		int						socket_fd;
 		struct pollfd			fds[MAX_CONN];
@@ -56,14 +57,19 @@ class Server
 		Server(int port, std::string password);
 		~Server(void);
 
-		std::map <int, User> &	get_users(void);
-		void					set_users(std::map <int, User> u_map);
-		int						get_socket_fd(void) const;
-		struct pollfd *			get_fds(void);
-		int						get_nfds(void) const;
-		void					set_nfds(int nfds);
-		int						get_port(void) const;
-		std::string const &		get_pass(void) const;
+		std::map <std::string, User *> &	getUsers(void);
+		std::map <int, User *> &			getGuests(void);
+		int						getSocketFd(void) const;
+		struct pollfd *			getFds(void);
+		int						getNfds(void) const;
+		void					setNfds(int nfds);
+		int						getPort(void) const;
+		std::string const &		getPass(void) const;
+
+		void	addGuest(int fd);
+		void	deleteGuest(int fd);
+		void	addUser(User * user);
+		void	deleteUser(std::string username);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
@@ -73,8 +79,6 @@ class Server
 		void	poll_trait(void);
 		bool	accept_connections(void);
 		bool	recv_send_msg(int fd);
-		
-		
 };
 
 #endif

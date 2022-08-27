@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/23 15:22:26 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/27 17:17:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef USER_HPP
 # define USER_HPP
 
+# include <unistd.h>
 # include <iostream>
 # include <string>
 
@@ -20,7 +21,6 @@ class User
 {
 	private:
 		int			fd;
-		std::string	ip;
 		std::string	username;
 		std::string	nickname;
 		std::string	password;
@@ -31,20 +31,19 @@ class User
 		User(void) {};
 
 	public:
-		User(std::string ip, int fd);
+		User(int fd);
 		~User(void);
 
-		int					get_fd(void) const;
-		std::string const &	get_ip(void) const;
-		std::string const &	get_username(void) const;
-		std::string const &	get_nickname(void) const;
-		std::string const &	get_password(void) const;
+		int					getFd(void) const;
+		std::string const &	getUsername(void) const;
+		std::string const &	getNickname(void) const;
+		std::string const &	getPassword(void) const;
 
-		void	set_username(std::string user_name);
-		void	set_nickname(std::string nick_name);
-		void	set_password(std::string pass_word);
+		void	setUsername(std::string user_name);
+		void	setNickname(std::string nick_name);
+		void	setPassword(std::string pass_word);
 
-		bool	check_auth();
+		bool	isAuth(void);
 };
 
 #endif
