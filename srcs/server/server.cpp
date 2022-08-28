@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/27 17:14:14 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/28 17:33:48 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,6 +215,28 @@ bool	Server::accept_connections(void)
 	} while (new_fd != -1);
 	return (true);
 }
+void Server::checkMsg(Msg msg)
+{
+	// Might Put command on a list and check them instead of If else
+	std::vector<std::string> parsedMsg;
+	std::map <int, User *>::iterator it;
+	
+	parsedMsg = msg.getParsedMsg();
+	if (!msg.get_cmd().compare("USER"))
+	{
+		if (parsedMsg.size() < 5)
+			send(msg.get_sender(), "Error need more parameters\n", 
+				sizeof("Error need more parameters\n"), 0);
+		else
+		{
+			it = this->guests.find(msg.get_sender());
+			it->second->setUsername(parsedMsg[1]);
+			it->second->setHostName(parsedMsg[2]);
+			it->second->setServerName(parsedMsg[3]);
+			it->second->setFullName(parsedMsg[4]);
+		}			
+	}
+};
 
 bool	Server::recv_send_msg(int fd)
 {
@@ -240,7 +262,7 @@ bool	Server::recv_send_msg(int fd)
 		}
 		this->buffer[rc] = '\0';
 		Msg msg = Msg(buffer, fd);
-		
+		checkMsg(msg);
 		send(fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
 	} while (true);
 	return (true);

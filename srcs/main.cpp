@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/27 17:07:22 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/28 12:11:46 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ int main(int argc, char **argv)
 				{
 					close(serv.getFds()[i].fd);
 					// TODO: Here, we must set user's fd to -1. either guest or user.
+					
 					for (int j = i; j < serv.getNfds() - 1; j++)
 					{
 						memcpy(&serv.getFds()[j], &serv.getFds()[j + 1], sizeof(struct pollfd));

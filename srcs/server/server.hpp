@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/27 18:05:59 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/28 15:24:54 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,7 @@ class Server
 		void	deleteGuest(int fd);
 		void	addUser(User * user);
 		void	deleteUser(std::string username);
+		void	checkMsg(Msg msg);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
