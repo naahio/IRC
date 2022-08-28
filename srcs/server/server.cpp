@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/28 17:33:48 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/28 18:02:59 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,6 +236,17 @@ void Server::checkMsg(Msg msg)
 			it->second->setFullName(parsedMsg[4]);
 		}			
 	}
+	if (!msg.get_cmd().compare("NICK"))
+	{
+		if (parsedMsg.size() < 2)
+			send(msg.get_sender(), "Error need more parameters\n", 
+				sizeof("Error need more parameters\n"), 0);
+		else
+		{
+			it = this->guests.find(msg.get_sender());
+			it->second->setNickname(parsedMsg[1]);
+		}
+	}
 };
 
 bool	Server::recv_send_msg(int fd)
@@ -263,6 +274,14 @@ bool	Server::recv_send_msg(int fd)
 		this->buffer[rc] = '\0';
 		Msg msg = Msg(buffer, fd);
 		checkMsg(msg);
+		// this for testing 
+		// std::map <int, User *>::iterator it;
+		// it = this->guests.find(fd);
+		// std::cout << it->second->getUsername() << std::endl;
+		// std::cout << it->second->getNickname() << std::endl;
+		// std::cout << it->second->getHostName() << std::endl;
+		// std::cout << it->second->getServerName() << std::endl;
+		// std::cout << it->second->getFullName() << std::endl;
 		send(fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
 	} while (true);
 	return (true);
