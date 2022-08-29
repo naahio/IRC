@@ -6,16 +6,20 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/08/27 18:03:00 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/29 09:53:51 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 
-Channel::Channel(std::string _name, User * _operator) {
+/*************************[ Constructors/Destructors ]*************************/
+
+Channel::Channel(std::string _name, User & _operator) {
 	this->name = _name;
-	this->op = _operator;
+	this->op = &_operator;
 }
+
+/******************************[ Getters/Setters ]*****************************/
 
 std::string const &	Channel::getName(void) const {
 	return (this->name);
@@ -35,4 +39,19 @@ void	Channel::setName(std::string _name) {
 
 void	Channel::setOperator(User *	_operator) {
 	this->op = _operator;
+}
+
+/*****************************[ Member Functions ]*****************************/
+
+void	Channel::addMember(User * member, std::string username) {
+	this->members.insert(std::pair<std::string, User *>(username, member));
+}
+
+void	Channel::removeMember(std::string username) {
+	std::map<std::string, User *>::iterator it;
+
+	it = this->members.find(username);
+	if (it != this->members.end()) {
+		this->members.erase(it);
+	}
 }

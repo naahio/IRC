@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/27 18:05:59 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/29 12:09:40 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,19 +59,25 @@ class Server
 		Server(int port, std::string password);
 		~Server(void);
 
-		std::map <std::string, User *> &	getUsers(void);
+		int					getSocketFd(void) const;
+		struct pollfd *		getFds(void);
+		int					getNfds(void) const;
+		void				setNfds(int nfds);
+		int					getPort(void) const;
+		std::string const &	getPass(void) const;
+
 		std::map <int, User *> &			getGuests(void);
-		int						getSocketFd(void) const;
-		struct pollfd *			getFds(void);
-		int						getNfds(void) const;
-		void					setNfds(int nfds);
-		int						getPort(void) const;
-		std::string const &		getPass(void) const;
+		std::map <std::string, User *> &	getUsers(void);
+		std::map <std::string, Channel *> &	getChannels(void);
+
+		User *	getUser(int fd);
 
 		void	addGuest(int fd);
-		void	deleteGuest(int fd);
-		void	addUser(User * user);
-		void	deleteUser(std::string username);
+		void	registerUser(User & user);
+		void	clientDisconnect(int fd);
+
+		void	createChannel(std::string name, User & op);
+		void	deleteChannel(std::string name);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
