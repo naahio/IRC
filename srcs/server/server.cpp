@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/29 12:10:30 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/29 16:08:17 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,12 @@ Server::~Server(void)
 {
 	std::map<int, User *>::iterator guest;
 	for(guest = this->guests.begin(); guest != this->guests.end(); ++guest) {
-		close(guest->first);
 		delete guest->second;
 	}
 	this->guests.clear();
 
 	std::map<std::string, User *>::iterator user;
 	for(user = this->users.begin(); user != this->users.end(); ++user) {
-		close(user->second->getFd());
 		delete user->second;
 	}
 	this->users.clear();
@@ -75,15 +73,15 @@ std::string const &	Server::getPass(void) const {
 	return (this->password);
 }
 
-std::map<int, User *>	& Server::getGuests(void) {
+std::map<int, User *> &	Server::getGuests(void) {
 	return (this->guests);
 }
 
-std::map<std::string, User *>	& Server::getUsers(void) {
+std::map<std::string, User *> &	Server::getUsers(void) {
 	return (this->users);
 }
 
-std::map<std::string, Channel *>	& Server::getChannels(void) {
+std::map<std::string, Channel *> &	Server::getChannels(void) {
 	return (this->channels);
 }
 
@@ -98,6 +96,14 @@ User *	Server::getUser(int fd) {
 		if (user->second->getFd() == fd) {
 			return (user->second);
 		}
+	}
+	return (NULL);
+}
+
+Channel *	Server::getChannel(std::string name) {
+	std::map<std::string, Channel *>::iterator channel = this->channels.find(name);
+	if (channel != this->channels.end()) {
+		return (channel->second);
 	}
 	return (NULL);
 }
@@ -122,7 +128,6 @@ void	Server::registerUser(User & user) {
 void	Server::clientDisconnect(int fd) {
 	std::map<int, User *>::iterator guest = this->guests.find(fd);
 	if (guest != this->guests.end()) {
-		close(guest->first);
 		delete guest->second;
 		this->guests.erase(guest);	// delete guest infos?
 		return ;
@@ -131,7 +136,6 @@ void	Server::clientDisconnect(int fd) {
 	std::map<std::string, User *>::iterator user;
 	for(user = this->users.begin(); user != this->users.end(); ++user) {
 		if (user->second->getFd() == fd) {
-			close(user->second->getFd());
 			user->second->setFd(-1);
 			return ;
 		}
