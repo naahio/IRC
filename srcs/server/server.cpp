@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/27 17:14:14 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/29 12:10:30 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "server.hpp"
+
+/*************************[ Constructors/Destructors ]*************************/
 
 Server::Server(int _port, std::string _password)
 {
@@ -24,83 +26,138 @@ Server::Server(int _port, std::string _password)
 
 Server::~Server(void)
 {
+	std::map<int, User *>::iterator guest;
+	for(guest = this->guests.begin(); guest != this->guests.end(); ++guest) {
+		close(guest->first);
+		delete guest->second;
+	}
+	this->guests.clear();
+
+	std::map<std::string, User *>::iterator user;
+	for(user = this->users.begin(); user != this->users.end(); ++user) {
+		close(user->second->getFd());
+		delete user->second;
+	}
+	this->users.clear();
+
+	std::map<std::string, Channel *>::iterator channel;
+	for(channel = this->channels.begin(); channel != this->channels.end(); ++channel) {
+		delete channel->second;
+	}
+	this->channels.clear();
+	
 	std::cout << "Server deleted." << std::endl;
 }
 
-std::map<std::string, User *>	& Server::getUsers(void)
-{
-	return (this->users);
-}
+/******************************[ Getters/Setters ]*****************************/
 
-std::map<int, User *>	& Server::getGuests(void)
-{
-	return (this->guests);
-}
-
-int		Server::getSocketFd(void) const
-{
+int		Server::getSocketFd(void) const {
 	return (this->socket_fd);
 }
 
-struct pollfd *	Server::getFds(void)
-{
+struct pollfd *	Server::getFds(void) {
 	return (this->fds);
 }
 
-int		Server::getNfds(void) const
-{
+int		Server::getNfds(void) const {
 	return (this->nfds);
 }
 
-void	Server::setNfds(int nfds)
-{
+void	Server::setNfds(int nfds) {
 	this->nfds = nfds;
 }
 
-int		Server::getPort(void) const
-{
+int		Server::getPort(void) const {
 	return (this->port);
 }
 
-std::string const &	Server::getPass(void) const
-{
+std::string const &	Server::getPass(void) const {
 	return (this->password);
 }
 
-void	Server::addGuest(int fd)
-{
+std::map<int, User *>	& Server::getGuests(void) {
+	return (this->guests);
+}
+
+std::map<std::string, User *>	& Server::getUsers(void) {
+	return (this->users);
+}
+
+std::map<std::string, Channel *>	& Server::getChannels(void) {
+	return (this->channels);
+}
+
+User *	Server::getUser(int fd) {
+	std::map<int, User *>::iterator guest = this->guests.find(fd);
+	if (guest != this->guests.end()) {
+		return (guest->second);
+	}
+
+	std::map<std::string, User *>::iterator user;
+	for(user = this->users.begin(); user != this->users.end(); ++user) {
+		if (user->second->getFd() == fd) {
+			return (user->second);
+		}
+	}
+	return (NULL);
+}
+
+/*****************************[ Users Management ]*****************************/
+
+void	Server::addGuest(int fd) {
 	User *	guest;
 
 	guest = new User(fd);
 	this->guests.insert(std::pair<int, User *>(fd, guest));
 }
 
-void	Server::deleteGuest(int fd)
-{
-	std::map<int, User *>::iterator it;
+void	Server::registerUser(User & user) {
+	std::map<int, User *>::iterator guest = this->guests.find(user.getFd());
+	if (guest == this->guests.end())
+		return ;
+	this->guests.erase(guest);
+	this->users.insert(std::pair<std::string, User *>(user.getUsername(), &user));
+}
 
-	it = this->guests.find(fd);
-	if (it != this->guests.end()) {
-		delete it->second;
-		this->guests.erase(it);
+void	Server::clientDisconnect(int fd) {
+	std::map<int, User *>::iterator guest = this->guests.find(fd);
+	if (guest != this->guests.end()) {
+		close(guest->first);
+		delete guest->second;
+		this->guests.erase(guest);	// delete guest infos?
+		return ;
+	}
+
+	std::map<std::string, User *>::iterator user;
+	for(user = this->users.begin(); user != this->users.end(); ++user) {
+		if (user->second->getFd() == fd) {
+			close(user->second->getFd());
+			user->second->setFd(-1);
+			return ;
+		}
 	}
 }
 
-void	Server::addUser(User * user)
-{
-	this->users.insert(std::pair<std::string, User *>(user->getUsername(), user));
+/****************************[ Channels Management ]***************************/
+
+void	Server::createChannel(std::string name, User & op) {
+	Channel *	channel;
+
+	channel = new Channel(name, op);
+	this->channels.insert(std::pair<std::string, Channel *>(name, channel));
 }
 
-void	Server::deleteUser(std::string username)
-{
-	std::map<std::string, User *>::iterator it;
+void	Server::deleteChannel(std::string name) {
+	std::map<std::string, Channel *>::iterator it;
 
-	it = this->users.find(username);
-	if (it != this->users.end()) {
+	it = this->channels.find(name);
+	if (it != this->channels.end()) {
 		delete it->second;
-		this->users.erase(it);
+		this->channels.erase(it);
 	}
 }
+
+/*****************************[ Server Management ]****************************/
 
 int		Server::Create_socket(void)
 {
