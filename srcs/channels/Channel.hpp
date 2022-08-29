@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/08/29 09:37:35 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/29 17:35:53 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ class Channel {
 		std::string						name;
 		User *							op;
 		std::map <std::string, User *>	members;
+
+		Channel(void) {}
 	
 	public:
 		Channel(std::string _name, User & _operator);

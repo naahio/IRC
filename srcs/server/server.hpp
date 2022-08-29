@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/29 12:09:40 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/29 17:36:16 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ class Server
 		int				port;
 		std::string		password;
 
-		Server(void) {};
+		Server(void) {}
 
 	public:
 		Server(int port, std::string password);
@@ -70,7 +70,8 @@ class Server
 		std::map <std::string, User *> &	getUsers(void);
 		std::map <std::string, Channel *> &	getChannels(void);
 
-		User *	getUser(int fd);
+		User *		getUser(int fd);
+		Channel *	getChannel(std::string name);
 
 		void	addGuest(int fd);
 		void	registerUser(User & user);
