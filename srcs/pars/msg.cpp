@@ -6,12 +6,11 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 08:54:42 by a                 #+#    #+#             */
-/*   Updated: 2022/08/30 11:49:42 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/30 14:33:58 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "msg.hpp"
-#include <sstream>
 
 Msg::Msg(void)
 {
@@ -23,16 +22,32 @@ Msg::Msg(void)
 
 Msg::Msg(std::string &full_msg, int sender)
 {
-	//std::stringstream s(full_msg);
 	char *ptr;
 	std::string tmp;
-
-	this->sender = sender;
-	this->full_msg = full_msg;
 	
-	// while (std::getline(s,tmp,' '))
-	// 	this->parsedMsg.push_back(tmp);
-	this->cmd = this->parsedMsg[0];
+	this->sender = sender;
+	ptr = strtok((char *)full_msg.c_str(),"\r\n");
+	while (ptr != NULL)
+	{
+		this->commands.push_back(ptr);
+		ptr = strtok(NULL,"\r\n");
+	}
+
+
+
+
+// 	std::cout << "/**********************************\\" << std::endl;
+// 	std::cout << "************** COMMANDS ************" << std::endl;
+// 	for (size_t i = 0 ; i < this->commands.size(); i++)
+// 	{
+// 		// for (int j = 0 ; this->commands[i][j] != '\0' ; j++)
+// 		// 	std::cout << std::hex << (int)this->commands[i][j] << std::endl;
+// 		std::cout << this->commands[i] << std::endl;
+// 	}
+// 	std::cout << "/**********************************\\" << std::endl;
+
+
+
 }
 
 

@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 08:54:40 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 10:57:08 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/30 14:41:47 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,24 @@
 # include <iostream>
 # include <string>
 # include <vector>
+# include <sstream>
+# include <cstring>
 
 class Msg
 {
 	private:
 		int			sender;
 
+		std::vector<std::string> commands;
+		
+		std::vector<std::string> parsedMsg;
 		std::string	full_msg;
 		std::string	cmd;
 		std::string	param_list;
-		std::vector<std::string> parsedMsg;
 		
 	public:
 		Msg(void);
-		Msg(std::string &full_msg, int sender);
+		Msg(std::string  & full_msg, int sender);
 		~Msg(void);
 
 		std::string get_full_msg(void);

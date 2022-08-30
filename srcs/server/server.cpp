@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 11:48:42 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/30 15:01:49 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,7 +215,7 @@ bool	Server::accept_connections(void)
 	} while (new_fd != -1);
 	return (true);
 }
-void Server::checkMsg(Msg msg)
+void Server::checkMsg(Msg &msg)
 {
 	// Might Put command on a list and check them instead of If else
 	std::vector<std::string> parsedMsg;
@@ -262,6 +262,7 @@ bool	Server::recv_send_msg(int fd)
 			rc = recv(fd, this->buffer, sizeof(this->buffer), 0);
 			if (rc > 0)
 			{
+				this->buffer[rc] = '\0';
 				buff +=  this->buffer;
 			}
 			if (rc == -1)
@@ -279,12 +280,12 @@ bool	Server::recv_send_msg(int fd)
 			}
 			
 		}
-		for (size_t i = 0 ; i < buff.length() ; i++)
-		{
-			std::cout << std::hex << (int)buff[i] << "-"; 
-		}
+		// for (size_t i = 0 ; i < buff.length() ; i++)
+		// {
+		// 	std::cout << std::hex << (int)buff[i] << "-"; 
+		// }
 		Msg msg = Msg(buff, fd);
-		//checkMsg(msg);
+		checkMsg(msg);
 		// this for testing 
 		// std::map <int, User *>::iterator it;
 		// it = this->guests.find(fd);
