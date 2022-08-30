@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 15:03:49 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/30 16:10:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,25 +53,33 @@ class Server
 		int				port;
 		std::string		password;
 
-		Server(void) {};
+		Server(void) {}
 
 	public:
 		Server(int port, std::string password);
 		~Server(void);
 
-		std::map <std::string, User *> &	getUsers(void);
+		int					getSocketFd(void) const;
+		struct pollfd *		getFds(void);
+		int					getNfds(void) const;
+		void				setNfds(int nfds);
+		int					getPort(void) const;
+		std::string const &	getPass(void) const;
+
 		std::map <int, User *> &			getGuests(void);
-		int						getSocketFd(void) const;
-		struct pollfd *			getFds(void);
-		int						getNfds(void) const;
-		void					setNfds(int nfds);
-		int						getPort(void) const;
-		std::string const &		getPass(void) const;
+		std::map <std::string, User *> &	getUsers(void);
+		std::map <std::string, Channel *> &	getChannels(void);
+
+		User	*	getUser(int fd);
+		Channel	*	getChannel(std::string name);
 
 		void	addGuest(int fd);
-		void	deleteGuest(int fd);
-		void	addUser(User * user);
-		void	deleteUser(std::string username);
+		void	registerUser(int fd);
+		void	clientDisconnect(int fd);
+
+		void	createChannel(std::string name, User & op);
+		void	deleteChannel(std::string name);
+		
 		void	checkMsg(Msg &msg);
 
 		int		Create_socket(void);
