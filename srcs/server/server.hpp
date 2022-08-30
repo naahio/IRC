@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 12:54:17 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/30 16:10:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,8 @@ class Server
 
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
+		
+		void	checkMsg(Msg &msg);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
