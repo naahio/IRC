@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 08:54:42 by a                 #+#    #+#             */
-/*   Updated: 2022/08/28 15:39:03 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/30 11:49:42 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,17 @@ Msg::Msg(void)
 	this->param_list = "";
 }
 
-Msg::Msg(std::string full_msg, int sender)
+Msg::Msg(std::string &full_msg, int sender)
 {
-	std::stringstream s(full_msg);
+	//std::stringstream s(full_msg);
+	char *ptr;
 	std::string tmp;
 
 	this->sender = sender;
 	this->full_msg = full_msg;
-
-	while (std::getline(s,tmp,' '))
-		this->parsedMsg.push_back(tmp);
+	
+	// while (std::getline(s,tmp,' '))
+	// 	this->parsedMsg.push_back(tmp);
 	this->cmd = this->parsedMsg[0];
 }
 

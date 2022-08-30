@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/28 18:02:59 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/30 11:48:42 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -251,29 +251,40 @@ void Server::checkMsg(Msg msg)
 
 bool	Server::recv_send_msg(int fd)
 {
-	int	rc;
-
+	int	rc = 1;
+	std::string buff;
 	std::cout <<  "Receiving message . . ." << std::endl;
 	do
 	{
-		rc = recv(fd, this->buffer, sizeof(this->buffer), 0);
-		if (rc == -1)
+		// we should read until we get (CR or LF OR both IN THE BUFFER)
+		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
-			if (errno != EWOULDBLOCK)
+			rc = recv(fd, this->buffer, sizeof(this->buffer), 0);
+			if (rc > 0)
 			{
-				std::cout << "FAILED at receiving a msg ! errno : " << errno << std::endl;
+				buff +=  this->buffer;
+			}
+			if (rc == -1)
+			{
+				if (errno != EWOULDBLOCK)
+				{
+					std::cout << "FAILED at receiving a msg ! errno : " << errno << std::endl;
+					return (false);
+				}
+			}
+			if (rc == 0)
+			{
+				std::cout << "Connection closed . . . " << std::endl;
 				return (false);
 			}
-			break ;
+			
 		}
-		if (rc == 0)
+		for (size_t i = 0 ; i < buff.length() ; i++)
 		{
-			std::cout << "Connection closed . . . " << std::endl;
-			return (false);
+			std::cout << std::hex << (int)buff[i] << "-"; 
 		}
-		this->buffer[rc] = '\0';
-		Msg msg = Msg(buffer, fd);
-		checkMsg(msg);
+		Msg msg = Msg(buff, fd);
+		//checkMsg(msg);
 		// this for testing 
 		// std::map <int, User *>::iterator it;
 		// it = this->guests.find(fd);
@@ -283,6 +294,7 @@ bool	Server::recv_send_msg(int fd)
 		// std::cout << it->second->getServerName() << std::endl;
 		// std::cout << it->second->getFullName() << std::endl;
 		send(fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
+		return (true);
 	} while (true);
 	return (true);
 }
