@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 08:54:42 by a                 #+#    #+#             */
-/*   Updated: 2022/08/30 14:33:58 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 10:03:31 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,11 @@ int	Msg::get_sender(void)
 std::vector<std::string> Msg::getParsedMsg(void)
 {
 	return this->parsedMsg;
+}
+
+std::vector<std::string> Msg::getCommands(void)
+{
+	return this->commands;
 }
 // bool        Msg::check_syntax(std::string full_msg)
 // {

@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 16:07:18 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 12:55:41 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -306,7 +306,46 @@ bool	Server::accept_connections(void)
 		this->nfds++;
 	} while (new_fd != -1);
 	return (true);
-}
+}		
+
+void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+{
+	std::vector<std::string> collonSplit;  
+	//I split first the command with ':'
+   		// then I split with spaces		
+
+	split(cmd,':',collonSplit);
+	split(collonSplit[0],' ',oneCmdParsed);
+	for (size_t i = 1 ; i < collonSplit.size();i++)
+		oneCmdParsed.push_back(collonSplit[i]);
+};
+
+void	Server::parsExecCommands(Msg &msg)
+{
+	std::vector<std::string> allCmds;
+	std::vector<std::string> oneCmdParsed;
+
+	allCmds = msg.getCommands();
+	std::cout << "******************************************" << std::endl;
+	for (size_t i = 0 ; i < allCmds.size() ;i++)
+	{
+		splitCmd(allCmds[i],oneCmdParsed);
+		std::cout << "            Command " << i << ":" << std::endl;
+		
+		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
+		{
+			std::cout << oneCmdParsed[i] << std::endl;
+		}
+		std::cout << "---------------------------------" << std::endl;
+		oneCmdParsed.clear();
+	};
+	std::cout << "******************************************" << std::endl;
+
+};
+
+
+
+
 void Server::checkMsg(Msg &msg)
 {
 	// Might Put command on a list and check them instead of If else
@@ -326,7 +365,7 @@ void Server::checkMsg(Msg &msg)
 			it->second->setHostName(parsedMsg[2]);
 			it->second->setServerName(parsedMsg[3]);
 			it->second->setFullName(parsedMsg[4]);
-		}			
+		}
 	}
 	if (!msg.get_cmd().compare("NICK"))
 	{
@@ -339,7 +378,7 @@ void Server::checkMsg(Msg &msg)
 			it->second->setNickname(parsedMsg[1]);
 		}
 	}
-};
+}
 
 bool	Server::recv_send_msg(int fd)
 {
@@ -377,7 +416,8 @@ bool	Server::recv_send_msg(int fd)
 		// 	std::cout << std::hex << (int)buff[i] << "-"; 
 		// }
 		Msg msg = Msg(buff, fd);
-		checkMsg(msg);
+		parsExecCommands(msg);
+		//checkMsg(msg);
 		// this for testing 
 		// std::map <int, User *>::iterator it;
 		// it = this->guests.find(fd);

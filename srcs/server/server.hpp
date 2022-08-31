@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 16:10:29 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 11:57:52 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # include <map>
 # include <fcntl.h>
 # include <arpa/inet.h>
+# include <sstream>
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
@@ -80,7 +81,9 @@ class Server
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		
+		void	parsExecCommands(Msg &msg);
 		void	checkMsg(Msg &msg);
+		void	splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed); 
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
