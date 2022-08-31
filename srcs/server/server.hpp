@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 16:10:29 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 14:28:36 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,7 @@
 class Server
 {
 	private:
-		std::map <int, User *>				guests;
-		std::map <std::string, User *>		users;
+		std::map <int, User *>				users;
 		std::map <std::string, Channel *>	channels;
 		
 		int				socket_fd;
@@ -66,15 +65,13 @@ class Server
 		int					getPort(void) const;
 		std::string const &	getPass(void) const;
 
-		std::map <int, User *> &			getGuests(void);
-		std::map <std::string, User *> &	getUsers(void);
+		std::map <int, User *> &			getUsers(void);
 		std::map <std::string, Channel *> &	getChannels(void);
 
 		User	*	getUser(int fd);
 		Channel	*	getChannel(std::string name);
 
-		void	addGuest(int fd);
-		void	registerUser(int fd);
+		void	addUser(int fd);
 		void	clientDisconnect(int fd);
 
 		void	createChannel(std::string name, User & op);

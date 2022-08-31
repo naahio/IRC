@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 16:13:02 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 14:54:57 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <string>
 
 # include "../channels/Channel.hpp"
+# include "../tools/tool.hpp"
 
 class User
 {
@@ -25,9 +26,8 @@ class User
 		int			fd;
 		std::string	username;
 		std::string	nickname;
-		std::string	password;
-		std::string	servername;
-		std::string	hostname;
+		std::string	servName;
+		std::string	hostName;
 		std::string	fullName;
 		std::map <std::string, Channel *>	channels;
 		
@@ -40,31 +40,24 @@ class User
 		int					getFd(void) const;
 		std::string const &	getUsername(void) const;
 		std::string const &	getNickname(void) const;
-		std::string const &	getPassword(void) const;
 		std::string const &	getServerName(void) const;
 		std::string const &	getHostName(void) const;
 		std::string const &	getFullName(void) const;
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
-		
+
 		void	setFd(int _fd);
 		void	setUsername(std::string user_name);
 		void	setNickname(std::string nick_name);
-		void	setPassword(std::string pass_word);
-		void	setServerName(std::string servername);
+		void	setServerName(std::string servname);
 		void	setHostName(std::string hostname);
 		void	setFullName(std::string fullName);
+
 		bool	isAuth(void);
 
-		void	joinChannel(Channel & _channel);
+		void	joinChannel(Channel & channel, std::string key = "");
 		void	leaveChannel(std::string name);
-		
-		class notInChannel : public std::exception {
-			char const *	what() const throw() {
-				return "You are not on that channel.";
-			}
-		};
 };
 
 #endif
