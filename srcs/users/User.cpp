@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 16:16:57 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 14:57:30 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,9 @@ User::User(int _fd)
 	this->fd			= _fd;
 	this->username		= "";
 	this->nickname		= "";
-	this->password		= "";
-	this->servername 	= "";
+	this->servName 		= "";
 	this->fullName	 	= "";
-	this->hostname   	= "";
+	this->hostName   	= "";
 }
 
 User::~User()
@@ -44,18 +43,14 @@ std::string	const &	User::getNickname(void) const {
 	return (this->nickname);
 }
 
-std::string	const &	User::getPassword(void) const {
-	return (this->password);
-}
-
 std::string const & User::getServerName(void) const
 {
-	return (this->servername);
+	return (this->servName);
 }
 
 std::string const & User::getHostName(void) const
 {
-	return (this->hostname);
+	return (this->hostName);
 }
 
 std::string const & User::getFullName(void) const
@@ -89,37 +84,34 @@ void	User::setNickname(std::string _nickname) {
 	this->nickname = _nickname;
 }
 
-void	User::setPassword(std::string _password) {
-	this->password = _password;
+void	User::setServerName(std::string _servName)
+{
+	this->servName = _servName;
 }
 
-void	User::setServerName(std::string servername)
+void	User::setHostName(std::string _hostName)
 {
-	this->servername = servername;
+	this->hostName = _hostName;
 }
 
-void	User::setHostName(std::string hostname)
+void	User::setFullName(std::string _fullName)
 {
-	this->hostname = hostname;
-}
-
-void	User::setFullName(std::string fullName)
-{
-	this->fullName = fullName;
+	this->fullName = _fullName;
 }
 
 /*****************************[ Member Functions ]*****************************/
 
-bool	User::isAuth(void)
-{
-	return (!this->username.empty()
-		&& !this->nickname.empty()
-		&& !this->password.empty());
+bool	User::isAuth(void) {
+	return (!this->username.empty() && !this->nickname.empty());
 }
 
-void	User::joinChannel(Channel & _channel) {
-	this->channels.insert(std::pair<std::string, Channel *>(_channel.getName(), &_channel));
-	_channel.addMember(this, this->username);
+void	User::joinChannel(Channel & channel, std::string key) {
+	try {
+		this->channels.insert(std::pair<std::string, Channel *>(channel.getName(), &channel));
+		channel.addMember(this, this->fd, key);
+	} catch (std::exception & e) {
+		throw myException("Couldn't join channel: " + std::string(e.what()));
+	}
 }
 
 void	User::leaveChannel(std::string name) {
@@ -127,8 +119,8 @@ void	User::leaveChannel(std::string name) {
 
 	it = this->channels.find(name);
 	if (it == this->channels.end()) {
-		throw notInChannel();
+		throw myException("You are not on that channel.");
 	}
-	it->second->removeMember(this->username);
+	it->second->removeMember(this->fd);
 	this->channels.erase(it);
 }

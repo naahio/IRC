@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 16:07:18 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 15:06:33 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,7 @@ Server::Server(int _port, std::string _password)
 
 Server::~Server(void)
 {
-	std::map<int, User *>::iterator guest;
-	for (guest = this->guests.begin(); guest != this->guests.end(); ++guest) {
-		delete guest->second;
-	}
-	this->guests.clear();
-
-	std::map<std::string, User *>::iterator user;
+	std::map<int, User *>::iterator user;
 	for (user = this->users.begin(); user != this->users.end(); ++user) {
 		delete user->second;
 	}
@@ -73,11 +67,7 @@ std::string const &	Server::getPass(void) const {
 	return (this->password);
 }
 
-std::map<int, User *> &	Server::getGuests(void) {
-	return (this->guests);
-}
-
-std::map<std::string, User *> &	Server::getUsers(void) {
+std::map<int, User *> &	Server::getUsers(void) {
 	return (this->users);
 }
 
@@ -86,18 +76,11 @@ std::map<std::string, Channel *> &	Server::getChannels(void) {
 }
 
 User *	Server::getUser(int fd) {
-	std::map<int, User *>::iterator 		guest;
-	std::map<std::string, User *>::iterator	user;
-	
-	guest = this->guests.find(fd);
-	if (guest != this->guests.end()) {
-		return (guest->second);
-	}
+	std::map<int, User *>::iterator	user;
 
-	for (user = this->users.begin(); user != this->users.end(); ++user) {
-		if (user->second->getFd() == fd) {
-			return (user->second);
-		}
+	user = this->users.find(fd);
+	if (user != this->users.end()) {
+		return (user->second);
 	}
 	return (NULL);
 }
@@ -114,68 +97,49 @@ Channel *	Server::getChannel(std::string name) {
 
 /*****************************[ Users Management ]*****************************/
 
-void	Server::addGuest(int fd) {
-	User *	guest;
+void	Server::addUser(int fd) {
+	User *	user;
 
-	guest = new User(fd);
-	this->guests.insert(std::pair<int, User *>(fd, guest));
-}
-
-void	Server::registerUser(int fd) {
-	std::map<int, User *>::iterator	guest;
-	User *							user;
-	
-	guest = this->guests.find(fd);
-	if (guest == this->guests.end())
-		return ;
-	user = guest->second;
-	this->users.insert(std::pair<std::string, User *>(user->getUsername(), user));
-	this->guests.erase(guest);
+	user = new User(fd);
+	this->users.insert(std::pair<int, User *>(fd, user));
 }
 
 void	Server::clientDisconnect(int fd) {
-	std::map<int, User *>::iterator				guest;
-	std::map<std::string, User *>::iterator		user;
-	std::map<std::string, Channel *>			channels;
-	std::map<std::string, Channel *>::iterator	channel;
+	std::map<int, User *>::iterator		user;
+	std::map<std::string, Channel *>	channels;
 
-	guest = this->guests.find(fd);
-	if (guest != this->guests.end()) {
-		delete guest->second;
-		this->guests.erase(guest);
-		return ;
-	}
-
-	for (user = this->users.begin(); user != this->users.end(); ++user) {
-		if (user->second->getFd() == fd) {
-			user->second->setFd(-1);
-			channels = user->second->getChannels();
-			while (!channels.empty()) {
-				channel = channels.begin();
-				user->second->leaveChannel(channel->second->getName());
-			}
-			return ;
+	user = this->users.find(fd);
+	if (user != this->users.end()) {
+		channels = user->second->getChannels();
+		while (!channels.empty()) {
+			user->second->leaveChannel(channels.begin()->second->getName());
 		}
+		delete user->second;
+		this->users.erase(user);
 	}
 }
 
 /****************************[ Channels Management ]***************************/
 
 void	Server::createChannel(std::string name, User & op) {
-	Channel *	channel;
+	try {
+		Channel *	channel;
 
-	channel = new Channel(name);
-	if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
-		op.joinChannel(*channel);
-		return ;
+		channel = new Channel(name);
+		if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
+			op.joinChannel(*channel);
+			return ;
+		}
+		delete channel;
+	} catch (std::exception & e) {
+		std::cout << e.what() << std::endl;
 	}
-	delete channel;
 }
 
 void	Server::deleteChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator	channel;
-	std::map<std::string, User *>::iterator 	member;
-	std::map<std::string, User *>				channelMembers;
+	std::map<int, User *>::iterator 			member;
+	std::map<int, User *>						channelMembers;
 	std::map<std::string, Channel *>			memberChannels;
 
 	channel = this->channels.find(name);
@@ -300,13 +264,14 @@ bool	Server::accept_connections(void)
 			break;
 		}
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
-		this->addGuest(new_fd);
+		this->addUser(new_fd);
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
 	} while (new_fd != -1);
 	return (true);
 }
+
 void Server::checkMsg(Msg &msg)
 {
 	// Might Put command on a list and check them instead of If else
@@ -321,7 +286,7 @@ void Server::checkMsg(Msg &msg)
 				sizeof("Error need more parameters\n"), 0);
 		else
 		{
-			it = this->guests.find(msg.get_sender());
+			it = this->users.find(msg.get_sender());
 			it->second->setUsername(parsedMsg[1]);
 			it->second->setHostName(parsedMsg[2]);
 			it->second->setServerName(parsedMsg[3]);
@@ -335,7 +300,7 @@ void Server::checkMsg(Msg &msg)
 				sizeof("Error need more parameters\n"), 0);
 		else
 		{
-			it = this->guests.find(msg.get_sender());
+			it = this->users.find(msg.get_sender());
 			it->second->setNickname(parsedMsg[1]);
 		}
 	}
