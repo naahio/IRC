@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 12:55:41 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 14:27:06 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,6 +320,37 @@ void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 		oneCmdParsed.push_back(collonSplit[i]);
 };
 
+void Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
+{
+	std::map <int, User *>::iterator it;
+
+	if (!cmd[0].compare("USER"))
+	{
+		if (cmd.size() < 5)
+			send(msg.get_sender(), "Error need more parameters\n", 
+				sizeof("Error need more parameters\n"), 0);
+		else
+		{
+			it = this->guests.find(msg.get_sender());
+			it->second->setUsername(cmd[1]);
+			it->second->setHostName(cmd[2]);
+			it->second->setServerName(cmd[3]);
+			it->second->setFullName(cmd[4]);
+		}
+	}
+	if (!cmd[0].compare("NICK"))
+	{
+		if (cmd.size() < 2)
+			send(msg.get_sender(), "Error need more parameters\n", 
+				sizeof("Error need more parameters\n"), 0);
+		else
+		{
+			it = this->guests.find(msg.get_sender());
+			it->second->setNickname(cmd[1]);
+		}
+	}
+}
+
 void	Server::parsExecCommands(Msg &msg)
 {
 	std::vector<std::string> allCmds;
@@ -337,48 +368,13 @@ void	Server::parsExecCommands(Msg &msg)
 			std::cout << oneCmdParsed[i] << std::endl;
 		}
 		std::cout << "---------------------------------" << std::endl;
+		cmdExec(msg,oneCmdParsed);
 		oneCmdParsed.clear();
 	};
 	std::cout << "******************************************" << std::endl;
 
 };
 
-
-
-
-void Server::checkMsg(Msg &msg)
-{
-	// Might Put command on a list and check them instead of If else
-	std::vector<std::string> parsedMsg;
-	std::map <int, User *>::iterator it;
-	
-	parsedMsg = msg.getParsedMsg();
-	if (!msg.get_cmd().compare("USER"))
-	{
-		if (parsedMsg.size() < 5)
-			send(msg.get_sender(), "Error need more parameters\n", 
-				sizeof("Error need more parameters\n"), 0);
-		else
-		{
-			it = this->guests.find(msg.get_sender());
-			it->second->setUsername(parsedMsg[1]);
-			it->second->setHostName(parsedMsg[2]);
-			it->second->setServerName(parsedMsg[3]);
-			it->second->setFullName(parsedMsg[4]);
-		}
-	}
-	if (!msg.get_cmd().compare("NICK"))
-	{
-		if (parsedMsg.size() < 2)
-			send(msg.get_sender(), "Error need more parameters\n", 
-				sizeof("Error need more parameters\n"), 0);
-		else
-		{
-			it = this->guests.find(msg.get_sender());
-			it->second->setNickname(parsedMsg[1]);
-		}
-	}
-}
 
 bool	Server::recv_send_msg(int fd)
 {

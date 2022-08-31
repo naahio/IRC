@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 11:57:52 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 14:27:20 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,7 @@ class Server
 		void	deleteChannel(std::string name);
 		
 		void	parsExecCommands(Msg &msg);
-		void	checkMsg(Msg &msg);
+		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		void	splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed); 
 
 		int		Create_socket(void);
