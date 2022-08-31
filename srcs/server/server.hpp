@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 14:27:20 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/08/31 18:06:06 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,7 @@
 class Server
 {
 	private:
-		std::map <int, User *>				guests;
-		std::map <std::string, User *>		users;
+		std::map <int, User *>				users;
 		std::map <std::string, Channel *>	channels;
 		
 		int				socket_fd;
@@ -67,23 +66,27 @@ class Server
 		int					getPort(void) const;
 		std::string const &	getPass(void) const;
 
-		std::map <int, User *> &			getGuests(void);
-		std::map <std::string, User *> &	getUsers(void);
+		std::map <int, User *> &			getUsers(void);
 		std::map <std::string, Channel *> &	getChannels(void);
 
 		User	*	getUser(int fd);
 		Channel	*	getChannel(std::string name);
 
-		void	addGuest(int fd);
-		void	registerUser(int fd);
+		void	addUser(int fd);
 		void	clientDisconnect(int fd);
 
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		
+		/********* executiing command member fubctions ***********/
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
-		void	splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed); 
+		void	splitCmd(std::string &cmd,
+						std::vector<std::string> &oneCmdParsed);
+		int		paramsCheker();
+		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
+		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
+
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
