@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/08/31 15:34:39 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/01 11:49:00 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,8 @@ void	split(std::string const &s1,char delim,
 
 	while (std::getline(X,T,delim))
 	{
-		out.push_back(T);
+		if (!T.empty())
+			out.push_back(T);
 	}
 }
 

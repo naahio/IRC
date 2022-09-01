@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 18:29:29 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/01 13:40:11 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,13 +270,16 @@ bool	Server::accept_connections(void)
 		this->nfds++;
 	} while (new_fd != -1);
 	return (true);
-}		
+}	
 
-int		paramsCheker(std::string &param)
+int		Server::paramsCheker(const std::string &param)
 {
-	(void)param;
+	if (param.find_first_of(" \r\n\v\f\r\'\",*?!@.")
+		|| param[0] == '$' || param[0] == ':'
+		|| param[0] == '#' || param[0] == '&')
+		return 0;
 	return 1;
-}
+};
 
 void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 {
@@ -288,42 +291,73 @@ void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 	split(collonSplit[0],' ',oneCmdParsed);
 	for (size_t i = 1 ; i < collonSplit.size();i++)
 		oneCmdParsed.push_back(collonSplit[i]);
-};
+}
 
 void	Server::USERcmd(Msg &msg,std::vector<std::string> &cmd)
 {
-	User *tmp;
+	User *user;
 
-	if (cmd.size() < 5)
+	user = this->getUser(msg.get_sender());
+	if (user->isAuth())
+		send(msg.get_sender(), "you cant register multiple times\n", 
+					sizeof("you cant register multiple times\n"), 0);
+	else if (cmd.size() < 5)
 		send(msg.get_sender(), "Error need more parameters\n", 
 			sizeof("Error need more parameters\n"), 0);
 	else
 	{
-		tmp = this->getUser(msg.get_sender());
-		if (tmp)
+		if (user)
 		{
-			tmp->setUsername(cmd[1]);
-			tmp->setHostName(cmd[2]);
-			tmp->setServerName(cmd[3]);
-			tmp->setFullName(cmd[4]);
+			if (paramsCheker(cmd[1]))
+			{
+				send(msg.get_sender(), "Bad UserName\n", 
+					sizeof("Bad UserName\n"), 0);
+				return ;
+			}
+			user->setUsername(cmd[1]);
+			user->setHostName(cmd[2]);
+			user->setServerName(cmd[3]);
+			user->setFullName(cmd[4]);
 		}
+		else
+			std::cout << "Error " << std::endl;
+
+	}
+	if (user->isAuth())
+	{
+		send(msg.get_sender(), "you have been registered\n", 
+			sizeof("you have been registered\n"), 0);
+		user->setRegistered();
 	}
 }
 
 void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 {
-	User *tmp;
+	User *user;
 
+	user = this->getUser(msg.get_sender());
 	if (cmd.size() < 2)
 			send(msg.get_sender(), "Error need more parameters\n", 
 				sizeof("Error need more parameters\n"), 0);
 	else
 	{
-		tmp = this->getUser(msg.get_sender());
-		if (tmp)
+		if (user)
 		{
-			tmp->setNickname(cmd[1]);
+			if (paramsCheker(cmd[1]))
+			{
+				send(msg.get_sender(), "Bad Nickname\n", 
+					sizeof("Bad Nickname\n"), 0);
+				return ;
+			}
+			else
+			user->setNickname(cmd[1]);
 		}
+	}
+	if (!user->getRegistered() && user->isAuth())
+	{
+		send(msg.get_sender(), "you have been registered\n", 
+			sizeof("you have been registered\n"), 0);
+		user->setRegistered();
 	}
 }
 
@@ -363,7 +397,7 @@ void	Server::parsExecCommands(Msg &msg)
 	std::cout << "User : " << this->getUser(msg.get_sender())->getUsername() << std::endl;
 	std::cout << "Nick : " << this->getUser(msg.get_sender())->getNickname() << std::endl;
 
-};
+}
 
 
 bool	Server::recv_send_msg(int fd)

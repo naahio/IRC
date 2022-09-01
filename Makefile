@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
+#    By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/08/27 14:31:14 by hel-makh         ###   ########.fr        #
+#    Updated: 2022/09/01 10:26:07 by ybensell         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,7 @@ SRCS		=	srcs/main.cpp\
 				./srcs/users/User.cpp\
 				./srcs/pars/msg.cpp\
 				./srcs/channels/Channel.cpp\
-				./srcs/tools/check_args.cpp
+				./srcs/tools/tool.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 
