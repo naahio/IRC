@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 14:57:30 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/31 16:40:26 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,13 +105,8 @@ bool	User::isAuth(void) {
 	return (!this->username.empty() && !this->nickname.empty());
 }
 
-void	User::joinChannel(Channel & channel, std::string key) {
-	try {
-		this->channels.insert(std::pair<std::string, Channel *>(channel.getName(), &channel));
-		channel.addMember(this, this->fd, key);
-	} catch (std::exception & e) {
-		throw myException("Couldn't join channel: " + std::string(e.what()));
-	}
+void	User::joinChannel(Channel & channel, std::string name) {
+	this->channels.insert(std::pair<std::string, Channel *>(name, &channel));
 }
 
 void	User::leaveChannel(std::string name) {
@@ -121,6 +116,5 @@ void	User::leaveChannel(std::string name) {
 	if (it == this->channels.end()) {
 		throw myException("You are not on that channel.");
 	}
-	it->second->removeMember(this->fd);
 	this->channels.erase(it);
 }

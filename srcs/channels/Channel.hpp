@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/08/31 14:47:56 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/01 11:08:04 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,30 @@
 # define CHANNEL_HPP
 
 # include <string>
+# include <vector>
 # include <map>
+# include <algorithm>
+# include <sys/types.h>
+# include <sys/socket.h>
 
+# include "../users/User.hpp"
 # include "../tools/tool.hpp"
-
-class User;
 
 class Channel {
 	private:
 		std::string				name;
 		std::string				topic;
 		std::string				key;
-		std::map <int, User *>	operators;
+		int						membersLimit;
+		bool					memberChatOnly;
+		bool					inviteOnly;
+		bool					moderated;
+		bool					topicSettable;
+
 		std::map <int, User *>	members;
+		std::vector <int>		operators;
+		std::vector <int>		moderators;
+		std::vector <int>		invitees;
 
 		Channel(void) {}
 	
@@ -37,19 +48,40 @@ class Channel {
 		std::string const &			getName(void) const;
 		std::string const &			getTopic(void) const;
 		std::string const &			getKey(void) const;
-		std::map <int, User *> &	getOperators(void);
+		int							getMembersLimit(void) const;
+		bool						isMemberChatOnly(void) const;
+		bool						isInviteOnly(void) const;
+		bool						isModerated(void) const;
+		bool						isTopicSettable(void) const;
+		
 		std::map <int, User *> &	getMembers(void);
+		std::vector <int> &			getOperators(void);
+		std::vector <int> &			getModerators(void);
+		std::vector <int> &			getInvitees(void);
 
-		void	setName(std::string _name);
-		void	setTopic(std::string _topic);
-		void	setKey(std::string _topic);
-
+		void	setTopic(std::string _topic, int fd);
+		void	setKey(std::string _topic, int fd);
+		void	setLimit(int limit, int fd);
+		void	setMemberChatOnly(bool option, int fd);
+		void	setInviteOnly(bool option, int fd);
+		void	setModerated(bool option, int fd);
+		void	setTopicSettable(bool option, int fd);
+		
 		User *	getMember(int fd);
+		User *	getOperator(int fd);
+		User *	getModerator(int fd);
+		User *	getInvitee(int fd);
 
 		void	addOperator(int fd);
 		void	removeOperator(int fd);
-		void	addMember(User * member, int fd, std::string key = "");
+		void	addModerator(int fd);
+		void	removeModerator(int fd);
+		void	addInvitee(int fd);
+		void	removeInvitee(int fd);
+		void	addMember(User * member, std::string key = "");
 		void	removeMember(int fd);
+		
+		void	broadCastMessage(std::string & message, int fd = -1);
 };
 
 #endif

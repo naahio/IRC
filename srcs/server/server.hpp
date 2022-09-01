@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 14:28:36 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/08/31 16:13:56 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,7 @@ class Server
 		std::map <std::string, Channel *> &	getChannels(void);
 
 		User	*	getUser(int fd);
+		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
 		void	addUser(int fd);
