@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/01 13:40:11 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 10:56:09 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -272,6 +272,20 @@ bool	Server::accept_connections(void)
 	return (true);
 }	
 
+bool	Server::findNickname(const std::string & nick)
+{
+	std::map<int, User *>::iterator	it;
+
+	for (it = this->users.begin() ; it != this->users.end();it++)
+	{
+		if (it->second->getNickname() == nick)
+			return false;
+	}
+	return true;
+
+}
+
+
 int		Server::paramsCheker(const std::string &param)
 {
 	if (param.find_first_of(" \r\n\v\f\r\'\",*?!@.")
@@ -341,17 +355,14 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 				sizeof("Error need more parameters\n"), 0);
 	else
 	{
-		if (user)
+		if (paramsCheker(cmd[1]) || !findNickname(cmd[1]))
 		{
-			if (paramsCheker(cmd[1]))
-			{
-				send(msg.get_sender(), "Bad Nickname\n", 
-					sizeof("Bad Nickname\n"), 0);
-				return ;
-			}
-			else
-			user->setNickname(cmd[1]);
+			// This is temporary message To change later
+			send(msg.get_sender(), "Bad Nickname\n", 
+				sizeof("Bad Nickname\n"), 0);
+			return ;
 		}
+		user->setNickname(cmd[1]);
 	}
 	if (!user->getRegistered() && user->isAuth())
 	{

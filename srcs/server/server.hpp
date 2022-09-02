@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/01 13:30:41 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 10:47:57 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ class Server
 						std::vector<std::string> &oneCmdParsed);
 
 		int		paramsCheker(const std::string &param);
+		bool	findNickname(const std::string & nick);	
 		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
 		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
 
