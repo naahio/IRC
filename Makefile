@@ -3,27 +3,29 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+         #
+#    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/01 10:26:07 by ybensell         ###   ########.fr        #
+#    Updated: 2022/09/02 12:46:22 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		=	ircserv
 
-HEADERS		=	./srcs/tools/tool.hpp\
-				./srcs/server/server.hpp\
+HEADERS		=	./srcs/server/server.hpp\
 				./srcs/users/User.hpp\
 				./srcs/pars/msg.hpp\
-				./srcs/channels/Channel.hpp
+				./srcs/channels/Channel.hpp\
+				./srcs/tools/tool.hpp\
+				./srcs/tools/replies.hpp
 
 SRCS		=	srcs/main.cpp\
 				./srcs/server/server.cpp\
 				./srcs/users/User.cpp\
 				./srcs/pars/msg.cpp\
 				./srcs/channels/Channel.cpp\
-				./srcs/tools/tool.cpp
+				./srcs/tools/tool.cpp\
+				./srcs/tools/replies.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 

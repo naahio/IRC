@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 10:56:09 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:44:30 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,17 @@ User *	Server::getUser(int fd) {
 	return (NULL);
 }
 
+User *	Server::getUser(std::string nickname) {
+	std::map<int, User *>::iterator	user;
+
+	for (user = this->users.begin(); user != this->users.end(); ++user) {
+		if (user->second->getNickname() == nickname) {
+			return (user->second);
+		}
+	}
+	return (NULL);
+}
+
 Channel *	Server::getChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator	channel;
 	
@@ -127,7 +138,7 @@ void	Server::createChannel(std::string name, User & op) {
 
 		channel = new Channel(name);
 		if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
-			op.joinChannel(*channel);
+			channel->addMember(&op);
 			return ;
 		}
 		delete channel;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 15:21:01 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:47:51 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 # define TOOL_HPP
 
 # include <string>
+# include <vector>
+
+# include "replies.hpp"
 
 class myException : public std::exception {
 	private:
@@ -21,6 +24,7 @@ class myException : public std::exception {
 
 	public:
 		myException(std::string msg) : message(msg) {}
+		myException(int err_no) : message(err_reply(err_no)) {}
 		virtual ~myException() throw() {}
 		
 		char const *	what() const throw() {

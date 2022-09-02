@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/01 13:23:12 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:45:39 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,13 +118,8 @@ bool	User::isAuth(void) {
 	return (!this->username.empty() && !this->nickname.empty());
 }
 
-void	User::joinChannel(Channel & channel, std::string key) {
-	try {
-		this->channels.insert(std::pair<std::string, Channel *>(channel.getName(), &channel));
-		channel.addMember(this, this->fd, key);
-	} catch (std::exception & e) {
-		throw myException("Couldn't join channel: " + std::string(e.what()));
-	}
+void	User::joinChannel(Channel & channel, std::string name) {
+	this->channels.insert(std::pair<std::string, Channel *>(name, &channel));
 }
 
 void	User::leaveChannel(std::string name) {
@@ -134,6 +129,5 @@ void	User::leaveChannel(std::string name) {
 	if (it == this->channels.end()) {
 		throw myException("You are not on that channel.");
 	}
-	it->second->removeMember(this->fd);
 	this->channels.erase(it);
 }

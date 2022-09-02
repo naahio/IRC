@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 10:47:57 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:45:07 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,7 @@ class Server
 		std::map <std::string, Channel *> &	getChannels(void);
 
 		User	*	getUser(int fd);
+		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
 		void	addUser(int fd);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/01 13:21:26 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:45:15 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,12 @@
 # define USER_HPP
 
 # include <unistd.h>
-# include <iostream>
 # include <string>
+# include <map>
 
-# include "../channels/Channel.hpp"
 # include "../tools/tool.hpp"
+
+class Channel;
 
 class User
 {
@@ -59,7 +60,7 @@ class User
 
 		bool	isAuth(void);
 
-		void	joinChannel(Channel & channel, std::string key = "");
+		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);
 };
 

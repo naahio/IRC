@@ -35,4 +35,5 @@ ircserv
 #others
 .history
 .vscode
-TODO
+*.dSYM/
+.DS_Store
