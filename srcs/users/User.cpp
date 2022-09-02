@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 14:57:30 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/01 13:23:12 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ User::User(int _fd)
 	this->servName 		= "";
 	this->fullName	 	= "";
 	this->hostName   	= "";
+	this->registered	= false;
 }
 
 User::~User()
@@ -71,6 +72,18 @@ Channel *	User::getChannel(std::string name) {
 	}
 	return (NULL);
 }
+
+
+bool	User::getRegistered()
+{
+	return this->registered;
+}
+
+void	User::setRegistered()
+{
+	this->registered = true;
+}
+
 
 void	User::setFd(int _fd) {
 	this->fd = _fd;

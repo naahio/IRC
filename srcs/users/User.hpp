@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 14:54:57 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/01 13:21:26 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class User
 		std::string	hostName;
 		std::string	fullName;
 		std::map <std::string, Channel *>	channels;
+		bool	registered;
 		
 		User(void) {}
 
@@ -46,7 +47,9 @@ class User
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
+		bool				getRegistered();
 
+		void	setRegistered();
 		void	setFd(int _fd);
 		void	setUsername(std::string user_name);
 		void	setNickname(std::string nick_name);

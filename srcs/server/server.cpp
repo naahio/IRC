@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 15:06:33 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 10:56:09 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,41 +270,146 @@ bool	Server::accept_connections(void)
 		this->nfds++;
 	} while (new_fd != -1);
 	return (true);
+}	
+
+bool	Server::findNickname(const std::string & nick)
+{
+	std::map<int, User *>::iterator	it;
+
+	for (it = this->users.begin() ; it != this->users.end();it++)
+	{
+		if (it->second->getNickname() == nick)
+			return false;
+	}
+	return true;
+
 }
 
-void Server::checkMsg(Msg &msg)
+
+int		Server::paramsCheker(const std::string &param)
 {
-	// Might Put command on a list and check them instead of If else
-	std::vector<std::string> parsedMsg;
-	std::map <int, User *>::iterator it;
-	
-	parsedMsg = msg.getParsedMsg();
-	if (!msg.get_cmd().compare("USER"))
-	{
-		if (parsedMsg.size() < 5)
-			send(msg.get_sender(), "Error need more parameters\n", 
-				sizeof("Error need more parameters\n"), 0);
-		else
-		{
-			it = this->users.find(msg.get_sender());
-			it->second->setUsername(parsedMsg[1]);
-			it->second->setHostName(parsedMsg[2]);
-			it->second->setServerName(parsedMsg[3]);
-			it->second->setFullName(parsedMsg[4]);
-		}			
-	}
-	if (!msg.get_cmd().compare("NICK"))
-	{
-		if (parsedMsg.size() < 2)
-			send(msg.get_sender(), "Error need more parameters\n", 
-				sizeof("Error need more parameters\n"), 0);
-		else
-		{
-			it = this->users.find(msg.get_sender());
-			it->second->setNickname(parsedMsg[1]);
-		}
-	}
+	if (param.find_first_of(" \r\n\v\f\r\'\",*?!@.")
+		|| param[0] == '$' || param[0] == ':'
+		|| param[0] == '#' || param[0] == '&')
+		return 0;
+	return 1;
 };
+
+void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+{
+	std::vector<std::string> collonSplit;  
+	//I split first the command with ':'
+   		// then I split with spaces		
+
+	split(cmd,':',collonSplit);
+	split(collonSplit[0],' ',oneCmdParsed);
+	for (size_t i = 1 ; i < collonSplit.size();i++)
+		oneCmdParsed.push_back(collonSplit[i]);
+}
+
+void	Server::USERcmd(Msg &msg,std::vector<std::string> &cmd)
+{
+	User *user;
+
+	user = this->getUser(msg.get_sender());
+	if (user->isAuth())
+		send(msg.get_sender(), "you cant register multiple times\n", 
+					sizeof("you cant register multiple times\n"), 0);
+	else if (cmd.size() < 5)
+		send(msg.get_sender(), "Error need more parameters\n", 
+			sizeof("Error need more parameters\n"), 0);
+	else
+	{
+		if (user)
+		{
+			if (paramsCheker(cmd[1]))
+			{
+				send(msg.get_sender(), "Bad UserName\n", 
+					sizeof("Bad UserName\n"), 0);
+				return ;
+			}
+			user->setUsername(cmd[1]);
+			user->setHostName(cmd[2]);
+			user->setServerName(cmd[3]);
+			user->setFullName(cmd[4]);
+		}
+		else
+			std::cout << "Error " << std::endl;
+
+	}
+	if (user->isAuth())
+	{
+		send(msg.get_sender(), "you have been registered\n", 
+			sizeof("you have been registered\n"), 0);
+		user->setRegistered();
+	}
+}
+
+void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
+{
+	User *user;
+
+	user = this->getUser(msg.get_sender());
+	if (cmd.size() < 2)
+			send(msg.get_sender(), "Error need more parameters\n", 
+				sizeof("Error need more parameters\n"), 0);
+	else
+	{
+		if (paramsCheker(cmd[1]) || !findNickname(cmd[1]))
+		{
+			// This is temporary message To change later
+			send(msg.get_sender(), "Bad Nickname\n", 
+				sizeof("Bad Nickname\n"), 0);
+			return ;
+		}
+		user->setNickname(cmd[1]);
+	}
+	if (!user->getRegistered() && user->isAuth())
+	{
+		send(msg.get_sender(), "you have been registered\n", 
+			sizeof("you have been registered\n"), 0);
+		user->setRegistered();
+	}
+}
+
+void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
+{
+	if (!cmd[0].compare("USER"))
+	{
+		USERcmd(msg,cmd);
+	}
+	if (!cmd[0].compare("NICK"))
+	{
+		NICKcmd(msg,cmd);
+	}
+}
+
+void	Server::parsExecCommands(Msg &msg)
+{
+	std::vector<std::string> allCmds;
+	std::vector<std::string> oneCmdParsed;
+
+	allCmds = msg.getCommands();
+	std::cout << "******************************************" << std::endl;
+	for (size_t i = 0 ; i < allCmds.size() ;i++)
+	{
+		splitCmd(allCmds[i],oneCmdParsed);
+		std::cout << "            Command " << i << ":" << std::endl;
+		
+		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
+		{
+			std::cout << oneCmdParsed[i] << std::endl;
+		}
+		std::cout << "---------------------------------" << std::endl;
+		cmdExec(msg,oneCmdParsed);
+		oneCmdParsed.clear();
+	};
+	std::cout << "******************************************" << std::endl;
+	std::cout << "User : " << this->getUser(msg.get_sender())->getUsername() << std::endl;
+	std::cout << "Nick : " << this->getUser(msg.get_sender())->getNickname() << std::endl;
+
+}
+
 
 bool	Server::recv_send_msg(int fd)
 {
@@ -342,7 +447,8 @@ bool	Server::recv_send_msg(int fd)
 		// 	std::cout << std::hex << (int)buff[i] << "-"; 
 		// }
 		Msg msg = Msg(buff, fd);
-		checkMsg(msg);
+		parsExecCommands(msg);
+		//checkMsg(msg);
 		// this for testing 
 		// std::map <int, User *>::iterator it;
 		// it = this->guests.find(fd);

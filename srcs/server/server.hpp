@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 14:28:36 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 10:47:57 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # include <map>
 # include <fcntl.h>
 # include <arpa/inet.h>
+# include <sstream>
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
@@ -77,7 +78,17 @@ class Server
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		
-		void	checkMsg(Msg &msg);
+		/********* executiing command member fubctions ***********/
+		void	parsExecCommands(Msg &msg);
+		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
+		void	splitCmd(std::string &cmd,
+						std::vector<std::string> &oneCmdParsed);
+
+		int		paramsCheker(const std::string &param);
+		bool	findNickname(const std::string & nick);	
+		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
+		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
+
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
