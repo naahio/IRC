@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/02 11:05:18 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/02 12:48:49 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 13:02:39 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,8 +117,6 @@ std::string	err_reply(int err_no) {
 			return (":Permission Denied- You're not an IRC operator");
 		case ERR_CHANOPRIVSNEEDED:
 			return (":You're not channel operator");
-		case ERR_CANTKILLSERVER:
-			return (":You cant kill a server!");
 		case ERR_NOOPERHOST:
 			return (":No O-lines for your host");
 		case ERR_UMODEUNKNOWNFLAG:
