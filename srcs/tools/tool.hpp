@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 11:48:40 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:47:51 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define TOOL_HPP
 
 # include <string>
+# include <vector>
 
 # include "replies.hpp"
 
@@ -33,5 +34,8 @@ class myException : public std::exception {
 
 bool			isNumeric(std::string const &str);
 std::string *	pre_cmd(std::string full_msg);
+void            split(std::string const &s1, char delim,
+                         std::vector<std::string> &out);
+
 
 #endif

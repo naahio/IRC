@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/31 16:40:26 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:45:39 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ User::User(int _fd)
 	this->servName 		= "";
 	this->fullName	 	= "";
 	this->hostName   	= "";
+	this->registered	= false;
 }
 
 User::~User()
@@ -71,6 +72,18 @@ Channel *	User::getChannel(std::string name) {
 	}
 	return (NULL);
 }
+
+
+bool	User::getRegistered()
+{
+	return this->registered;
+}
+
+void	User::setRegistered()
+{
+	this->registered = true;
+}
+
 
 void	User::setFd(int _fd) {
 	this->fd = _fd;

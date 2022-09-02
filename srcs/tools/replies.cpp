@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/02 11:05:18 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/02 12:36:05 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:48:49 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ std::string	reply(int repl_no) {
 			return (":End of /INFO list");
 		case RPL_YOUREOPER:
 			return (":You are now an IRC operator");
+		default:
+			return (":Undefined reply");
 	}
 }
 
@@ -123,5 +125,7 @@ std::string	err_reply(int err_no) {
 			return (":Unknown MODE flag");
 		case ERR_USERSDONTMATCH:
 			return (":Cant change mode for other users");
+		default:
+			return (":Undefined error");
 	}
 }

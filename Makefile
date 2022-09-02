@@ -6,7 +6,7 @@
 #    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/02 11:50:48 by hel-makh         ###   ########.fr        #
+#    Updated: 2022/09/02 12:46:22 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ SRCS		=	srcs/main.cpp\
 				./srcs/users/User.cpp\
 				./srcs/pars/msg.cpp\
 				./srcs/channels/Channel.cpp\
-				./srcs/tools/check_args.cpp\
+				./srcs/tools/tool.cpp\
 				./srcs/tools/replies.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
