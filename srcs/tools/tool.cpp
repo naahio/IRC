@@ -3,13 +3,12 @@
 /*                                                        :::      ::::::::   */
 /*   tool.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/01 11:49:00 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 13:03:08 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 # include "tool.hpp"
 # include "../server/server.hpp"
@@ -34,10 +33,3 @@ void	split(std::string const &s1,char delim,
 			out.push_back(T);
 	}
 }
-
-// std::string *	pre_cmd(std::string full_msg)
-// {
-// 	(void)full_msg;
-
-	
-// }

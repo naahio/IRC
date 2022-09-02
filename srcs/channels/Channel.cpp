@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/01 11:09:26 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 13:26:31 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,11 @@
 
 Channel::Channel(std::string _name) {
 	if (_name[0] != '#') {
-		throw myException("Invalid channel name: must start with '#'.");
+		throw myException(ERR_NOSUCHCHANNEL);
 	}
 	for (std::string::iterator it = _name.begin(); it != _name.end(); ++it) {
 		if (isspace(*it)) {
-			throw myException("Invalid channel name: contains illegal characters.");
+			throw myException(":Channel name contains illegal characters");
 		}
 	}
 	this->name = _name;
@@ -47,7 +47,7 @@ std::string const &	Channel::getKey(void) const {
 	return (this->key);
 }
 
-int	Channel::getMembersLimit(void) const {
+size_t	Channel::getMembersLimit(void) const {
 	return (this->membersLimit);
 }
 
@@ -85,43 +85,45 @@ std::vector <int> &	Channel::getInvitees(void) {
 
 void	Channel::setTopic(std::string _topic, int fd) {
 	if (!this->topicSettable && !this->getOperator(fd))
-		throw myException("You're not channel operator.");
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->topic = _topic;
 }
 
 void	Channel::setKey(std::string _key, int fd) {
 	if (!this->getOperator(fd))
-		throw myException("You're not channel operator.");
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	if (!this->key.empty())
+		throw myException(ERR_KEYSET);
 	this->key = _key;
 }
 
-void	Channel::setLimit(int limit, int fd) {
+void	Channel::setLimit(size_t limit, int fd) {
 	if (!this->getOperator(fd))
-		throw myException("You're not channel operator.");
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->membersLimit = limit;
 }
 
 void	Channel::setMemberChatOnly(bool option, int fd) {
 	if (!this->getOperator(fd))
-		throw myException("You're not channel operator.");
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->memberChatOnly = option;
 }
 
 void	Channel::setInviteOnly(bool option, int fd) {
 	if (!this->getOperator(fd))
-		throw myException("You're not channel operator.");
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->inviteOnly = option;
 }
 
 void	Channel::setModerated(bool option, int fd) {
 	if (!this->getOperator(fd))
-		throw myException("You're not channel operator.");
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->moderated = option;
 }
 
 void	Channel::setTopicSettable(bool option, int fd) {
 	if (!this->getOperator(fd))
-		throw myException("You're not channel operator.");
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->topicSettable = option;
 }
 
@@ -168,7 +170,7 @@ void	Channel::addOperator(int fd) {
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
-		throw myException("Invalid username: user not in channel.");
+		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	this->operators.push_back(fd);
 }
@@ -179,13 +181,12 @@ void	Channel::removeOperator(int fd) {
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
-		throw myException("Invalid username: user not in channel.");
+		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	it = std::find(this->operators.begin(), this->operators.end(), fd);
-	if (it == this->operators.end()) {
-		throw myException("User is not an operator.");
+	if (it != this->operators.end()) {
+		this->operators.erase(it);
 	}
-	this->operators.erase(it);
 }
 
 void	Channel::addModerator(int fd) {
@@ -193,7 +194,7 @@ void	Channel::addModerator(int fd) {
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
-		throw myException("Invalid username: user not in channel.");
+		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	this->moderators.push_back(fd);
 }
@@ -204,13 +205,12 @@ void	Channel::removeModerator(int fd) {
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
-		throw myException("Invalid username: user not in channel.");
+		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	it = std::find(this->moderators.begin(), this->moderators.end(), fd);
-	if (it == this->moderators.end()) {
-		throw myException("User is not a moderator.");
+	if (it != this->moderators.end()) {
+		this->moderators.erase(it);
 	}
-	this->moderators.erase(it);
 }
 
 void	Channel::addInvitee(int fd) {
@@ -218,7 +218,7 @@ void	Channel::addInvitee(int fd) {
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
-		throw myException("Invalid username: user not in channel.");
+		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	this->invitees.push_back(fd);
 }
@@ -229,21 +229,23 @@ void	Channel::removeInvitee(int fd) {
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
-		throw myException("Invalid username: user not in channel.");
+		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	it = std::find(this->invitees.begin(), this->invitees.end(), fd);
-	if (it == this->invitees.end()) {
-		throw myException("User is not a moderator.");
+	if (it != this->invitees.end()) {
+		this->invitees.erase(it);
 	}
-	this->invitees.erase(it);
 }
 
 void	Channel::addMember(User * member, std::string key) {
 	if (this->inviteOnly && !this->getInvitee(member->getFd())) {
-		throw myException("User is not invited.");
+		throw myException(ERR_INVITEONLYCHAN);
 	}
 	if (!this->key.empty() && this->key != key) {
-		throw myException("Invalid channel key.");
+		throw myException(ERR_BADCHANNELKEY);
+	}
+	if (this->members.size() >= this->membersLimit) {
+		throw myException(ERR_CHANNELISFULL);
 	}
 	if (this->members.insert(std::pair<int, User *>(member->getFd(), member)).second) {
 		member->joinChannel(*this, this->name);
@@ -276,11 +278,9 @@ void	Channel::removeMember(int fd) {
 void	Channel::broadCastMessage(std::string & message, int fd) {
 	std::map<int, User *>::iterator	it;
 
-	if (this->memberChatOnly && !this->getMember(fd)) {
-		throw myException("Cannot send to channel.");
-	}
-	if (fd != -1 && this->moderated && !this->getModerator(fd)) {
-		throw myException("Cannot send to moderated channel.");
+	if ((this->memberChatOnly && !this->getMember(fd))
+		|| (fd != -1 && this->moderated && !this->getModerator(fd))) {
+		throw myException(ERR_CANNOTSENDTOCHAN);
 	}
 	for (it = this->members.begin(); it != this->members.end(); ++it) {
 		send(it->second->getFd(), message.c_str(), sizeof(message.c_str()), 0);

@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 12:45:39 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 13:25:21 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,18 +73,6 @@ Channel *	User::getChannel(std::string name) {
 	return (NULL);
 }
 
-
-bool	User::getRegistered()
-{
-	return this->registered;
-}
-
-void	User::setRegistered()
-{
-	this->registered = true;
-}
-
-
 void	User::setFd(int _fd) {
 	this->fd = _fd;
 }
@@ -112,10 +100,20 @@ void	User::setFullName(std::string _fullName)
 	this->fullName = _fullName;
 }
 
+void	User::setRegistered(void)
+{
+	this->registered = true;
+}
+
 /*****************************[ Member Functions ]*****************************/
 
 bool	User::isAuth(void) {
 	return (!this->username.empty() && !this->nickname.empty());
+}
+
+bool	User::isRegistered(void)
+{
+	return this->registered;
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {
@@ -127,7 +125,7 @@ void	User::leaveChannel(std::string name) {
 
 	it = this->channels.find(name);
 	if (it == this->channels.end()) {
-		throw myException("You are not on that channel.");
+		throw myException(ERR_NOTONCHANNEL);
 	}
 	this->channels.erase(it);
 }

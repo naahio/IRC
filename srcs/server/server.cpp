@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 12:44:30 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 13:14:03 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,7 +297,7 @@ bool	Server::findNickname(const std::string & nick)
 }
 
 
-int		Server::paramsCheker(const std::string &param)
+int		Server::paramsChecker(const std::string &param)
 {
 	if (param.find_first_of(" \r\n\v\f\r\'\",*?!@.")
 		|| param[0] == '$' || param[0] == ':'
@@ -333,7 +333,7 @@ void	Server::USERcmd(Msg &msg,std::vector<std::string> &cmd)
 	{
 		if (user)
 		{
-			if (paramsCheker(cmd[1]))
+			if (paramsChecker(cmd[1]))
 			{
 				send(msg.get_sender(), "Bad UserName\n", 
 					sizeof("Bad UserName\n"), 0);
@@ -366,7 +366,7 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 				sizeof("Error need more parameters\n"), 0);
 	else
 	{
-		if (paramsCheker(cmd[1]) || !findNickname(cmd[1]))
+		if (paramsChecker(cmd[1]) || !findNickname(cmd[1]))
 		{
 			// This is temporary message To change later
 			send(msg.get_sender(), "Bad Nickname\n", 
@@ -375,7 +375,7 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 		}
 		user->setNickname(cmd[1]);
 	}
-	if (!user->getRegistered() && user->isAuth())
+	if (!user->isRegistered() && user->isAuth())
 	{
 		send(msg.get_sender(), "you have been registered\n", 
 			sizeof("you have been registered\n"), 0);

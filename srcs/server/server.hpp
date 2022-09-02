@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 12:45:07 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 12:54:21 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,13 +79,13 @@ class Server
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		
-		/********* executiing command member fubctions ***********/
+		/********* executing command member functions ***********/
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		void	splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
 
-		int		paramsCheker(const std::string &param);
+		int		paramsChecker(const std::string &param);
 		bool	findNickname(const std::string & nick);	
 		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
 		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);

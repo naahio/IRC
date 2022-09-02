@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 12:45:15 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 13:14:04 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ class User
 		std::string	servName;
 		std::string	hostName;
 		std::string	fullName;
+		bool		registered;
 		std::map <std::string, Channel *>	channels;
-		bool	registered;
 		
 		User(void) {}
 
@@ -45,20 +45,21 @@ class User
 		std::string const &	getServerName(void) const;
 		std::string const &	getHostName(void) const;
 		std::string const &	getFullName(void) const;
+
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
-		bool				getRegistered();
 
-		void	setRegistered();
 		void	setFd(int _fd);
 		void	setUsername(std::string user_name);
 		void	setNickname(std::string nick_name);
 		void	setServerName(std::string servname);
 		void	setHostName(std::string hostname);
 		void	setFullName(std::string fullName);
+		void	setRegistered(void);
 
 		bool	isAuth(void);
+		bool	isRegistered(void);
 
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);
