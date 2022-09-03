@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/30 16:17:13 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/02 14:00:58 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,8 @@
 
 void	close_server(Server & serv, int exit_status)
 {
-	for (int i = 0; i < serv.getNfds(); i++)
-	{
-		if (serv.getFds()[i].fd != 0)
-			close(serv.getFds()[i].fd);
-	}
-	std::cout << "Server Closed." << std::endl;
+	close(serv.getSocketFd());
+	serv.~Server();
 	exit(exit_status);
 }
 
