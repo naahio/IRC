@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 13:03:00 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/03 13:00:07 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class myException : public std::exception {
 
 	public:
 		myException(std::string msg) : message(msg) {}
-		myException(int err_no) : message(err_reply(err_no)) {}
+		myException(int err_no) : message(err_reply(err_no,"")) {}
 		virtual ~myException() throw() {}
 		
 		char const *	what() const throw() {
@@ -32,9 +32,9 @@ class myException : public std::exception {
 		}
 };
 
-bool			isNumeric(std::string const &str);
-void            split(std::string const &s1, char delim,
-                         std::vector<std::string> &out);
-
+bool	isNumeric(std::string const &str);
+void	split(std::string const &s1, char delim,
+			std::vector<std::string> &out);
+int	paramsChecker(const std::string &param);
 
 #endif
