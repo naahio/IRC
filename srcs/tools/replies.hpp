@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   replies.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/02 11:04:33 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/02 11:30:06 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/03 12:51:01 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,7 +139,7 @@ enum e_err_replies {
 	ERR_USERSDONTMATCH = 502
 };
 
-std::string	reply(int repl_no);
-std::string	err_reply(int err_no);
+std::string	reply(int repl_no, std::string msg);
+std::string	err_reply(int err_no, std::string msg);
 
 #endif

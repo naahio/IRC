@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 13:25:21 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 15:49:00 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ User::User(int _fd)
 	this->fullName	 	= "";
 	this->hostName   	= "";
 	this->registered	= false;
+	this->connected		= false;
 }
 
 User::~User()
@@ -57,6 +58,11 @@ std::string const & User::getHostName(void) const
 std::string const & User::getFullName(void) const
 {
 	return (this->fullName);
+}
+
+std::string	const & User::getPassword(void) const
+{
+	return (this->password);
 }
 
 std::map<std::string, Channel *> &	User::getChannels(void) {
@@ -100,9 +106,20 @@ void	User::setFullName(std::string _fullName)
 	this->fullName = _fullName;
 }
 
+void	User::setPassword(std::string &password)
+{
+	this->password = password;
+}
+
 void	User::setRegistered(void)
 {
 	this->registered = true;
+}
+
+void	User::setConnected(void)
+
+{
+	this->connected = true;
 }
 
 /*****************************[ Member Functions ]*****************************/
@@ -114,6 +131,11 @@ bool	User::isAuth(void) {
 bool	User::isRegistered(void)
 {
 	return this->registered;
+}
+
+bool	User::isConnected(void)
+{
+	return	this->connected;
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {
