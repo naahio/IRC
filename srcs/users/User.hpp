@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 13:14:04 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 15:48:01 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,9 @@ class User
 		std::string	servName;
 		std::string	hostName;
 		std::string	fullName;
+		std::string	password;
 		bool		registered;
+		bool		connected;
 		std::map <std::string, Channel *>	channels;
 		
 		User(void) {}
@@ -45,6 +47,7 @@ class User
 		std::string const &	getServerName(void) const;
 		std::string const &	getHostName(void) const;
 		std::string const &	getFullName(void) const;
+		std::string	const & getPassword(void) const;
 
 		std::map <std::string, Channel *> &
 							getChannels(void);
@@ -56,10 +59,13 @@ class User
 		void	setServerName(std::string servname);
 		void	setHostName(std::string hostname);
 		void	setFullName(std::string fullName);
+		void	setPassword(std::string &password);
 		void	setRegistered(void);
+		void	setConnected(void);
 
 		bool	isAuth(void);
 		bool	isRegistered(void);
+		bool	isConnected(void);
 
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);

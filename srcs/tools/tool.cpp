@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/02 13:03:08 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/02 16:17:24 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,4 +32,13 @@ void	split(std::string const &s1,char delim,
 		if (!T.empty())
 			out.push_back(T);
 	}
+}
+
+int	paramsChecker(const std::string &param)
+{
+	if ((param.find_first_of(" \r\n\v\f\r\'\",*?!@.") != std::string::npos)
+		|| param[0] == '$' || param[0] == ':'
+		|| param[0] == '#' || param[0] == '&')
+		return 0;
+	return 1;
 }
