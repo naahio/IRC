@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 08:54:42 by a                 #+#    #+#             */
-/*   Updated: 2022/09/04 10:34:36 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/04 16:18:16 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 Msg::Msg(void)
 {
 	this->sender    = 0;
-	this->full_msg  = "";
-	this->cmd       = "";
-	this->param_list = "";
 }
 
 Msg::Msg(std::string &full_msg, int sender)
@@ -34,35 +31,16 @@ Msg::Msg(std::string &full_msg, int sender)
 	}
 }
 
-
 Msg::~Msg(void)
 {
 }
 
-std::string	Msg::get_full_msg(void)
-{
-	return (this->full_msg);
-}
 
-std::string	Msg::get_cmd(void)
-{
-	return (this->cmd);
-}
-
-std::string	Msg::get_param_list(void)
-{
-	return (this->param_list);
-}
-
-int	Msg::get_sender(void)
+int	Msg::getSender(void)
 {
 	return (this->sender);
 }
 
-std::vector<std::string> &Msg::getParsedMsg(void)
-{
-	return this->parsedMsg;
-}
 
 std::vector<std::string> &Msg::getCommands(void)
 {
