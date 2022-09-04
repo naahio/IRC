@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/15 08:54:42 by a                 #+#    #+#             */
-/*   Updated: 2022/08/31 15:26:38 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/04 10:34:36 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@ Msg::Msg(std::string &full_msg, int sender)
 		this->commands.push_back(ptr);
 		ptr = strtok(NULL,"\r\n");
 	}
-
 }
 
 
@@ -60,12 +59,12 @@ int	Msg::get_sender(void)
 	return (this->sender);
 }
 
-std::vector<std::string> Msg::getParsedMsg(void)
+std::vector<std::string> &Msg::getParsedMsg(void)
 {
 	return this->parsedMsg;
 }
 
-std::vector<std::string> Msg::getCommands(void)
+std::vector<std::string> &Msg::getCommands(void)
 {
 	return this->commands;
 }

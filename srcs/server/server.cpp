@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/03 13:08:39 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/04 11:48:45 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,6 +284,40 @@ bool	Server::accept_connections(void)
 }	
 /********************************[ Parsing ]**********************************/
 
+void	Server::saveMsgRemainder(std::string &buff,Msg &msg)
+{
+	/*  if We get "USER\r\nPASS" then 'PASS' should be saved for the next
+		 read ; in this case , "USER\r\nPASS\r\n" nothing will be saved */
+
+	size_t cmdNbr = 0; // for each \r\n we should have one command 
+	std::size_t found;
+
+	std::vector<std::string> cmds = msg.getCommands();
+	std::cout << "------------------------" << std::endl;
+	found = buff.find_first_of("\r\n");
+	while (found != std::string::npos)
+	{
+		std::cout << " found : "  << found << std::endl;
+		cmdNbr++;
+		found = buff.find_first_of("\r\n",found + 2);
+	}
+	/* now we check the size of the commands vector we parsed .
+		if it equal to cmdNbr we dont save anything */
+
+	std::cout << "cmdnbr       : " << cmdNbr << std::endl;
+	std::cout << "size of cmds : " << cmds.size() << std::endl; 
+	if (cmdNbr == cmds.size())
+		return ;
+	else if (cmdNbr  < cmds.size())
+	{	
+		this->getUser(msg.get_sender())->setMsgRemainder(cmds[cmds.size() - 1]);
+		msg.getCommands().pop_back();
+		for (size_t i = 0 ; i < msg.getCommands().size() ; i++)
+			std::cout << msg.getCommands()[i] << std::endl;
+	};
+
+}
+
 void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 {
 	std::vector<std::string> collonSplit;  
@@ -475,6 +509,9 @@ bool	Server::recv_send_msg(int fd)
 		// 	std::cout << std::hex << (int)buff[i] << "-"; 
 		// }
 		Msg msg = Msg(buff, fd);
+		saveMsgRemainder(buff,msg);
+		// std::cout << " remainder :" << this->getUser(msg.get_sender())->getMsgRemainder() << std::endl;
+		// std::cout << "------------------------"  << std::endl;
 		parsExecCommands(msg);
 		//checkMsg(msg);
 		// this for testing 

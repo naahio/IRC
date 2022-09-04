@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 14:54:54 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/04 10:26:18 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ class Server
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		
+		void	saveMsgRemainder(std::string &buff,Msg &msg);
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		void	splitCmd(std::string &cmd,
