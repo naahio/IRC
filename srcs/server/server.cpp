@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/03 13:08:39 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/04 16:16:40 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -315,9 +315,9 @@ void	Server::parsExecCommands(Msg &msg)
 		oneCmdParsed.clear();
 	};
 	// std::cout << "******************************************" << std::endl;
-	// std::cout << "User : " << this->getUser(msg.get_sender())->getUsername()
+	// std::cout << "User : " << this->getUser(msg.getSender())->getUsername()
 	// 	<< std::endl;
-	// std::cout << "Nick : " << this->getUser(msg.get_sender())->getNickname() 
+	// std::cout << "Nick : " << this->getUser(msg.getSender())->getNickname() 
 	// 	<< std::endl;
 
 }
@@ -328,13 +328,13 @@ void	Server::PASScmd(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(msg.get_sender());
+	user = this->getUser(msg.getSender());
 	if (user->isAuth())
-		send(msg.get_sender(), "you cant register multiple times\n",  // already_registered error
+		send(msg.getSender(), "you cant register multiple times\n",  // already_registered error
 					sizeof("you cant register multiple times\n"), 0);
 	else if (cmd.size() < 2)
 	{
-		send(msg.get_sender(), "Error need more parameters\n", 
+		send(msg.getSender(), "Error need more parameters\n", 
 			sizeof("Error need more parameters\n"), 0);
 	}
 	else
@@ -348,14 +348,14 @@ void	Server::USERcmd(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(msg.get_sender());
+	user = this->getUser(msg.getSender());
 	if (!user)
 		return ;
 	if (user->isAuth())
-		send(msg.get_sender(), err_reply(ERR_ALREADYREGISTRED,"").c_str(), 
+		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED,"").c_str(), 
 					err_reply(ERR_ALREADYREGISTRED,"").length(), 0);
 	else if (cmd.size() < 5)
-		send(msg.get_sender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(), 
+		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(), 
 			err_reply(ERR_NEEDMOREPARAMS,"").length(), 0);
 	else
 	{
@@ -368,13 +368,13 @@ void	Server::USERcmd(Msg &msg,std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->password)
 		{
-			send(msg.get_sender(), "you have been registered\n", 
+			send(msg.getSender(), "you have been registered\n", 
 				sizeof("you have been registered\n"), 0);
 			user->setRegistered();
 		}
 		else
 		{
-			send(msg.get_sender(), "hh password ghalat\n", 
+			send(msg.getSender(), "hh password ghalat\n", 
 				sizeof("hh password ghalat\n"), 0);
 			this->clientDisconnect(user->getFd());
 		}
@@ -385,24 +385,24 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(msg.get_sender());
+	user = this->getUser(msg.getSender());
 	if (!user)
 		return;
 	if (cmd.size() < 2)
-		send(msg.get_sender(), err_reply(ERR_NONICKNAMEGIVEN,"").c_str(), 
+		send(msg.getSender(), err_reply(ERR_NONICKNAMEGIVEN,"").c_str(), 
 			err_reply(ERR_NONICKNAMEGIVEN,"").length(), 0);
 	else
 	{
 		if (!paramsChecker(cmd[1]))
 		{
 			// This is temporary message To change later
-			send(msg.get_sender(), err_reply(ERR_ERRONEUSNICKNAME, cmd[1]).c_str(), 
+			send(msg.getSender(), err_reply(ERR_ERRONEUSNICKNAME, cmd[1]).c_str(), 
 				err_reply(ERR_ERRONEUSNICKNAME,cmd[1]).length(), 0);
 			return ;
 		}
 		else if (this->getUser(cmd[1]))
 		{
-			send(msg.get_sender(), err_reply(ERR_NICKNAMEINUSE,cmd[1]).c_str(), 
+			send(msg.getSender(), err_reply(ERR_NICKNAMEINUSE,cmd[1]).c_str(), 
 			err_reply(ERR_NICKNAMEINUSE,cmd[1]).length(), 0);
 
 		}
@@ -412,13 +412,13 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->password)
 		{
-			send(msg.get_sender(), "you have been registered\n", 
+			send(msg.getSender(), "you have been registered\n", 
 				sizeof("you have been registered\n"), 0);
 			user->setRegistered();
 		}
 		else
 		{
-			send(msg.get_sender(), "hh u cant register\n", 
+			send(msg.getSender(), "hh u cant register\n", 
 				sizeof("hh u cant register\n"), 0);
 			this->clientDisconnect(user->getFd());
 		}
@@ -443,18 +443,22 @@ bool	Server::recv_send_msg(int fd)
 {
 	int	rc = 1;
 	std::string buff;
+	std::string remain;
+	char		buffer[BUFF_SIZE];
+	User *		user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return (false);
 	std::cout <<  "Receiving message . . ." << std::endl;
+	buff += user->getMsgRemainder();
 	do
 	{
+		//std::cout << "buff" << buff << std::endl;
 		// we should read until we get (CR or LF OR both IN THE BUFFER)
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
-			rc = recv(fd, this->buffer, sizeof(this->buffer), 0);
-			if (rc > 0)
-			{
-				this->buffer[rc] = '\0';
-				buff +=  this->buffer;
-			}
+			rc = recv(fd,buffer, sizeof(buffer), 0);
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -468,23 +472,15 @@ bool	Server::recv_send_msg(int fd)
 				std::cout << "Connection closed . . . " << std::endl;
 				return (false);
 			}
-			
+			buffer[rc] = '\0';
+			buff += buffer;	
 		}
-		// for (size_t i = 0 ; i < buff.length() ; i++)
-		// {
-		// 	std::cout << std::hex << (int)buff[i] << "-"; 
-		// }
+		size_t pos = buff.find_last_of("\r\n");
+		remain = buff.substr(pos + 1);
+		buff = buff.substr(0, pos);
+		user->setMsgRemainder(remain);
 		Msg msg = Msg(buff, fd);
 		parsExecCommands(msg);
-		//checkMsg(msg);
-		// this for testing 
-		// std::map <int, User *>::iterator it;
-		// it = this->guests.find(fd);
-		// std::cout << it->second->getUsername() << std::endl;
-		// std::cout << it->second->getNickname() << std::endl;
-		// std::cout << it->second->getHostName() << std::endl;
-		// std::cout << it->second->getServerName() << std::endl;
-		// std::cout << it->second->getFullName() << std::endl;
 		send(fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
 		return (true);
 	} while (true);

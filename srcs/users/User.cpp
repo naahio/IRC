@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 15:49:00 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/04 10:04:07 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ User::User(int _fd)
 	this->hostName   	= "";
 	this->registered	= false;
 	this->connected		= false;
+	this->msgRemainder		= "";
 }
 
 User::~User()
@@ -63,6 +64,11 @@ std::string const & User::getFullName(void) const
 std::string	const & User::getPassword(void) const
 {
 	return (this->password);
+}
+
+std::string const & User::getMsgRemainder(void) const
+{
+	return (this->msgRemainder);
 }
 
 std::map<std::string, Channel *> &	User::getChannels(void) {
@@ -109,6 +115,11 @@ void	User::setFullName(std::string _fullName)
 void	User::setPassword(std::string &password)
 {
 	this->password = password;
+}
+
+void	User::setMsgRemainder(std::string &remaining)
+{
+	this->msgRemainder = remaining;
 }
 
 void	User::setRegistered(void)

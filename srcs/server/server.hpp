@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/02 14:54:54 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/04 16:16:00 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ class Server
 		int				socket_fd;
 		struct pollfd	fds[MAX_CONN];
 		int				nfds;
-		char			buffer[BUFF_SIZE];
 		int				on;
 		int				port;
 		std::string		password;
