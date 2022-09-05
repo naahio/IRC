@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/04 16:16:40 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/05 14:46:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,18 +116,20 @@ void	Server::addUser(int fd) {
 }
 
 void	Server::clientDisconnect(int fd) {
-	std::map<int, User *>::iterator		user;
-	std::map<std::string, Channel *>	channels;
+	try {
+		std::map<int, User *>::iterator		user;
+		std::map<std::string, Channel *>	channels;
 
-	user = this->users.find(fd);
-	if (user != this->users.end()) {
-		channels = user->second->getChannels();
-		while (!channels.empty()) {
-			user->second->leaveChannel(channels.begin()->second->getName());
+		user = this->users.find(fd);
+		if (user != this->users.end()) {
+			channels = user->second->getChannels();
+			while (!channels.empty()) {
+				channels.begin()->second->removeMember(fd);
+			}
+			delete user->second;
+			this->users.erase(user);
 		}
-		delete user->second;
-		this->users.erase(user);
-	}
+	} catch (std::exception & e) {}
 }
 
 /****************************[ Channels Management ]***************************/
@@ -143,7 +145,7 @@ void	Server::createChannel(std::string name, User & op) {
 		}
 		delete channel;
 	} catch (std::exception & e) {
-		std::cout << e.what() << std::endl;
+		throw myException(std::string(e.what()));
 	}
 }
 
@@ -313,7 +315,7 @@ void	Server::parsExecCommands(Msg &msg)
 		std::cout << "---------------------------------" << std::endl;
 		cmdExec(msg,oneCmdParsed);
 		oneCmdParsed.clear();
-	};
+	}
 	// std::cout << "******************************************" << std::endl;
 	// std::cout << "User : " << this->getUser(msg.getSender())->getUsername()
 	// 	<< std::endl;
@@ -324,18 +326,116 @@ void	Server::parsExecCommands(Msg &msg)
 
 /*****************************[ Commands Execution ]***************************/
 
+void	Server::JOINcmd(Msg &msg,std::vector<std::string> &cmd)
+{
+	User *user;
+	std::vector<std::string> channels;
+	std::vector<std::string> keys;
+
+	user = this->getUser(msg.getSender());
+	if (!user)
+		return ;
+	if (cmd.size() < 2)
+	{
+		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(),
+			err_reply(ERR_NEEDMOREPARAMS,"").length(), 0);
+		return;
+	}
+
+	split(cmd[1],',',channels);  // vector of channels;
+	if (cmd.size() > 2)
+		split(cmd[2],',',keys);	// vector of the keys on the input if they exist
+	if (keys.size() < channels.size())
+	{
+		size_t i = channels.size() - keys.size();
+		while (i < channels.size())
+		{
+			keys[i] = "";
+			i++;
+		}
+	}
+	for (size_t i = 0 ; i < channels.size() ; i++)
+	{
+		try {
+			Channel *chan = this->getChannel(channels[i]);
+			if (chan)	
+				chan->addMember(user, keys[i]);
+			else
+				this->createChannel(channels[i], *user);
+		}
+		catch (myException &e) {
+			send(msg.getSender(), e.what(), strlen(e.what()), 0);
+			continue;
+		}
+		send(msg.getSender(),"Mar7ba bik f channel hh\n",
+			strlen("Mar7ba bik f channel hh\n"), 0);
+	}
+}
+
+void	Server::PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd)
+{
+	User *user;
+	Channel *chan;
+
+	chan = this->getChannel(cmd[1]);
+	user = this->getUser(msg.getSender());
+	if (!user)
+		return ;
+	if (cmd.size() == 1)
+	{
+		send(msg.getSender(), err_reply(ERR_NORECIPIENT,"PRIVMSG").c_str(),
+			err_reply(ERR_NORECIPIENT,"PRIVMSG").length(), 0);
+		return;
+	}
+	else if (cmd.size() == 2)
+	{
+		send(msg.getSender(), err_reply(ERR_NOTEXTTOSEND,"").c_str(),
+			err_reply(ERR_NOTEXTTOSEND,"").length(), 0);
+		return ;
+	}
+	else
+	{
+		if (cmd[1][0] == '#' && chan)
+		{	
+			try {
+				chan->broadCastMessage(cmd[2],user->getFd());
+			}
+			catch (myException &e )
+			{
+				send(msg.getSender(),e.what(),strlen(e.what()),0);
+			}
+		}
+		else if (user)
+		{
+			int target = this->getUser(cmd[1])->getFd();
+			cmd[2] += '\n';
+			send(target,cmd[2].c_str(),cmd[2].length(),0);
+		}
+		else if (!user && !chan)
+		{
+			send(msg.getSender(), err_reply(ERR_NOSUCHNICK,cmd[1]).c_str(),
+			err_reply(ERR_NOSUCHNICK,cmd[1]).length(), 0);
+		}
+	}
+
+}
+
 void	Server::PASScmd(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
 	user = this->getUser(msg.getSender());
 	if (user->isAuth())
-		send(msg.getSender(), "you cant register multiple times\n",  // already_registered error
-					sizeof("you cant register multiple times\n"), 0);
+	{
+		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED,"").c_str(), 
+					err_reply(ERR_ALREADYREGISTRED,"").length(), 0);
+		return ;
+	}
 	else if (cmd.size() < 2)
 	{
-		send(msg.getSender(), "Error need more parameters\n", 
-			sizeof("Error need more parameters\n"), 0);
+		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(), 
+			err_reply(ERR_NEEDMOREPARAMS,"").length(), 0);
+		return ;
 	}
 	else
 	{
@@ -352,11 +452,17 @@ void	Server::USERcmd(Msg &msg,std::vector<std::string> &cmd)
 	if (!user)
 		return ;
 	if (user->isAuth())
+	{
 		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED,"").c_str(), 
-					err_reply(ERR_ALREADYREGISTRED,"").length(), 0);
+				err_reply(ERR_ALREADYREGISTRED,"").length(), 0);
+		return ;
+	}
 	else if (cmd.size() < 5)
+	{
 		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(), 
 			err_reply(ERR_NEEDMOREPARAMS,"").length(), 0);
+		return ;
+	}
 	else
 	{
 		user->setUsername(cmd[1]);
@@ -389,8 +495,11 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 	if (!user)
 		return;
 	if (cmd.size() < 2)
+	{
 		send(msg.getSender(), err_reply(ERR_NONICKNAMEGIVEN,"").c_str(), 
 			err_reply(ERR_NONICKNAMEGIVEN,"").length(), 0);
+		return ;
+	}
 	else
 	{
 		if (!paramsChecker(cmd[1]))
@@ -427,6 +536,9 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 
 void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
+	User *user;
+
+	user = this->getUser(msg.getSender());
 	for (int i = 0 ; cmd[0][i] ; i++)
 		cmd[0][i] = toupper(cmd[0][i]);
 	if (!cmd[0].compare("USER"))
@@ -435,6 +547,13 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 		NICKcmd(msg,cmd);
 	if (!cmd[0].compare("PASS"))
 		PASScmd(msg,cmd);
+	if (user && user->isAuth())
+	{
+		// if (!cmd[0].compare("PRIVMSG"))
+		// 	PRIVMSGcmd(msg,cmd);
+		// if (!cmd[0].compare("JOIN"))
+		// 	JOINcmd(msg,cmd);
+	}
 }
 
 /*****************************[ Receive Message ]****************************/

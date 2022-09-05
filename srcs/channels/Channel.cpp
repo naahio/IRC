@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/02 13:26:31 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/05 13:16:31 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,7 +244,7 @@ void	Channel::addMember(User * member, std::string key) {
 	if (!this->key.empty() && this->key != key) {
 		throw myException(ERR_BADCHANNELKEY);
 	}
-	if (this->members.size() >= this->membersLimit) {
+	if (this->membersLimit && this->members.size() >= this->membersLimit) {
 		throw myException(ERR_CHANNELISFULL);
 	}
 	if (this->members.insert(std::pair<int, User *>(member->getFd(), member)).second) {
