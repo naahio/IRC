@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/05 14:46:29 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/07 18:10:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -316,12 +316,6 @@ void	Server::parsExecCommands(Msg &msg)
 		cmdExec(msg,oneCmdParsed);
 		oneCmdParsed.clear();
 	}
-	// std::cout << "******************************************" << std::endl;
-	// std::cout << "User : " << this->getUser(msg.getSender())->getUsername()
-	// 	<< std::endl;
-	// std::cout << "Nick : " << this->getUser(msg.getSender())->getNickname() 
-	// 	<< std::endl;
-
 }
 
 /*****************************[ Commands Execution ]***************************/
@@ -345,21 +339,15 @@ void	Server::JOINcmd(Msg &msg,std::vector<std::string> &cmd)
 	split(cmd[1],',',channels);  // vector of channels;
 	if (cmd.size() > 2)
 		split(cmd[2],',',keys);	// vector of the keys on the input if they exist
-	if (keys.size() < channels.size())
-	{
-		size_t i = channels.size() - keys.size();
-		while (i < channels.size())
-		{
-			keys[i] = "";
-			i++;
-		}
-	}
+	if (keys.size() < channels.size())		
+		keys.resize(channels.size()," ");
+
 	for (size_t i = 0 ; i < channels.size() ; i++)
 	{
 		try {
 			Channel *chan = this->getChannel(channels[i]);
-			if (chan)	
-				chan->addMember(user, keys[i]);
+			if (chan)
+				chan->addMember(user,keys[i]);
 			else
 				this->createChannel(channels[i], *user);
 		}
@@ -374,10 +362,11 @@ void	Server::JOINcmd(Msg &msg,std::vector<std::string> &cmd)
 
 void	Server::PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd)
 {
-	User *user;
+	User *user,*target;
 	Channel *chan;
 
 	chan = this->getChannel(cmd[1]);
+	target = this->getUser(cmd[1]);
 	user = this->getUser(msg.getSender());
 	if (!user)
 		return ;
@@ -395,9 +384,10 @@ void	Server::PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd)
 	}
 	else
 	{
-		if (cmd[1][0] == '#' && chan)
+		if (chan)
 		{	
 			try {
+				cmd[2] += "\n";
 				chan->broadCastMessage(cmd[2],user->getFd());
 			}
 			catch (myException &e )
@@ -405,13 +395,14 @@ void	Server::PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd)
 				send(msg.getSender(),e.what(),strlen(e.what()),0);
 			}
 		}
-		else if (user)
+		else if (target)
 		{
-			int target = this->getUser(cmd[1])->getFd();
+			std::cout << "im here" << std::endl;
 			cmd[2] += '\n';
-			send(target,cmd[2].c_str(),cmd[2].length(),0);
+			if (send(target->getFd(),cmd[2].c_str(),cmd[2].length(),0) == -1)
+				std::cout << "sending error" << std::endl;
 		}
-		else if (!user && !chan)
+		else if (!target && !chan)
 		{
 			send(msg.getSender(), err_reply(ERR_NOSUCHNICK,cmd[1]).c_str(),
 			err_reply(ERR_NOSUCHNICK,cmd[1]).length(), 0);
@@ -504,7 +495,6 @@ void	Server::NICKcmd(Msg &msg,std::vector<std::string> &cmd)
 	{
 		if (!paramsChecker(cmd[1]))
 		{
-			// This is temporary message To change later
 			send(msg.getSender(), err_reply(ERR_ERRONEUSNICKNAME, cmd[1]).c_str(), 
 				err_reply(ERR_ERRONEUSNICKNAME,cmd[1]).length(), 0);
 			return ;
@@ -549,10 +539,10 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 		PASScmd(msg,cmd);
 	if (user && user->isAuth())
 	{
-		// if (!cmd[0].compare("PRIVMSG"))
-		// 	PRIVMSGcmd(msg,cmd);
-		// if (!cmd[0].compare("JOIN"))
-		// 	JOINcmd(msg,cmd);
+		if (!cmd[0].compare("PRIVMSG"))
+			PRIVMSGcmd(msg,cmd);
+		if (!cmd[0].compare("JOIN"))
+			JOINcmd(msg,cmd);
 	}
 }
 
@@ -600,7 +590,6 @@ bool	Server::recv_send_msg(int fd)
 		user->setMsgRemainder(remain);
 		Msg msg = Msg(buff, fd);
 		parsExecCommands(msg);
-		send(fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
 		return (true);
 	} while (true);
 	return (true);
