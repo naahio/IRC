@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/10 13:08:00 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/10 14:22:17 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -400,9 +400,17 @@ void	Server::PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd)
 		}
 		else if (target)
 		{
-			std::cout << "im here" << std::endl;
+			// std::cout << "im here" << std::endl;
+			std::string	reply;
 			cmd[2] += '\n';
-			if (send(target->getFd(),cmd[2].c_str(),cmd[2].length(),0) == -1)
+			reply = ":";
+			reply += user->getNickname();
+			reply += " ";
+			reply += "PRIVMSG ";
+			reply += target->getNickname();
+			reply += ":";
+			reply += cmd[2].c_str();
+			if (send(target->getFd(),reply.c_str(), reply.length(), 0) == -1)
 				std::cout << "sending error" << std::endl;
 		}
 		else if (!target && !chan)
@@ -589,6 +597,7 @@ bool	Server::recv_send_msg(int fd)
 			buffer[rc] = '\0';
 			buff += buffer;	
 		}
+		std::cout << " >>>>> MSG : "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");
 		remain = buff.substr(pos + 1);
 		buff = buff.substr(0, pos);

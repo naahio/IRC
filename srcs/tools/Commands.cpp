@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/10 13:18:27 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/10 15:49:15 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void    helps(int fd)
 {
-    send(fd, "use te following commands to register or log in : \n", sizeof("use te following commands to register or log in : \n"), 0);
+    send(fd, ":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n", sizeof(":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n"), 0);
     send(fd, "|-> <PASS> 'password' \n", sizeof("|-> <PASS> 'password' \n"), 0);
     send(fd, "|-> <USER> 'username' 'hostname' 'servername' 'realname' \n", sizeof("|-> <USER> 'username' 'hostname' 'servername' 'realname' \n"), 0);
     send(fd, "|-> <NICK> 'nickname' \n", sizeof("|-> <NICK> 'nickname' \n"), 0);
@@ -59,3 +59,13 @@ void    helps(int fd)
     // std::cout << "|-> <PRIVMSG> 'receiver' 'message'" <<std::endl;
 
 }
+
+// void    kick(int fd)
+// {
+
+// }
+
+// void    part(int fd)
+// {
+    
+// }
