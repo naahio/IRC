@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
+#    By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/02 12:46:22 by hel-makh         ###   ########.fr        #
+#    Updated: 2022/09/10 12:58:27 by mbabela          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,8 @@ HEADERS		=	./srcs/server/server.hpp\
 				./srcs/pars/msg.hpp\
 				./srcs/channels/Channel.hpp\
 				./srcs/tools/tool.hpp\
-				./srcs/tools/replies.hpp
+				./srcs/tools/replies.hpp\
+				./srcs/tools/Commands.hpp
 
 SRCS		=	srcs/main.cpp\
 				./srcs/server/server.cpp\
@@ -25,7 +26,8 @@ SRCS		=	srcs/main.cpp\
 				./srcs/pars/msg.cpp\
 				./srcs/channels/Channel.cpp\
 				./srcs/tools/tool.cpp\
-				./srcs/tools/replies.cpp
+				./srcs/tools/replies.cpp\
+				./srcs/tools/Commands.cpp
 
 OBJS		=	$(SRCS:.cpp=.o)
 

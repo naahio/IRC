@@ -18,3 +18,9 @@
         ->  insert and erase a user with his ip and fd.
     24-08-2022:
         ->  create msg class and add check the syntaxe of the received message.
+
+    ******************************************************************************************************************************
+
+        ->   *JOIN*     Commande must check in the channel has a key so that the user much give before joining. 
+        ->   *JOIN*     Check if the user is banned from the channel beforre joining .
+        ->   *channels* banned users_list needed . 
