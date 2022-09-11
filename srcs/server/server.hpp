@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/10 10:35:17 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/11 09:35:00 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,11 +85,11 @@ class Server
 		void	splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
 
-		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	PASScmd(Msg &msg,std::vector<std::string> &cmd);
-		void	JOINcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd);
+		// void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
+		// void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
+		// void	PASScmd(Msg &msg,std::vector<std::string> &cmd);
+		// void	JOINcmd(Msg &msg,std::vector<std::string> &cmd);
+		// void	PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
