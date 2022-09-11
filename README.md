@@ -21,6 +21,4 @@
 
     ******************************************************************************************************************************
 
-        ->   *JOIN*     Commande must check in the channel has a key so that the user much give before joining. 
-        ->   *JOIN*     Check if the user is banned from the channel beforre joining .
-        ->   *channels* banned users_list needed . 
+   
