@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/12 13:08:22 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/12 13:32:19 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ void	Server::JOINcmd(Msg &msg, std::vector<std::string> &cmd)
 		return ;
 	if (cmd.size() < 2)
 	{
-		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(),
-			err_reply(ERR_NEEDMOREPARAMS,"").length(), 0);
+		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS).c_str(),
+			err_reply(ERR_NEEDMOREPARAMS).length(), 0);
 		return;
 	}
     // join chan1 " "
@@ -63,14 +63,14 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 		return ;
 	if (cmd.size() == 1)
 	{
-		send(msg.getSender(), err_reply(ERR_NORECIPIENT,"PRIVMSG").c_str(),
-			err_reply(ERR_NORECIPIENT,"PRIVMSG").length(), 0);
+		send(msg.getSender(), err_reply(ERR_NORECIPIENT).c_str(),
+			err_reply(ERR_NORECIPIENT).length(), 0);
 		return;
 	}
 	else if (cmd.size() == 2)
 	{
-		send(msg.getSender(), err_reply(ERR_NOTEXTTOSEND,"").c_str(),
-			err_reply(ERR_NOTEXTTOSEND,"").length(), 0);
+		send(msg.getSender(), err_reply(ERR_NOTEXTTOSEND).c_str(),
+			err_reply(ERR_NOTEXTTOSEND).length(), 0);
 		return ;
 	}
 	else
@@ -79,7 +79,17 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 		{	
 			try {
 				cmd[2] += "\n";
-				chan->broadCastMessage(cmd[2], user->getFd());
+				std::string reply;
+				reply = ":";
+				reply += user->getNickname();
+				reply += "!~";
+				reply += user->getUsername();
+				reply += "@10.13.6.10 ";
+				reply += "PRIVMSG ";
+				reply += chan->getName();
+				reply += " :";
+				reply += cmd[2].c_str();
+				chan->broadCastMessage(reply, user->getFd());
 			}
 			catch (myException &e )
 			{
@@ -95,19 +105,18 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 			reply += user->getNickname();
 			reply += "!~";
 			reply += user->getUsername();
-			reply += 
-			reply += " ";
+			reply += "@10.13.6.10 ";
 			reply += "PRIVMSG ";
 			reply += target->getNickname();
-			reply += ":";
+			reply += " :";
 			reply += cmd[2].c_str();
 			if (send(target->getFd(),reply.c_str(), reply.length(), 0) == -1)
 				std::cout << "sending error" << std::endl;
 		}
 		else if (!target && !chan)
 		{
-			send(msg.getSender(), err_reply(ERR_NOSUCHNICK,cmd[1]).c_str(),
-			err_reply(ERR_NOSUCHNICK,cmd[1]).length(), 0);
+			send(msg.getSender(), err_reply(ERR_NOSUCHNICK).c_str(),
+			err_reply(ERR_NOSUCHNICK).length(), 0);
 		}
 	}
 
@@ -120,14 +129,14 @@ void	Server::PASScmd(Msg &msg, std::vector<std::string> &cmd)
 	user = this->getUser(msg.getSender());
 	if (user->isAuth())
 	{
-		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED,"").c_str(), 
-					err_reply(ERR_ALREADYREGISTRED,"").length(), 0);
+		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED).c_str(), 
+					err_reply(ERR_ALREADYREGISTRED).length(), 0);
 		return ;
 	}
 	else if (cmd.size() < 2)
 	{
-		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(), 
-			err_reply(ERR_NEEDMOREPARAMS,"").length(), 0);
+		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS).c_str(), 
+			err_reply(ERR_NEEDMOREPARAMS).length(), 0);
 		return ;
 	}
 	else
@@ -146,14 +155,14 @@ void	Server::USERcmd(Msg &msg, std::vector<std::string> &cmd)
 		return ;
 	if (user->isAuth())
 	{
-		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED,"").c_str(), 
-				err_reply(ERR_ALREADYREGISTRED,"").length(), 0);
+		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED).c_str(), 
+				err_reply(ERR_ALREADYREGISTRED).length(), 0);
 		return ;
 	}
 	else if (cmd.size() < 5)
 	{
-		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS,"").c_str(), 
-			err_reply(ERR_NEEDMOREPARAMS,"").length(), 0);
+		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS).c_str(), 
+			err_reply(ERR_NEEDMOREPARAMS).length(), 0);
 		return ;
 	}
 	else
@@ -189,22 +198,22 @@ void	Server::NICKcmd(Msg &msg, std::vector<std::string> &cmd)
 		return;
 	if (cmd.size() < 2)
 	{
-		send(msg.getSender(), err_reply(ERR_NONICKNAMEGIVEN,"").c_str(), 
-			err_reply(ERR_NONICKNAMEGIVEN,"").length(), 0);
+		send(msg.getSender(), err_reply(ERR_NONICKNAMEGIVEN).c_str(), 
+			err_reply(ERR_NONICKNAMEGIVEN).length(), 0);
 		return ;
 	}
 	else
 	{
 		if (!paramsChecker(cmd[1]))
 		{
-			send(msg.getSender(), err_reply(ERR_ERRONEUSNICKNAME, cmd[1]).c_str(), 
-				err_reply(ERR_ERRONEUSNICKNAME,cmd[1]).length(), 0);
+			send(msg.getSender(), err_reply(ERR_ERRONEUSNICKNAME).c_str(), 
+				err_reply(ERR_ERRONEUSNICKNAME).length(), 0);
 			return ;
 		}
 		else if (this->getUser(cmd[1]))
 		{
-			send(msg.getSender(), err_reply(ERR_NICKNAMEINUSE,cmd[1]).c_str(), 
-			err_reply(ERR_NICKNAMEINUSE,cmd[1]).length(), 0);
+			send(msg.getSender(), err_reply(ERR_NICKNAMEINUSE).c_str(), 
+			err_reply(ERR_NICKNAMEINUSE).length(), 0);
             return ;
 		}
 		user->setNickname(cmd[1]);
@@ -299,13 +308,13 @@ void    Server::kick(std::vector<std::string> &cmd, int fd_u)
 	erply += cmd[2];
 	erply += " :";
 	erply += channel->getOperator(fd_u)->getNickname();
-    channel->broadCastMessage(erply);
+    channel->broadCastMessage(erply, fd_u);
 }
 
 void   Server::part(std::vector<std::string> &cmd, int fd_u)
 {
 
-    if (cmd.size() < 3)
+    if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
 	Channel *channel = this->getChannel(cmd[1]);
 	std::string	erply = ":";
@@ -320,7 +329,7 @@ void   Server::part(std::vector<std::string> &cmd, int fd_u)
 	erply += cmd[0];
 	erply += " ";
 	erply += cmd[1];
-	channel->broadCastMessage(erply);
+	channel->broadCastMessage(erply, fd_u);
 }
 
 void    Server::mode(Channel &channel)

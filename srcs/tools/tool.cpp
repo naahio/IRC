@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/02 16:17:24 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/12 13:02:51 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,4 +41,16 @@ int	paramsChecker(const std::string &param)
 		|| param[0] == '#' || param[0] == '&')
 		return 0;
 	return 1;
+}
+
+static std::string const	stringBuilder(void) {
+	return "\n";
+}
+
+template <typename T, typename... Types>
+std::string const	stringBuilder(T msg, Types ...msgs) {
+	std::stringstream	ss;
+
+	ss << msg;
+	return ss.str().append(" ") + stringBuilder(msgs...);
 }
