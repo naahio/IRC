@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/11 09:41:00 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/11 15:53:59 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,7 @@ int		Server::reusable_socket(void)
 	int	rc;
 	
 	std::cout << "Setting up socket options . . . ";
-	rc = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
+	rc = setsockopt(this->socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
 	if (rc < 0)
 	{
 		std::cout << "[FAILED: " << errno << "]" << std::endl;
@@ -539,15 +539,32 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
+	std::string test("NICK");
+	std::cout << "Im here" << std::endl;
+	std::cout << " cmd size " << cmd[0].size() << std::endl;
 	user = this->getUser(msg.getSender());
 	for (int i = 0 ; cmd[0][i] ; i++)
 		cmd[0][i] = toupper(cmd[0][i]);
+	std::cout << "cmd :[" << cmd[0] << "]" << std::endl;
 	if (!cmd[0].compare("HELP"))
 		helps(msg.getSender());
+	// for (size_t i = 0 ; cmd[0][i];i++)
+	// {
+	// 	std::cout << std::hex << cmd[0][i] << "-" ;
+	// }
+	// std::cout << std::endl;
+	// for (size_t i = 0 ; test[i];i++)
+	// {
+	// 	std::cout << std::hex << test[i] << "-" ;
+	// }
+		std::cout << std::endl;
+	std::cout << "compare result :" << cmd[0].compare("NICK") << std::endl;
 	if (!cmd[0].compare("USER"))
 		USERcmd(msg, cmd, *this);
 	if (!cmd[0].compare("NICK"))
+	{
 		NICKcmd(msg, cmd, *this);
+	}
 	if (!cmd[0].compare("PASS"))
 		PASScmd(msg, cmd, *this);
 	if (user && user->isAuth())
@@ -574,6 +591,7 @@ bool	Server::recv_send_msg(int fd)
 		return (false);
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
+	memset(buffer,0,BUFF_SIZE);
 	do
 	{
 		//std::cout << "buff" << buff << std::endl;
@@ -581,6 +599,7 @@ bool	Server::recv_send_msg(int fd)
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
 			rc = recv(fd,buffer, sizeof(buffer), 0);
+			std::cout << "rc = " << rc << std::endl;
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -588,6 +607,7 @@ bool	Server::recv_send_msg(int fd)
 					std::cout << "FAILED at receiving a msg ! errno : " << errno << std::endl;
 					return (false);
 				}
+				// std::cout << "error :" <<  strerror(errno) << std::endl;
 			}
 			if (rc == 0)
 			{
@@ -595,7 +615,9 @@ bool	Server::recv_send_msg(int fd)
 				return (false);
 			}
 			buffer[rc] = '\0';
-			buff += buffer;	
+			buff += buffer;
+			std::cout << "buffer size " << buff.size() << std::endl;
+			std::cout << "buffer  " << buff << std::endl;
 		}
 		std::cout << " >>>>> MSG : "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");

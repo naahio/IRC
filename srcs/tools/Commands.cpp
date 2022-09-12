@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/11 09:50:48 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/11 11:05:06 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,9 +203,10 @@ void	NICKcmd(Msg &msg,std::vector<std::string> &cmd, Server &server)
 		{
 			send(msg.getSender(), err_reply(ERR_NICKNAMEINUSE,cmd[1]).c_str(), 
 			err_reply(ERR_NICKNAMEINUSE,cmd[1]).length(), 0);
-
+			return ;
 		}
 		user->setNickname(cmd[1]);
+		std::cout << "nick :" << user->getNickname() << std::endl;
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{
