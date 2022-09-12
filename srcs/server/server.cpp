@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/11 09:41:00 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/12 12:53:14 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,13 +134,14 @@ void	Server::clientDisconnect(int fd) {
 
 /****************************[ Channels Management ]***************************/
 
-void	Server::createChannel(std::string name, User & op) {
+void	Server::createChannel(std::string name, User & op, std::string key) {
 	try {
 		Channel *	channel;
 
 		channel = new Channel(name);
 		if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
 			channel->addMember(&op);
+			channel->setKey(key, op.getFd());
 			return ;
 		}
 		delete channel;
@@ -540,22 +541,30 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	User *user;
 
 	user = this->getUser(msg.getSender());
-	for (int i = 0 ; cmd[0][i] ; i++)
-		cmd[0][i] = toupper(cmd[0][i]);
-	if (!cmd[0].compare("HELP"))
-		helps(msg.getSender());
-	if (!cmd[0].compare("USER"))
-		USERcmd(msg, cmd, *this);
-	if (!cmd[0].compare("NICK"))
-		NICKcmd(msg, cmd, *this);
-	if (!cmd[0].compare("PASS"))
-		PASScmd(msg, cmd, *this);
-	if (user && user->isAuth())
-	{
-		if (!cmd[0].compare("PRIVMSG"))
-			PRIVMSGcmd(msg, cmd, *this);
-		if (!cmd[0].compare("JOIN"))
-			JOINcmd(msg, cmd, *this);
+	try{
+		for (int i = 0 ; cmd[0][i] ; i++)
+			cmd[0][i] = toupper(cmd[0][i]);
+		if (!cmd[0].compare("HELP"))
+			helps(msg.getSender());
+		if (!cmd[0].compare("USER"))
+			USERcmd(msg, cmd);
+		if (!cmd[0].compare("NICK"))
+			NICKcmd(msg, cmd);
+		if (!cmd[0].compare("PASS"))
+			PASScmd(msg, cmd);
+		if (user && user->isAuth())
+		{
+			if (!cmd[0].compare("PRIVMSG"))
+				PRIVMSGcmd(msg, cmd);
+			if (!cmd[0].compare("JOIN"))
+				JOINcmd(msg, cmd);
+		}
+		if (!cmd[0].compare("KICK"))
+			kick(cmd, msg.getSender());
+		if (!cmd[0].compare("PART"))
+			part(cmd, msg.getSender());
+	}catch(std::exception & e) {
+		send(msg.getSender(),e.what(),strlen(e.what()),0);
 	}
 }
 
@@ -588,6 +597,7 @@ bool	Server::recv_send_msg(int fd)
 					std::cout << "FAILED at receiving a msg ! errno : " << errno << std::endl;
 					return (false);
 				}
+				continue;
 			}
 			if (rc == 0)
 			{
@@ -595,7 +605,10 @@ bool	Server::recv_send_msg(int fd)
 				return (false);
 			}
 			buffer[rc] = '\0';
-			buff += buffer;	
+			std::cout << "buffer " << buffer << std::endl;
+			buff += buffer;
+			std::cout << "buff " << buff.size() << std::endl;
+			// sleep(10);
 		}
 		std::cout << " >>>>> MSG : "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");
