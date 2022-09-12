@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/11 09:35:00 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/11 11:57:57 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ class Server
 		void	addUser(int fd);
 		void	clientDisconnect(int fd);
 
-		void	createChannel(std::string name, User & op);
+		void	createChannel(std::string name, std::string key, User & op);
 		void	deleteChannel(std::string name);
 		
 		void	parsExecCommands(Msg &msg);

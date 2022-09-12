@@ -3,127 +3,127 @@
 /*                                                        :::      ::::::::   */
 /*   replies.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/02 11:05:18 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/03 13:09:08 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/12 12:26:55 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "replies.hpp"
 
-std::string	reply(int repl_no, std::string msg) {
+std::string	reply(int repl_no) {
 	switch (repl_no) {
 		case RPL_WHOISOPERATOR:
-			return(msg + " :is an IRC operator\n");
+			return(":is an IRC operator");
 		case RPL_ENDOFWHOIS:
-			return(msg + " :End of /WHOIS list\n");
+			return(":End of /WHOIS list");
 		case RPL_ENDOFWHOWAS:
-			return(msg + " :End of WHOWAS\n");
+			return(":End of WHOWAS");
 		case RPL_LISTEND:
-			return(msg + " :End of /LIST\n");
+			return(":End of /LIST");
 		case RPL_NOTOPIC:
-			return(msg + " :No topic is set\n");
+			return(":No topic is set");
 		case RPL_ENDOFWHO:
-			return(msg + " :End of /WHO list\n");
+			return(":End of /WHO list");
 		case RPL_ENDOFNAMES:
-			return(msg + " :End of /NAMES list\n");
+			return(":End of /NAMES list");
 		case RPL_ENDOFINFO:
-			return(msg + " :End of /INFO list\n");
+			return(":End of /INFO list");
 		case RPL_YOUREOPER:
-			return(msg + " :You are now an IRC operator\n");
+			return(":You are now an IRC operator");
 		default:
-			return(msg + " :Undefined reply\n");
+			return(":Undefined reply");
 	}
 }
 
-std::string	err_reply(int err_no, std::string msg) {
+std::string	err_reply(int err_no) {
 	switch (err_no) {
 		case ERR_NOSUCHNICK:
-			return(msg + " :No such nick/channel\n");
+			return(":No such nick/channel");
 		case ERR_NOSUCHSERVER:
-			return(msg + " :No such server\n");
+			return(":No such server");
 		case ERR_NOSUCHCHANNEL:
-			return(msg + " :No such channel\n");
+			return(":No such channel");
 		case ERR_CANNOTSENDTOCHAN:
-			return(msg + " :Cannot send to channel\n");
+			return(":Cannot send to channel");
 		case ERR_TOOMANYCHANNELS:
-			return(msg + " :You have joined too many channels\n");
+			return(":You have joined too many channels");
 		case ERR_WASNOSUCHNICK:
-			return(msg + " :There was no such nickname\n");
+			return(":There was no such nickname");
 		case ERR_TOOMANYTARGETS:
-			return(msg + " :Duplicate recipients. No message delivered\n");
+			return(":Duplicate recipients. No message delivered");
 		case ERR_NOORIGIN:
-			return(msg + " :No origin specified\n");
+			return(":No origin specified");
 		case ERR_NORECIPIENT:
-			return(msg + " :No recipient given\n");
+			return(":No recipient given");
 		case ERR_NOTEXTTOSEND:
-			return(msg + " :No text to send\n");
+			return(":No text to send");
 		case ERR_NOTOPLEVEL:
-			return(msg + " :No toplevel domain specified\n");
+			return(":No toplevel domain specified");
 		case ERR_WILDTOPLEVEL:
-			return(msg + " :Wildcard in toplevel domain\n");
+			return(":Wildcard in toplevel domain");
 		case ERR_UNKNOWNCOMMAND:
-			return(msg + " :Unknown command\n");
+			return(":Unknown command");
 		case ERR_NOMOTD:
-			return(msg + " :MOTD File is missing\n");
+			return(":MOTD File is missing");
 		case ERR_NOADMININFO:
-			return(msg + " :No administrative info available\n");
+			return(":No administrative info available");
 		case ERR_FILEERROR:
-			return(msg + " :File error doing <file op> on <file>\n");
+			return(":File error doing <file op> on <file>");
 		case ERR_NONICKNAMEGIVEN:
-			return(msg + " :No nickname given\n");
+			return(":No nickname given");
 		case ERR_ERRONEUSNICKNAME:
-			return(msg + " :Erroneus nickname\n");
+			return(":Erroneus nickname");
 		case ERR_NICKNAMEINUSE:
-			return(msg + " :Nickname is already in use\n");
+			return(":Nickname is already in use");
 		case ERR_NICKCOLLISION:
-			return(msg + " :Nickname collision KILL\n");
+			return(":Nickname collision KILL");
 		case ERR_USERNOTINCHANNEL:
-			return(msg + " :They aren't on that channel\n");
+			return(":They aren't on that channel");
 		case ERR_NOTONCHANNEL:
-			return(msg + " :You're not on that channel\n");
+			return(":You're not on that channel");
 		case ERR_USERONCHANNEL:
-			return(msg + " :is already on channel\n");
+			return(":is already on channel");
 		case ERR_NOLOGIN:
-			return(msg + " :User not logged in\n");
+			return(":User not logged in");
 		case ERR_USERSDISABLED:
-			return(msg + " :USERS has been disabled\n");
+			return(":USERS has been disabled");
 		case ERR_NOTREGISTERED:
-			return(msg + " :You have not registered\n");
+			return(":You have not registered");
 		case ERR_NEEDMOREPARAMS:
-			return(msg + " :Not enough parameters\n");
+			return(":Not enough parameters");
 		case ERR_ALREADYREGISTRED:
-			return(msg + " :You may not reregister\n");
+			return(":You may not reregister");
 		case ERR_NOPERMFORHOST:
-			return(msg + " :Your host isn't among the privileged\n");
+			return(":Your host isn't among the privileged");
 		case ERR_PASSWDMISMATCH:
-			return(msg + " :Password incorrect\n");
+			return(":Password incorrect");
 		case ERR_YOUREBANNEDCREEP:
-			return(msg + " :You are banned from this server\n");
+			return(":You are banned from this server");
 		case ERR_KEYSET:
-			return(msg + " :Channel key already set\n");
+			return(":Channel key already set");
 		case ERR_CHANNELISFULL:
-			return(msg + " :Cannot join channel (+l)\n");
+			return(":Cannot join channel (+l)");
 		case ERR_UNKNOWNMODE:
-			return(msg + " :is unknown mode char to me\n");
+			return(":is unknown mode char to me");
 		case ERR_INVITEONLYCHAN:
-			return(msg + " :Cannot join channel (+i)\n");
+			return(":Cannot join channel (+i)");
 		case ERR_BANNEDFROMCHAN:
-			return(msg + " :Cannot join channel (+b)\n");
+			return(":Cannot join channel (+b)");
 		case ERR_BADCHANNELKEY:
-			return(msg + " :Cannot join channel (+k)\n");
+			return(":Cannot join channel (+k)");
 		case ERR_NOPRIVILEGES:
-			return(msg + " :Permission Denied- You're not an IRC operator\n");
+			return(":Permission Denied- You're not an IRC operator");
 		case ERR_CHANOPRIVSNEEDED:
-			return(msg + " :You're not channel operator\n");
+			return(":You're not channel operator");
 		case ERR_NOOPERHOST:
-			return(msg + " :No O-lines for your host\n");
+			return(":No O-lines for your host");
 		case ERR_UMODEUNKNOWNFLAG:
-			return(msg + " :Unknown MODE flag\n");
+			return(":Unknown MODE flag");
 		case ERR_USERSDONTMATCH:
-			return(msg + " :Cant change mode for other users\n");
+			return(":Cant change mode for other users");
 		default:
-			return(msg + " :Undefined error\n");
+			return(":Undefined error");
 	}
 }

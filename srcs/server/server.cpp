@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/11 09:41:00 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/11 11:57:38 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,13 +134,14 @@ void	Server::clientDisconnect(int fd) {
 
 /****************************[ Channels Management ]***************************/
 
-void	Server::createChannel(std::string name, User & op) {
+void	Server::createChannel(std::string name, std::string key, User & op) {
 	try {
 		Channel *	channel;
 
 		channel = new Channel(name);
 		if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
 			channel->addMember(&op);
+			channel->setKey(key, op.getFd());
 			return ;
 		}
 		delete channel;

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/10 11:28:27 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/11 12:35:44 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ class Channel {
 		std::vector <int> &			getInvitees(void);
 
 		void	setTopic(std::string _topic, int fd);
-		void	setKey(std::string _topic, int fd);
+		void	setKey(std::string _key, int fd);
 		void	setLimit(size_t limit, int fd);
 		void	setMemberChatOnly(bool option, int fd);
 		void	setInviteOnly(bool option, int fd);
@@ -72,14 +72,14 @@ class Channel {
 		User *	getModerator(int fd);
 		User *	getInvitee(int fd);
 
+		void	addMember(User * member, std::string _key = "");
+		void	removeMember(int fd);
 		void	addOperator(int fd);
 		void	removeOperator(int fd);
 		void	addModerator(int fd);
 		void	removeModerator(int fd);
 		void	addInvitee(int fd);
 		void	removeInvitee(int fd);
-		void	addMember(User * member, std::string key = "");
-		void	removeMember(int fd);
 		
 		void	broadCastMessage(std::string & message, int fd = -1);
 };

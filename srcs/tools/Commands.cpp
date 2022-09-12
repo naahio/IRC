@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/11 09:50:48 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/11 12:00:09 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,15 @@ void	JOINcmd(Msg &msg,std::vector<std::string> &cmd, Server &server)
 		try {
 			Channel *chan = server.getChannel(channels[i]);
 			if (chan)
-				chan->addMember(user,keys[i]);
+				chan->addMember(user, keys[i]);
 			else
-				server.createChannel(channels[i], *user);
+				server.createChannel(channels[i], keys[i], *user);
+			send(msg.getSender(), "Mar7ba bik f channel hh\n",
+				strlen("Mar7ba bik f channel hh\n"), 0);
 		}
 		catch (myException &e) {
 			send(msg.getSender(), e.what(), strlen(e.what()), 0);
-			continue;
 		}
-		send(msg.getSender(),"Mar7ba bik f channel hh\n",
-			strlen("Mar7ba bik f channel hh\n"), 0);
 	}
 }
 

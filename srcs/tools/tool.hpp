@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/03 13:00:07 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/12 13:02:50 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,9 @@
 # define TOOL_HPP
 
 # include <string>
+# include <sstream>
 # include <vector>
+# include <sys/socket.h>
 
 # include "replies.hpp"
 
@@ -24,7 +26,7 @@ class myException : public std::exception {
 
 	public:
 		myException(std::string msg) : message(msg) {}
-		myException(int err_no) : message(err_reply(err_no,"")) {}
+		myException(int err_no) : message(err_reply(err_no)) {}
 		virtual ~myException() throw() {}
 		
 		char const *	what() const throw() {
@@ -33,8 +35,10 @@ class myException : public std::exception {
 };
 
 bool	isNumeric(std::string const &str);
-void	split(std::string const &s1, char delim,
-			std::vector<std::string> &out);
-int	paramsChecker(const std::string &param);
+void	split(std::string const &s1, char delim, std::vector<std::string> &out);
+int		paramsChecker(const std::string &param);
+
+template <typename T, typename... Types>
+std::string const	stringBuilder(T msg, Types ...msgs);
 
 #endif
