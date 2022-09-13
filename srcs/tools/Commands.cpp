@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/12 13:32:19 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/13 11:19:43 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,10 @@ void	Server::JOINcmd(Msg &msg, std::vector<std::string> &cmd)
 				chan->addMember(user, keys[i]);
 			else
 				this->createChannel(channels[i], *user, keys[i]);
-            send(msg.getSender(),"Mar7ba bik f channel hh\n",
-                strlen("Mar7ba bik f channel hh\n"), 0);
+            send(msg.getSender(),"Mar7ba bik f channel ",
+                strlen("Mar7ba bik f channel "), 0);
+            send(msg.getSender(),channels[i].c_str(),
+                channels[i].length(), 0);
 		}
 		catch (myException &e) {
 			send(msg.getSender(), e.what(), strlen(e.what()), 0);
@@ -313,23 +315,27 @@ void    Server::kick(std::vector<std::string> &cmd, int fd_u)
 
 void   Server::part(std::vector<std::string> &cmd, int fd_u)
 {
+	Channel	*channel;
+	User	*member;
+	std::string	erply = ":";
 
     if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
-	Channel *channel = this->getChannel(cmd[1]);
-	std::string	erply = ":";
+	channel = this->getChannel(cmd[1]);
 	if (!channel)
 		throw myException(ERR_NOSUCHCHANNEL);
-	if (!channel->getMember(fd_u))
+	member = channel->getMember(fd_u);
+	if (!member)
 		throw myException(ERR_NOTONCHANNEL);
-	erply += channel->getOperator(fd_u)->getNickname();
+	erply += member->getNickname();
 	erply += "!~";
-	erply += channel->getOperator(fd_u)->getUsername();
+	erply += member->getUsername();
 	erply += "@10.13.6.10 ";
 	erply += cmd[0];
 	erply += " ";
 	erply += cmd[1];
 	channel->broadCastMessage(erply, fd_u);
+	channel->getMembers().erase(fd_u);
 }
 
 void    Server::mode(Channel &channel)
