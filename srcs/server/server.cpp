@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 12:51:03 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 13:40:37 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -342,17 +342,17 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 		if (!cmd[0].compare("HELP"))
 			helps(msg.getSender());
 		if (!cmd[0].compare("USER"))
-			USERcmd(msg, cmd);
+			USERcmd(msg.getSender(), cmd);
 		if (!cmd[0].compare("NICK"))
-			NICKcmd(msg, cmd);
+			NICKcmd(msg.getSender(), cmd);
 		if (!cmd[0].compare("PASS"))
-			PASScmd(msg, cmd);
+			PASScmd(msg.getSender(), cmd);
 		if (user && user->isAuth())
 		{
 			if (!cmd[0].compare("PRIVMSG"))
-				PRIVMSGcmd(msg, cmd);
+				PRIVMSGcmd(msg.getSender(), cmd);
 			if (!cmd[0].compare("JOIN"))
-				JOINcmd(msg, cmd);
+				JOINcmd(msg.getSender(), cmd);
 		}
 		if (!cmd[0].compare("KICK"))
 			kick(cmd, msg.getSender());

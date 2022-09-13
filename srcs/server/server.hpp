@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 12:36:10 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 13:41:35 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,11 +97,12 @@ class Server
 
 		//**************** Commands : 
 
-		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	PASScmd(Msg &msg,std::vector<std::string> &cmd);
-		void	JOINcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd);
+		void	USERcmd(int fd,std::vector<std::string> &cmd);
+		void	NICKcmd(int fd,std::vector<std::string> &cmd);
+		void	PASScmd(int fd,std::vector<std::string> &cmd);
+		void	JOINcmd(int fd,std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int fd,std::vector<std::string> &cmd);
+		void	INVITcmd(int fd,std::vector<std::string> &cmd);
 
 		void    kick(std::vector<std::string> &cmd, int fd_u);
 		void    helps(int fd);

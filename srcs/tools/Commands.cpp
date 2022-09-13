@@ -6,27 +6,23 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 12:44:20 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 14:28:39 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include  "../server/server.hpp"
 
-void	Server::JOINcmd(Msg &msg, std::vector<std::string> &cmd)
+void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 	std::vector<std::string> channels;
 	std::vector<std::string> keys;
 
-	user = this->getUser(msg.getSender());
+	user = this->getUser(fd);
 	if (!user)
 		return ;
 	if (cmd.size() < 2)
-	{
-		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS).c_str(),
-			err_reply(ERR_NEEDMOREPARAMS).length(), 0);
-		return;
-	}
+		throw myException(ERR_NEEDMOREPARAMS);
     // join chan1 " "
 	split(cmd[1],',',channels);  // vector of channels;
 	if (cmd.size() > 2)
@@ -42,39 +38,31 @@ void	Server::JOINcmd(Msg &msg, std::vector<std::string> &cmd)
 				chan->addMember(user, keys[i]);
 			else
 				this->createChannel(channels[i], *user, keys[i]);
-            send(msg.getSender(),"Mar7ba bik f channel ",
+            send(fd,"Mar7ba bik f channel ",
                 strlen("Mar7ba bik f channel "), 0);
-            send(msg.getSender(),channels[i].c_str(),
+            send(fd,channels[i].c_str(),
                 channels[i].length(), 0);
 		}
 		catch (myException &e) {
-			send(msg.getSender(), e.what(), strlen(e.what()), 0);
+			send(fd, e.what(), strlen(e.what()), 0);
 		}
 	}
 }
 
-void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
+void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user,*target;
 	Channel *chan;
 
 	chan = this->getChannel(cmd[1]);
 	target = this->getUser(cmd[1]);
-	user = this->getUser(msg.getSender());
+	user = this->getUser(fd);
 	if (!user)
 		return ;
 	if (cmd.size() == 1)
-	{
-		send(msg.getSender(), err_reply(ERR_NORECIPIENT).c_str(),
-			err_reply(ERR_NORECIPIENT).length(), 0);
-		return;
-	}
+		throw myException(ERR_NORECIPIENT);
 	else if (cmd.size() == 2)
-	{
-		send(msg.getSender(), err_reply(ERR_NOTEXTTOSEND).c_str(),
-			err_reply(ERR_NOTEXTTOSEND).length(), 0);
-		return ;
-	}
+		throw myException(ERR_NOTEXTTOSEND);
 	else
 	{
 		if (chan)
@@ -96,7 +84,7 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 			}
 			catch (myException &e )
 			{
-				send(msg.getSender(),e.what(),strlen(e.what()),0);
+				send(fd,e.what(),strlen(e.what()),0);
 			}
 		}
 		else if (target)
@@ -118,30 +106,22 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 		}
 		else if (!target && !chan)
 		{
-			send(msg.getSender(), err_reply(ERR_NOSUCHNICK).c_str(),
+			send(fd, err_reply(ERR_NOSUCHNICK).c_str(),
 			err_reply(ERR_NOSUCHNICK).length(), 0);
 		}
 	}
 
 }
 
-void	Server::PASScmd(Msg &msg, std::vector<std::string> &cmd)
+void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(msg.getSender());
+	user = this->getUser(fd);
 	if (user->isAuth())
-	{
-		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED).c_str(), 
-					err_reply(ERR_ALREADYREGISTRED).length(), 0);
-		return ;
-	}
+		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
-	{
-		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS).c_str(), 
-			err_reply(ERR_NEEDMOREPARAMS).length(), 0);
-		return ;
-	}
+		throw myException(ERR_NEEDMOREPARAMS);
 	else
 	{
 		user->setPassword(cmd[1]);
@@ -149,25 +129,17 @@ void	Server::PASScmd(Msg &msg, std::vector<std::string> &cmd)
 	}
 }
 
-void	Server::USERcmd(Msg &msg, std::vector<std::string> &cmd)
+void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(msg.getSender());
+	user = this->getUser(fd);
 	if (!user)
 		return ;
 	if (user->isAuth())
-	{
-		send(msg.getSender(), err_reply(ERR_ALREADYREGISTRED).c_str(), 
-				err_reply(ERR_ALREADYREGISTRED).length(), 0);
-		return ;
-	}
+		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 5)
-	{
-		send(msg.getSender(), err_reply(ERR_NEEDMOREPARAMS).c_str(), 
-			err_reply(ERR_NEEDMOREPARAMS).length(), 0);
-		return ;
-	}
+		throw myException(ERR_NEEDMOREPARAMS);
 	else
 	{
 		user->setUsername(cmd[1]);
@@ -179,60 +151,47 @@ void	Server::USERcmd(Msg &msg, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			send(msg.getSender(), "you have been registered\n", 
+			send(fd, "you have been registered\n",
 				sizeof("you have been registered\n"), 0);
 			user->setRegistered();
 		}
 		else
 		{
-			send(msg.getSender(), "hh password ghalat\n", 
+			send(fd, "hh password ghalat\n", 
 				sizeof("hh password ghalat\n"), 0);
 			this->clientDisconnect(user->getFd());
 		}
 	}
 }
 
-void	Server::NICKcmd(Msg &msg, std::vector<std::string> &cmd)
+void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(msg.getSender());
+	user = this->getUser(fd);
 	if (!user)
 		return;
 	if (cmd.size() < 2)
-	{
-		send(msg.getSender(), err_reply(ERR_NONICKNAMEGIVEN).c_str(), 
-			err_reply(ERR_NONICKNAMEGIVEN).length(), 0);
-		return ;
-	}
+		throw myException(ERR_NONICKNAMEGIVEN);
 	else
 	{
 		if (!paramsChecker(cmd[1]))
-		{
-			send(msg.getSender(), err_reply(ERR_ERRONEUSNICKNAME).c_str(), 
-				err_reply(ERR_ERRONEUSNICKNAME).length(), 0);
-			return ;
-		}
+			throw myException(ERR_ERRONEUSNICKNAME);
 		else if (this->getUser(cmd[1]))
-		{
-			send(msg.getSender(), err_reply(ERR_NICKNAMEINUSE).c_str(), 
-			err_reply(ERR_NICKNAMEINUSE).length(), 0);
-            return ;
-		}
+			throw myException(ERR_ERRONEUSNICKNAME);
 		user->setNickname(cmd[1]);
-		std::cout << "nick :" << user->getNickname() << std::endl;
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			send(msg.getSender(), "you have been registered\n", 
+			send(fd, "you have been registered\n", 
 				sizeof("you have been registered\n"), 0);
 			user->setRegistered();
 		}
 		else
 		{
-			send(msg.getSender(), "hh u cant register\n", 
+			send(fd, "hh u cant register\n", 
 				sizeof("hh u cant register\n"), 0);
 			this->clientDisconnect(user->getFd());
 		}
@@ -284,6 +243,35 @@ void    Server::helps(int fd)
     // std::cout << "Cient to client / channel commandes : " << std::endl;
     // std::cout << "|-> <PRIVMSG> 'receiver' 'message'" <<std::endl;
 
+}
+
+Void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
+{
+	User *user;
+	User *invit;
+	channel *channel;
+
+	user = this->getUser(fd);
+	if (!user)
+		return;
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	channel = this->getChannel(cmd[2]);
+	if (!channel)
+		throw myException(ERR_NOSUCHCHANNEL);
+	if (!channel->getMember(fd))
+		throw myException(ERR_NOTONCHANNEL);
+	if (channel->isInviteOnly() && !channel->getOperator(user->getFd()))
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	invit = this->getUser(cmd[1])
+	if (!invit)
+		throw myException(ERR_NOSUCHNICK);
+	if (channel->getMember(invit->getFd()))
+		throw MyException(ERR_USERONCHANNEL);
+	addInvitee(invit->getFd());
+	// here we send RPL_INVITING reply
+	
+	
 }
 
 void    Server::kick(std::vector<std::string> &cmd, int fd_u)
