@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/12 13:02:50 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/13 11:02:37 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <sstream>
 # include <vector>
 # include <sys/socket.h>
+# include <stdarg.h>
 
 # include "replies.hpp"
 
@@ -35,10 +36,11 @@ class myException : public std::exception {
 };
 
 bool	isNumeric(std::string const &str);
-void	split(std::string const &s1, char delim, std::vector<std::string> &out);
+void	split(std::string const &s1, char delim,
+			std::vector<std::string> &out);
 int		paramsChecker(const std::string &param);
 
-template <typename T, typename... Types>
-std::string const	stringBuilder(T msg, Types ...msgs);
+std::string const	ft_tostring(int n);
+std::string const	stringBuilder(int n, ...);
 
 #endif
