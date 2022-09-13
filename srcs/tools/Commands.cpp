@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 14:28:39 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 16:31:11 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,11 +245,11 @@ void    Server::helps(int fd)
 
 }
 
-Void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
+void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 {
 	User *user;
 	User *invit;
-	channel *channel;
+	Channel *channel;
 
 	user = this->getUser(fd);
 	if (!user)
@@ -263,12 +263,12 @@ Void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 		throw myException(ERR_NOTONCHANNEL);
 	if (channel->isInviteOnly() && !channel->getOperator(user->getFd()))
 		throw myException(ERR_CHANOPRIVSNEEDED);
-	invit = this->getUser(cmd[1])
+	invit = this->getUser(cmd[1]);
 	if (!invit)
 		throw myException(ERR_NOSUCHNICK);
 	if (channel->getMember(invit->getFd()))
-		throw MyException(ERR_USERONCHANNEL);
-	addInvitee(invit->getFd());
+		throw myException(ERR_USERONCHANNEL);
+	channel->addInvitee(invit->getFd());
 	// here we send RPL_INVITING reply
 	
 	
