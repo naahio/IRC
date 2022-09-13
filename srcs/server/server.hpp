@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/12 13:15:15 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/13 13:55:32 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,6 +107,8 @@ class Server
 		void    helps(int fd);
 		void    part(std::vector<std::string> &cmd,int fd);
 		void    mode(Channel &channel);
+		void	list(std::string channel_name = nullptr, int fd_u);
+
 };
 
 #endif

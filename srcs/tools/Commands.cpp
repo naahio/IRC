@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 11:37:55 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/13 14:10:07 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 				reply += chan->getName();
 				reply += " :";
 				reply += cmd[2].c_str();
-				// reply = stringBuilder(9, ":", user->getNickname(), );
 				chan->broadCastMessage(reply, user->getFd());
 			}
 			catch (myException &e )
@@ -101,18 +100,10 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 		}
 		else if (target)
 		{
-			// std::cout << "im here" << std::endl;
 			std::string	reply;
 			cmd[2] += '\n';
-			reply = ":";
-			reply += user->getNickname();
-			reply += "!~";
-			reply += user->getUsername();
-			reply += "@10.13.6.10 ";
-			reply += "PRIVMSG ";
-			reply += target->getNickname();
-			reply += " :";
-			reply += cmd[2].c_str();
+			reply = stringBuilder(9, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+					"@10.13.6.10 ", "PRIVMSG ", target->getNickname().c_str(), " :", cmd[2].c_str());
 			if (send(target->getFd(),reply.c_str(), reply.length(), 0) == -1)
 				std::cout << "sending error" << std::endl;
 		}
@@ -261,28 +252,6 @@ void    Server::helps(int fd)
     send(fd, "Cient to client / channel commandes : \n", sizeof("Cient to client / channel commandes : \n"), 0);
     send(fd, "|-> <PRIVMSG> 'receiver' 'message' \n", sizeof("|-> <PRIVMSG> 'receiver' 'message' \n"), 0);
 
-
-    // std::cout << "use te following commands to register or log in : " << std::endl;  
-    // std::cout << "|-> <PASS> 'password' " << std::endl;                                       *
-    // std::cout << "|-> <USER> 'username' 'hostname' 'servername' 'realname'" << std::endl;     *
-    // std::cout << "|-> <NICK> 'nickname' " << std::endl;                                       *
-    // std::cout << "Channel commands : " << std::endl;
-    // std::cout << "|-> <JOIN>  '<#>channel name'. . . 'key'. . ." <<std::endl;                 *
-    // std::cout << "|-> <KICK>  '<#>channel name'. . . 'user'. . ." <<std::endl;                *
-    // std::cout << "|-> <PART>  '<#>channel name'" <<std::endl;                                 *
-    // std::cout << "|-> <MODE>  '<#>channel name' <mode>" <<std::endl;                          *
-    // std::cout << "|-> <USERMODES>  'mode'" <<std::endl;                                       *
-    // std::cout << "|-> <LIST>  '<#>channel name' 'server'" <<std::endl;
-    // std::cout << "|-> <INVITE>  'nickname' '<#>channel name'" <<std::endl;
-    // std::cout << "Server commands : " << std::endl;
-    // std::cout << "|=> <VERSION> " << std::endl;
-    // std::cout << "|=> <TIME> " << std::endl;
-    // std::cout << "|=> <ADMINE> " << std::endl;
-    // std::cout << "|=> <INFO> " << std::endl;
-    // std::cout << "|=> <KILL> 'nickname' 'reason' " << std::endl;
-    // std::cout << "Cient to client / channel commandes : " << std::endl;
-    // std::cout << "|-> <PRIVMSG> 'receiver' 'message'" <<std::endl;
-
 }
 
 void    Server::kick(std::vector<std::string> &cmd, int fd_u)
@@ -318,7 +287,7 @@ void   Server::part(std::vector<std::string> &cmd, int fd_u)
 {
 	Channel	*channel;
 	User	*member;
-	std::string	erply = ":";
+	std::string	reply = ":";
 
     if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
@@ -328,15 +297,38 @@ void   Server::part(std::vector<std::string> &cmd, int fd_u)
 	member = channel->getMember(fd_u);
 	if (!member)
 		throw myException(ERR_NOTONCHANNEL);
-	erply += member->getNickname();
-	erply += "!~";
-	erply += member->getUsername();
-	erply += "@10.13.6.10 ";
-	erply += cmd[0];
-	erply += " ";
-	erply += cmd[1];
-	channel->broadCastMessage(erply, fd_u);
+	// erply += member->getNickname();
+	// erply += "!~";
+	// erply += member->getUsername();
+	// erply += "@10.13.6.10 ";
+	// erply += cmd[0];
+	// erply += " ";
+	// erply += cmd[1];
+	reply = stringBuilder(7, member->getNickname().c_str(), "!~", member->getUsername().c_str(),
+			"@10.13.6.10 ", cmd[0].c_str(), " ", cmd[1].c_str());
+	channel->broadCastMessage(reply, fd_u);
 	channel->getMembers().erase(fd_u);
+}
+
+void	Server::list(std::string channel_name, int fd_u)
+{
+	if (channel_name.empty())
+	{
+		std::map <std::string, Channel *>::iterator	it;
+		std::string reply;
+
+		reply = stringBuilder(3, ":irc!~irc1337@10.13.6.10 321 ", " :Channel :Users  Name", "\n");
+		send(fd_u, reply.c_str(), reply.length(), 0);
+		for (it = this->channels.begin(); it != this->channels.end(); ++it)
+		{
+			if (!it->second->get_is_priv())
+				reply = stringBuilder(5, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd_u)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()), " :", it->second->getTopic().c_str(), "\n");
+			else
+				reply = stringBuilder(4, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd_u)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()), "\n");
+			send(fd_u, reply.c_str(), reply.length(), 0);
+		}
+		reply = stringBuilder(4, ":irc!~irc1337@10.13.6.10 323 ", this->getUser(fd_u)->getNickname().c_str(), " :End of /LIST","\n");
+	}
 }
 
 void    Server::mode(Channel &channel)
