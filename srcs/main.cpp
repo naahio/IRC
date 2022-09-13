@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/12 10:12:17 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 11:02:16 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 				if (!serv.recv_send_msg(serv.getFds()[i].fd))
 				{
 					serv.clientDisconnect(serv.getFds()[i].fd);
-					for (int j = i; j < serv.getNfds() - 1; j++)
+					for (int j = i; j < serv.getNfds(); j++)
 					{
 						memcpy(&serv.getFds()[j], &serv.getFds()[j + 1], sizeof(struct pollfd));
 					}

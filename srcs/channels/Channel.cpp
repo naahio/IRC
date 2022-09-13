@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/10 11:33:16 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/12 13:35:09 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,6 +165,44 @@ User *	Channel::getInvitee(int fd) {
 	return (NULL);
 }
 
+void	Channel::addMember(User * member, std::string _key) {
+	if (this->inviteOnly && !this->getInvitee(member->getFd())) {
+		throw myException(ERR_INVITEONLYCHAN);
+	}
+	if (!this->key.empty() && this->key != _key) {
+		throw myException(ERR_BADCHANNELKEY);
+	}
+	if (this->membersLimit && this->members.size() >= this->membersLimit) {
+		throw myException(ERR_CHANNELISFULL);
+	}
+	if (this->members.insert(std::pair<int, User *>(member->getFd(), member)).second) {
+		member->joinChannel(*this, this->name);
+		if (this->members.size() == 1) {
+			this->addOperator(member->getFd());
+		}
+		if (this->inviteOnly && this->getInvitee(member->getFd())) {
+			this->removeInvitee(member->getFd());
+		}
+	}
+}
+
+void	Channel::removeMember(int fd) {
+	try {
+		std::map<int, User *>::iterator	it;
+
+		it = this->members.find(fd);
+		if (it != this->members.end()) {
+			this->removeOperator(fd);
+			this->removeModerator(fd);
+			this->removeInvitee(fd);
+			it->second->leaveChannel(this->name);
+			this->members.erase(it);
+		}
+	} catch (std::exception & e) {
+		throw myException(std::string(e.what()));
+	}
+}
+
 void	Channel::addOperator(int fd) {
 	User *	member;
 	
@@ -237,44 +275,6 @@ void	Channel::removeInvitee(int fd) {
 	}
 }
 
-void	Channel::addMember(User * member, std::string key) {
-	if (this->inviteOnly && !this->getInvitee(member->getFd())) {
-		throw myException(ERR_INVITEONLYCHAN);
-	}
-	if (!this->key.empty() && this->key != key) {
-		throw myException(ERR_BADCHANNELKEY);
-	}
-	if (this->membersLimit && this->members.size() >= this->membersLimit) {
-		throw myException(ERR_CHANNELISFULL);
-	}
-	if (this->members.insert(std::pair<int, User *>(member->getFd(), member)).second) {
-		member->joinChannel(*this, this->name);
-		if (this->members.size() == 1) {
-			this->addOperator(member->getFd());
-		}
-		if (this->inviteOnly && this->getInvitee(member->getFd())) {
-			this->removeInvitee(member->getFd());
-		}
-	}
-}
-
-void	Channel::removeMember(int fd) {
-	try {
-		std::map<int, User *>::iterator	it;
-
-		it = this->members.find(fd);
-		if (it != this->members.end()) {
-			this->removeOperator(fd);
-			this->removeModerator(fd);
-			this->removeInvitee(fd);
-			it->second->leaveChannel(this->name);
-			this->members.erase(it);
-		}
-	} catch (std::exception & e) {
-		throw myException(std::string(e.what()));
-	}
-}
-
 void	Channel::broadCastMessage(std::string & message, int fd) {
 	std::map<int, User *>::iterator	it;
 
@@ -283,6 +283,7 @@ void	Channel::broadCastMessage(std::string & message, int fd) {
 		throw myException(ERR_CANNOTSENDTOCHAN);
 	}
 	for (it = this->members.begin(); it != this->members.end(); ++it) {
-		send(it->second->getFd(), message.c_str(), message.length(), 0);
+		if (fd != it->second->getFd())
+			send(it->second->getFd(), message.c_str(), message.length(), 0);
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/11 09:35:00 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/12 13:15:15 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@
 # define BUFF_SIZE		1024
 # define MAX_CONN		32
 # define TIMEOUT		3 * 60 * 1000
+# define SERVNAME 		
 
 class Server
 {
@@ -77,19 +78,13 @@ class Server
 		void	addUser(int fd);
 		void	clientDisconnect(int fd);
 
-		void	createChannel(std::string name, User & op);
+		void	createChannel(std::string name, User & op, std::string key);
 		void	deleteChannel(std::string name);
 		
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		void	splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
-
-		// void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
-		// void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
-		// void	PASScmd(Msg &msg,std::vector<std::string> &cmd);
-		// void	JOINcmd(Msg &msg,std::vector<std::string> &cmd);
-		// void	PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
@@ -99,6 +94,19 @@ class Server
 		void	poll_trait(void);
 		bool	accept_connections(void);
 		bool	recv_send_msg(int fd);
+
+		//**************** Commands : 
+
+		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
+		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
+		void	PASScmd(Msg &msg,std::vector<std::string> &cmd);
+		void	JOINcmd(Msg &msg,std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd);
+
+		void    kick(std::vector<std::string> &cmd, int fd_u);
+		void    helps(int fd);
+		void    part(std::vector<std::string> &cmd,int fd);
+		void    mode(Channel &channel);
 };
 
 #endif
