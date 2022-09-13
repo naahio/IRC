@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/12 13:15:15 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/13 12:36:10 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ class Server
 		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
-		void	addUser(int fd);
+		void	addUser(int fd,char *ip);
 		void	clientDisconnect(int fd);
 
 		void	createChannel(std::string name, User & op, std::string key);

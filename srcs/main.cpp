@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 11:02:16 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 11:28:07 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,6 @@ int main(int argc, char **argv)
 			std::cout << "POLL : time out !" << std::endl;
 			close_server(serv, EXIT_FAILURE);
 		}
-		std::cout << "rc of poll : " << rc << std::endl;
-		sleep(1);
 		for (int i = 0; i < serv.getNfds(); i++)
 		{
 			if (serv.getFds()[i].revents == 0)
@@ -68,7 +66,6 @@ int main(int argc, char **argv)
 			if (serv.getFds()[i].revents != POLLIN)
 			{
 				std::cout << "Error ! revents : " << serv.getFds()[i].revents << std::endl;
-				close_server(serv, EXIT_FAILURE); //added this
 			}
 			if (serv.getFds()[i].fd == serv.getSocketFd())
 			{
