@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/13 11:11:47 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/13 11:21:35 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,6 @@ std::string const	stringBuilder(int n, ...) {
 	va_start(ptr, n);
 	for (int i = 0; i < n; i++) {
 		str += va_arg(ptr, char *);
-		if (i < n -1) {
-			str += " ";
-		}
 	}
 	str += "\n";
 	va_end(ptr);
