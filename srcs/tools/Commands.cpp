@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 11:19:43 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/13 11:37:55 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ void	Server::PRIVMSGcmd(Msg &msg, std::vector<std::string> &cmd)
 				reply += chan->getName();
 				reply += " :";
 				reply += cmd[2].c_str();
+				// reply = stringBuilder(9, ":", user->getNickname(), );
 				chan->broadCastMessage(reply, user->getFd());
 			}
 			catch (myException &e )
