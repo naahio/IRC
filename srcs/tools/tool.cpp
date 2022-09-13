@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/12 13:02:51 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/13 11:21:35 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,14 +43,22 @@ int	paramsChecker(const std::string &param)
 	return 1;
 }
 
-static std::string const	stringBuilder(void) {
-	return "\n";
-}
-
-template <typename T, typename... Types>
-std::string const	stringBuilder(T msg, Types ...msgs) {
+std::string const	ft_tostring(int n) {
 	std::stringstream	ss;
 
-	ss << msg;
-	return ss.str().append(" ") + stringBuilder(msgs...);
+	ss << n;
+	return (ss.str());
+}
+
+std::string const	stringBuilder(int n, ...) {
+	va_list		ptr;
+	std::string	str;
+
+	va_start(ptr, n);
+	for (int i = 0; i < n; i++) {
+		str += va_arg(ptr, char *);
+	}
+	str += "\n";
+	va_end(ptr);
+	return (str);
 }
