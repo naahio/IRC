@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/14 11:11:17 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/14 13:41:00 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,10 +75,10 @@ class Server
 		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
-		void	addUser(int fd);
+		void	addUser(int fd,char *ip);
 		void	clientDisconnect(int fd);
 
-		void	createChannel(std::string name, User & op, std::string key);
+		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		
 		void	parsExecCommands(Msg &msg);
@@ -97,18 +97,18 @@ class Server
 
 		//**************** Commands : 
 
-		void	USERcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	NICKcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	PASScmd(Msg &msg,std::vector<std::string> &cmd);
-		void	JOINcmd(Msg &msg,std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(Msg &msg,std::vector<std::string> &cmd);
+		void	USERcmd(int fd,std::vector<std::string> &cmd);
+		void	NICKcmd(int fd,std::vector<std::string> &cmd);
+		void	PASScmd(int fd,std::vector<std::string> &cmd);
+		void	JOINcmd(int fd,std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int fd,std::vector<std::string> &cmd);
+		void	INVITcmd(int fd,std::vector<std::string> &cmd);
 
-		void    kick(std::vector<std::string> &cmd, int fd_u);
+		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);
-		void    part(std::vector<std::string> &cmd, int fd);
-		void    mode(Channel &channel);
-		void	list(int fd_u, std::string channel_name = "");
-		// void	names()
+		void    part(int fd, std::vector<std::string> &cmd);
+		void	list(int fd_u, std::vector<std::string> &cmd);
+		void    mode(int fd_u, std::vector<std::string> &cmd);
 };
 
 #endif

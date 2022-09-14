@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/04 10:04:07 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 12:39:16 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 /*************************[ Constructors/Destructors ]*************************/
 
-User::User(int _fd)
+User::User(int _fd,char *ip)
 {
 	this->fd			= _fd;
 	this->username		= "";
@@ -25,6 +25,7 @@ User::User(int _fd)
 	this->registered	= false;
 	this->connected		= false;
 	this->msgRemainder		= "";
+	this->ipAddress = ip;
 }
 
 User::~User()
@@ -73,6 +74,11 @@ std::string const & User::getMsgRemainder(void) const
 
 std::map<std::string, Channel *> &	User::getChannels(void) {
 	return (this->channels);
+}
+
+std::string const & User::getIpAddress(void) const
+{
+	return (this->ipAddress);
 }
 
 Channel *	User::getChannel(std::string name) {

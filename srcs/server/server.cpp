@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 12:32:40 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/14 13:39:19 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,10 +108,10 @@ Channel *	Server::getChannel(std::string name) {
 
 /*****************************[ Users Management ]*****************************/
 
-void	Server::addUser(int fd) {
+void	Server::addUser(int fd,char *ip) {
 	User *	user;
 
-	user = new User(fd);
+	user = new User(fd,ip);
 	this->users.insert(std::pair<int, User *>(fd, user));
 }
 
@@ -134,14 +134,13 @@ void	Server::clientDisconnect(int fd) {
 
 /****************************[ Channels Management ]***************************/
 
-void	Server::createChannel(std::string name, User & op, std::string key) {
+void	Server::createChannel(std::string name, User & op) {
 	try {
 		Channel *	channel;
 
 		channel = new Channel(name);
 		if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
 			channel->addMember(&op);
-			channel->setKey(key, op.getFd());
 			return ;
 		}
 		delete channel;
@@ -192,7 +191,7 @@ int		Server::reusable_socket(void)
 	int	rc;
 	
 	std::cout << "Setting up socket options . . . ";
-	rc = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
+	rc = setsockopt(this->socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
 	if (rc < 0)
 	{
 		std::cout << "[FAILED: " << errno << "]" << std::endl;
@@ -262,12 +261,13 @@ void	Server::poll_trait(void)
 
 bool	Server::accept_connections(void)
 {
+	struct sockaddr_in	addr;
+	int addrlen = sizeof(addr);
 	int	new_fd = -1;
-	
 	std::cout << "Waiting for incoming connections . . . " << std::endl;
 	do
 	{
-		new_fd = accept(this->socket_fd, NULL, NULL);
+		new_fd = accept(this->socket_fd,(struct sockaddr*)&addr,(socklen_t*)&addrlen);
 		if (new_fd == -1)
 		{
 			if (errno != EWOULDBLOCK)
@@ -277,8 +277,12 @@ bool	Server::accept_connections(void)
 			}
 			break;
 		}
+		
+		struct in_addr ipAddr = addr.sin_addr; 
+		char str[INET_ADDRSTRLEN];
+		inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
-		this->addUser(new_fd);
+		this->addUser(new_fd,str);
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
@@ -322,39 +326,42 @@ void	Server::parsExecCommands(Msg &msg)
 	}
 }
 
-/*****************************[ Commands Execution ]***************************/
-
 void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
+	std::string test("NICK");
+	std::cout << "Im here" << std::endl;
+	std::cout << " cmd size " << cmd[0].size() << std::endl;
 	user = this->getUser(msg.getSender());
-	try{
+	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
 			cmd[0][i] = toupper(cmd[0][i]);
-		if (!cmd[0].compare("USER"))
-			USERcmd(msg, cmd);
+		if (!cmd[0].compare("HELP"))
+			helps(msg.getSender());
+		else if (!cmd[0].compare("USER"))
+			USERcmd(msg.getSender(), cmd);
 		else if (!cmd[0].compare("NICK"))
-			NICKcmd(msg, cmd);
+			NICKcmd(msg.getSender(), cmd);
 		else if (!cmd[0].compare("PASS"))
-			PASScmd(msg, cmd);
+			PASScmd(msg.getSender(), cmd);
 		else if (user && user->isAuth())
 		{
-			if (!cmd[0].compare("HELP"))
-				helps(msg.getSender());
-			else if (!cmd[0].compare("PRIVMSG"))
-				PRIVMSGcmd(msg, cmd);
+			if (!cmd[0].compare("PRIVMSG"))
+				PRIVMSGcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("JOIN"))
-				JOINcmd(msg, cmd);
+				JOINcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("KICK"))
-				kick(cmd, msg.getSender());
+				kick(msg.getSender(), cmd);
 			else if (!cmd[0].compare("PART"))
-				part(cmd, msg.getSender());
-			else
-				send(msg.getSender(), "Command error ! \n", strlen("Command error ! \n"), 0);
+				part(msg.getSender(), cmd);
+			else if (!cmd[0].compare("MODE"))
+				mode(msg.getSender(), cmd);
+			else if (!cmd[0].compare("LIST"))
+				list(msg.getSender(), cmd);
 		}
-	}catch(std::exception & e) {
-		send(msg.getSender(),e.what(),strlen(e.what()),0);
+	} catch(std::exception & e) {
+		send(msg.getSender(), e.what(), strlen(e.what()), 0);
 	}
 }
 
@@ -373,6 +380,7 @@ bool	Server::recv_send_msg(int fd)
 		return (false);
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
+	memset(buffer,0,BUFF_SIZE);
 	do
 	{
 		//std::cout << "buff" << buff << std::endl;
@@ -380,6 +388,7 @@ bool	Server::recv_send_msg(int fd)
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
 			rc = recv(fd,buffer, sizeof(buffer), 0);
+			std::cout << "rc = " << rc << std::endl;
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -395,14 +404,14 @@ bool	Server::recv_send_msg(int fd)
 				return (false);
 			}
 			buffer[rc] = '\0';
-			std::cout << "buffer " << buffer << std::endl;
+
 			buff += buffer;
-			std::cout << "buff " << buff.size() << std::endl;
-			// sleep(10);
+			std::cout << "buffer size " << buff.size() << std::endl;
+			std::cout << "buffer  " << buff << std::endl;
+
 		}
 		std::cout << " >>>>> MSG : "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");
-		remain = buff.substr(pos + 1);
 		buff = buff.substr(0, pos);
 		user->setMsgRemainder(remain);
 		Msg msg = Msg(buff, fd);

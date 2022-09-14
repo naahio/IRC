@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/12 11:21:15 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/13 11:28:07 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,9 @@ int main(int argc, char **argv)
 			if (serv.getFds()[i].revents == 0)
 				continue;
 			if (serv.getFds()[i].revents != POLLIN)
+			{
 				std::cout << "Error ! revents : " << serv.getFds()[i].revents << std::endl;
+			}
 			if (serv.getFds()[i].fd == serv.getSocketFd())
 			{
 				if (!serv.accept_connections())

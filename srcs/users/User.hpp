@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/04 10:03:34 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/13 12:38:14 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class User
 		std::string	fullName;
 		std::string	password;
 		std::string	msgRemainder;
+		std::string ipAddress;
 
 		bool		registered;
 		bool		connected;
@@ -40,7 +41,7 @@ class User
 		User(void) {}
 
 	public:
-		User(int fd);
+		User(int fd,char *ip);
 		~User(void);
 
 		int					getFd(void) const;
@@ -51,6 +52,7 @@ class User
 		std::string const &	getFullName(void) const;
 		std::string	const & getPassword(void) const;
 		std::string const & getMsgRemainder(void) const;
+		std::string const & getIpAddress(void) const;
 
 		std::map <std::string, Channel *> &
 							getChannels(void);
