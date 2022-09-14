@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 10:47:14 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/14 11:12:16 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,14 +134,13 @@ void	Server::clientDisconnect(int fd) {
 
 /****************************[ Channels Management ]***************************/
 
-void	Server::createChannel(std::string name, User & op, std::string key) {
+void	Server::createChannel(std::string name, User & op) {
 	try {
 		Channel *	channel;
 
 		channel = new Channel(name);
 		if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
 			channel->addMember(&op);
-			channel->setKey(key, op.getFd());
 			return ;
 		}
 		delete channel;
@@ -541,30 +540,32 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	User *user;
 
 	user = this->getUser(msg.getSender());
-	try{
+	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
 			cmd[0][i] = toupper(cmd[0][i]);
 		if (!cmd[0].compare("HELP"))
 			helps(msg.getSender());
-		if (!cmd[0].compare("USER"))
+		else if (!cmd[0].compare("USER"))
 			USERcmd(msg, cmd);
-		if (!cmd[0].compare("NICK"))
+		else if (!cmd[0].compare("NICK"))
 			NICKcmd(msg, cmd);
-		if (!cmd[0].compare("PASS"))
+		else if (!cmd[0].compare("PASS"))
 			PASScmd(msg, cmd);
-		if (user && user->isAuth())
+		else if (user && user->isAuth())
 		{
 			if (!cmd[0].compare("PRIVMSG"))
 				PRIVMSGcmd(msg, cmd);
-			if (!cmd[0].compare("JOIN"))
+			else if (!cmd[0].compare("JOIN"))
 				JOINcmd(msg, cmd);
+			else if (!cmd[0].compare("KICK"))
+				kick(cmd, msg.getSender());
+			else if (!cmd[0].compare("PART"))
+				part(cmd, msg.getSender());
+			else if (!cmd[0].compare("MODE"))
+				mode(msg, cmd);
 		}
-		if (!cmd[0].compare("KICK"))
-			kick(cmd, msg.getSender());
-		if (!cmd[0].compare("PART"))
-			part(cmd, msg.getSender());
-	}catch(std::exception & e) {
-		send(msg.getSender(),e.what(),strlen(e.what()),0);
+	} catch(std::exception & e) {
+		send(msg.getSender(), e.what(), strlen(e.what()), 0);
 	}
 }
 
