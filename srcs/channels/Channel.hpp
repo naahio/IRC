@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/11 12:35:44 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/14 10:58:59 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ class Channel {
 		std::string				topic;
 		std::string				key;
 		size_t					membersLimit;
+		bool					_private;
+		bool					secret;
 		bool					memberChatOnly;
 		bool					inviteOnly;
 		bool					moderated;
@@ -49,6 +51,8 @@ class Channel {
 		std::string const &			getTopic(void) const;
 		std::string const &			getKey(void) const;
 		size_t						getMembersLimit(void) const;
+		bool						isPrivate(void) const;
+		bool						isSecret(void) const;
 		bool						isMemberChatOnly(void) const;
 		bool						isInviteOnly(void) const;
 		bool						isModerated(void) const;
@@ -62,6 +66,8 @@ class Channel {
 		void	setTopic(std::string _topic, int fd);
 		void	setKey(std::string _key, int fd);
 		void	setLimit(size_t limit, int fd);
+		void	setPrivate(bool option, int fd);
+		void	setSecret(bool option, int fd);
 		void	setMemberChatOnly(bool option, int fd);
 		void	setInviteOnly(bool option, int fd);
 		void	setModerated(bool option, int fd);

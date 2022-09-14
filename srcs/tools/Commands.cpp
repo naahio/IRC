@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 16:31:11 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/14 13:20:32 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,8 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			if (chan)
 				chan->addMember(user, keys[i]);
 			else
-				this->createChannel(channels[i], *user, keys[i]);
-            send(fd,"Mar7ba bik f channel ",
+				this->createChannel(channels[i], *user);
+            send(fd, "Mar7ba bik f channel ",
                 strlen("Mar7ba bik f channel "), 0);
             send(fd,channels[i].c_str(),
                 channels[i].length(), 0);
@@ -274,7 +274,7 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 	
 }
 
-void    Server::kick(std::vector<std::string> &cmd, int fd_u)
+void    Server::kick(int fd, std::vector<std::string> &cmd)
 {
 
     if (cmd.size() < 3)
@@ -283,15 +283,15 @@ void    Server::kick(std::vector<std::string> &cmd, int fd_u)
 	std::string	erply = ":";
     if (!channel)
         throw myException(ERR_NOSUCHCHANNEL);
-    if (!channel->getOperator(fd_u))
+    if (!channel->getOperator(fd))
         throw myException(ERR_CHANOPRIVSNEEDED);
     User *user = this->getUser(cmd[2]);
     if (!user || !channel->getMember(user->getFd()))
         throw myException(ERR_NOSUCHNICK);
     channel->getMembers().erase(user->getFd());
-	erply += channel->getOperator(fd_u)->getNickname();
+	erply += channel->getOperator(fd)->getNickname();
 	erply += "!~";
-	erply += channel->getOperator(fd_u)->getUsername();
+	erply += channel->getOperator(fd)->getUsername();
 	erply += "@10.13.6.10 ";
 	erply += cmd[0];
 	erply += " ";
@@ -299,11 +299,11 @@ void    Server::kick(std::vector<std::string> &cmd, int fd_u)
 	erply += " ";
 	erply += cmd[2];
 	erply += " :";
-	erply += channel->getOperator(fd_u)->getNickname();
-    channel->broadCastMessage(erply, fd_u);
+	erply += channel->getOperator(fd)->getNickname();
+    channel->broadCastMessage(erply, fd);
 }
 
-void   Server::part(std::vector<std::string> &cmd, int fd_u)
+void   Server::part(int fd, std::vector<std::string> &cmd)
 {
 	Channel	*channel;
 	User	*member;
@@ -314,7 +314,7 @@ void   Server::part(std::vector<std::string> &cmd, int fd_u)
 	channel = this->getChannel(cmd[1]);
 	if (!channel)
 		throw myException(ERR_NOSUCHCHANNEL);
-	member = channel->getMember(fd_u);
+	member = channel->getMember(fd);
 	if (!member)
 		throw myException(ERR_NOTONCHANNEL);
 	erply += member->getNickname();
@@ -324,11 +324,129 @@ void   Server::part(std::vector<std::string> &cmd, int fd_u)
 	erply += cmd[0];
 	erply += " ";
 	erply += cmd[1];
-	channel->broadCastMessage(erply, fd_u);
-	channel->getMembers().erase(fd_u);
+	channel->broadCastMessage(erply, fd);
+	channel->getMembers().erase(fd);
 }
 
-void    Server::mode(Channel &channel)
-{
-    (void)channel;
+void	Server::mode(int fd, std::vector<std::string> & cmd) {
+	try {
+		Channel *			channel;
+		User *				user;
+		int					sign = 1;
+		int					argId = 3;
+		std::stringstream	ss;
+
+		if (cmd.size() < 2)
+			throw myException(ERR_NEEDMOREPARAMS);
+		channel = this->getChannel(cmd[1]);
+		if (!channel)
+			throw myException(ERR_NOSUCHCHANNEL);
+		if (!channel->getOperator(fd))
+			throw myException(ERR_CHANOPRIVSNEEDED);
+		for (int i = 0; i < cmd[2].length(); i++) {
+			try {
+				switch (cmd[2][i]) {
+					case '+':
+						sign = 1;
+						break;
+					case '-':
+						sign = 0;
+						break;
+					case 'o':
+						if (cmd.size() < 3)
+							break;
+						user = this->getUser(cmd[argId++]);
+						if (!user)
+							throw myException(ERR_NOSUCHNICK);
+						if (sign == 1) {
+							channel->addOperator(user->getFd());
+						} else if (sign == 0) {
+							channel->removeOperator(user->getFd());
+						}
+						break;
+					case 'p':
+						if (sign == 1) {
+							channel->setPrivate(true, fd);
+						} else if (sign == 0) {
+							channel->setPrivate(false, fd);
+						}
+						break;
+					case 's':
+						if (sign == 1) {
+							channel->setSecret(true, fd);
+						} else if (sign == 0) {
+							channel->setSecret(false, fd);
+						}
+						break;
+					case 'i':
+						if (sign == 1) {
+							channel->setInviteOnly(true, fd);
+						} else if (sign == 0) {
+							channel->setInviteOnly(false, fd);
+						}
+						break;
+					case 't':
+						if (sign == 1) {
+							channel->setTopicSettable(true, fd);
+						} else if (sign == 0) {
+							channel->setTopicSettable(false, fd);
+						}
+						break;
+					case 'n':
+						if (sign == 1) {
+							channel->setMemberChatOnly(true, fd);
+						} else if (sign == 0) {
+							channel->setMemberChatOnly(false, fd);
+						}
+						break;
+					case 'm':
+						if (sign == 1) {
+							channel->setModerated(true, fd);
+						} else if (sign == 0) {
+							channel->setModerated(false, fd);
+						}
+						break;
+					case 'l':
+						if (cmd.size() < 3)
+							throw myException(ERR_NEEDMOREPARAMS);
+						ss << cmd[argId++];
+						int	limit;
+						ss >> limit;
+						if (sign == 1) {
+							channel->setLimit(limit, fd);
+						} else if (sign == 0) {
+							channel->setLimit(-1, fd);
+						}
+						break;
+					case 'b':
+						if (cmd.size() < 3)
+							break;
+						user = this->getUser(cmd[argId++]);
+						if (!user)
+							throw myException(ERR_NOSUCHNICK);
+						if (sign == 1) {
+							channel->addModerator(user->getFd());
+						} else if (sign == 0) {
+							channel->removeModerator(user->getFd());
+						}
+						break;
+					case 'k':
+						if (cmd.size() < 3)
+							break;
+						if (sign == 1) {
+							channel->setKey(cmd[argId++], fd);
+						} else if (sign == 0) {
+							channel->setKey("", fd);
+						}
+						break;
+					default:
+						throw myException(ERR_UNKNOWNMODE);
+				}
+			} catch (std::exception & e) {
+				send(fd, e.what(), strlen(e.what()), 0);
+			}
+		}
+	} catch (std::exception & e) {
+		throw myException(std::string(e.what()));
+	}
 }
