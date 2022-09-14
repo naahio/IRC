@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/12 13:35:09 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/14 12:57:09 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Channel::Channel(std::string _name) {
 	this->topic = "";
 	this->key = "";
 	this->membersLimit = 0;
-	this->memberChatOnly = true;
+	this->memberChatOnly = false;
 	this->inviteOnly = false;
 	this->moderated = false;
 	this->topicSettable = true;
