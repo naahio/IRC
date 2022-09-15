@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 17:32:33 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/15 17:34:02 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 		}
 	}
 }
-
 void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user,*target;
@@ -112,9 +111,17 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getUser(fd);
 	if (user->isAuth())
-		throw myException(ERR_ALREADYREGISTRED);
+	{
+		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
+			" PASS ",err_reply(ERR_ALREADYREGISTRED).c_str()));
+		return ;
+	}
 	else if (cmd.size() < 2)
-		throw myException(ERR_NEEDMOREPARAMS);
+	{
+		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
+			" PASS ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
+		return ;
+	}
 	else
 	{
 		user->setPassword(cmd[1]);
@@ -125,14 +132,22 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
-
+	std::string reply;
 	user = this->getUser(fd);
 	if (!user)
 		return ;
 	if (user->isAuth())
-		throw myException(ERR_ALREADYREGISTRED);
+	{
+		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
+			" USER ",err_reply(ERR_ALREADYREGISTRED).c_str()));
+		return ;
+	}
 	else if (cmd.size() < 5)
-		throw myException(ERR_NEEDMOREPARAMS);
+	{
+		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
+			" USER ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
+		return ;
+	}
 	else
 	{
 		user->setUsername(cmd[1]);
@@ -144,15 +159,18 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			send(fd, "you have been registered\n",
-				sizeof("you have been registered\n"), 0);
+			sendReply(fd, stringBuilder(8,":irc!~irc1337 001 ",
+					user->getNickname().c_str(),
+					" :Welcome to the Internet Relay Network ",
+					user->getNickname().c_str(),"!",
+					user->getUsername().c_str(),
+					"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
 		{
-			send(fd, "hh password ghalat\n", 
-				sizeof("hh password ghalat\n"), 0);
-			this->clientDisconnect(user->getFd());
+			sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
 		}
 	}
 }
@@ -165,27 +183,44 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return;
 	if (cmd.size() < 2)
-		throw myException(ERR_NONICKNAMEGIVEN);
+	{
+		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NONICKNAMEGIVEN).c_str(),
+			" NICK :",err_reply(ERR_NONICKNAMEGIVEN).c_str()));
+		return ;
+	}
 	else
 	{
 		if (!paramsChecker(cmd[1]))
-			throw myException(ERR_ERRONEUSNICKNAME);
+		{
+			sendReply(fd,stringBuilder(6,":irc!~irc1337 ",ft_tostring(ERR_ERRONEUSNICKNAME).c_str(),
+			" ",cmd[1].c_str()," ",err_reply(ERR_ERRONEUSNICKNAME).c_str()));
+			return ;
+		}
 		else if (this->getUser(cmd[1]))
-			throw myException(ERR_ERRONEUSNICKNAME);
+		{
+			sendReply(fd,stringBuilder(6,":irc!~irc1337 ",ft_tostring(ERR_NICKNAMEINUSE).c_str(),
+			" ",cmd[1].c_str()," ",err_reply(ERR_NICKNAMEINUSE).c_str()));
+			return ;
+		}
 		user->setNickname(cmd[1]);
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			send(fd, "you have been registered\n", 
-				sizeof("you have been registered\n"), 0);
+			sendReply(fd, stringBuilder(8,":irc!~irc1337 001 ",
+					user->getNickname().c_str(),
+					" :Welcome to the Internet Relay Network ",
+					user->getNickname().c_str(),"!",
+					user->getUsername().c_str(),
+					"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
 		{
-			send(fd, "hh u cant register\n", 
-				sizeof("hh u cant register\n"), 0);
+			sendReply(fd,stringBuilder(4,":irc!~irc1337 ",
+			ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
 			this->clientDisconnect(user->getFd());
 		}
 	}
@@ -240,6 +275,7 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 	if (channel->getMember(invit->getFd()))
 		throw myException(ERR_USERONCHANNEL);
 	channel->addInvitee(invit->getFd());
+	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
 	// here we send RPL_INVITING reply
 
 }
@@ -301,7 +337,7 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 	Channel						*chans;
 
 	reply = stringBuilder(2, ":irc!~irc1337@10.13.6.10 321 ", " :Channel :Users  Name");
-	sendReplay(fd, reply);
+	sendReply(fd, reply);
 	if (cmd.size() == 1)
 	{
 		std::map <std::string, Channel *>::iterator	it;
@@ -312,11 +348,8 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 				reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
 			else
 				reply = stringBuilder(7, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
-			sendReplay(fd, reply);
+			sendReply(fd, reply);
 		}
-	}
-	else
-	{
 		split(cmd[1], ',', channel);
 		while (i < channel.size())
 		{	
@@ -327,13 +360,14 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 					reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
 				else
 					reply = stringBuilder(7, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
-				sendReplay(fd, reply);
+				sendReply(fd, reply);
 			}
 			i++;
 		}
 	}
 	reply = stringBuilder(3, ":irc!~irc1337@10.13.6.10 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
-	sendReplay(fd, reply);
+	sendReply(fd, reply);
+	sendReply(fd, reply);
 }
 
 void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
@@ -514,3 +548,20 @@ void	Server::mode(int fd, std::vector<std::string> & cmd) {
 
 // 	if (cmd.size() > 1)
 // }
+
+
+void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
+{
+	std::string reply;
+	User *user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	if (!cmd[1].empty())
+		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", cmd[1].c_str(), ")");
+	else
+		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", user->getNickname().c_str(), ")");
+	sendReply(fd,reply);
+	this->clientDisconnect(fd);
+}

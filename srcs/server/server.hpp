@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 14:26:09 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/15 17:34:29 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,12 +97,13 @@ class Server
 
 		//**************** Commands : 
 
-		void	USERcmd(int fd,std::vector<std::string> &cmd);
-		void	NICKcmd(int fd,std::vector<std::string> &cmd);
-		void	PASScmd(int fd,std::vector<std::string> &cmd);
-		void	JOINcmd(int fd,std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(int fd,std::vector<std::string> &cmd);
-		void	INVITcmd(int fd,std::vector<std::string> &cmd);
+		void	USERcmd(int fd,    std::vector<std::string> &cmd);
+		void	NICKcmd(int fd,    std::vector<std::string> &cmd);
+		void	PASScmd(int fd,    std::vector<std::string> &cmd);
+		void	JOINcmd(int fd,    std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int fd, std::vector<std::string> &cmd);
+		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
+		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
 
 		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);
