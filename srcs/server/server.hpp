@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 12:53:05 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/15 16:09:11 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,12 +97,13 @@ class Server
 
 		//**************** Commands : 
 
-		void	USERcmd(int fd,std::vector<std::string> &cmd);
-		void	NICKcmd(int fd,std::vector<std::string> &cmd);
-		void	PASScmd(int fd,std::vector<std::string> &cmd);
-		void	JOINcmd(int fd,std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(int fd,std::vector<std::string> &cmd);
-		void	INVITcmd(int fd,std::vector<std::string> &cmd);
+		void	USERcmd(int fd,    std::vector<std::string> &cmd);
+		void	NICKcmd(int fd,    std::vector<std::string> &cmd);
+		void	PASScmd(int fd,    std::vector<std::string> &cmd);
+		void	JOINcmd(int fd,    std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int fd, std::vector<std::string> &cmd);
+		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
+		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
 
 		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);
