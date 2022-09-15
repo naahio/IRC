@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 10:27:27 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/15 15:54:57 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ int					paramsChecker(const std::string &param);
 
 std::string const	ft_tostring(int n);
 std::string const	stringBuilder(int n, ...);
-void				sendReplay(int fd, std::string replay);
+void				sendReply(int fd, const std::string &reply);
 
+//void	sendReply(int fd,const std::string &replay);
 #endif

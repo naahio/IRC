@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 11:37:59 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/15 15:55:59 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,7 +286,8 @@ bool	Server::accept_connections(void)
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
-		sendReplay(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
+		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
+		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
 	} while (new_fd != -1);
 	return (true);
 }	
@@ -324,7 +325,6 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
-	std::string test("NICK");
 	user = this->getUser(msg.getSender());
 	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
