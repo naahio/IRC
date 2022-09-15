@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 11:02:37 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/15 10:27:27 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,12 @@ class myException : public std::exception {
 		}
 };
 
-bool	isNumeric(std::string const &str);
-void	split(std::string const &s1, char delim,
-			std::vector<std::string> &out);
-int		paramsChecker(const std::string &param);
+bool				isNumeric(std::string const &str);
+void				split(std::string const &s1, char delim, std::vector<std::string> &out);
+int					paramsChecker(const std::string &param);
 
 std::string const	ft_tostring(int n);
 std::string const	stringBuilder(int n, ...);
+void				sendReplay(int fd, std::string replay);
 
 #endif

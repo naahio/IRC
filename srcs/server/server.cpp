@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/14 13:39:19 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/15 11:37:59 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,9 +286,7 @@ bool	Server::accept_connections(void)
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
-		send(new_fd, "Log in to use the full server's Command !\n", sizeof("Log in to use the full server's Command !\n"), 0);
-		send(new_fd, "********************\n", sizeof("********************\n"), 0);
-		send(new_fd, "user the command *HELP* for more information\n", sizeof("user the command *HELP* for more information\n"), 0);
+		sendReplay(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
 	} while (new_fd != -1);
 	return (true);
 }	
@@ -310,17 +308,13 @@ void	Server::parsExecCommands(Msg &msg)
 	std::vector<std::string> oneCmdParsed;
 
 	allCmds = msg.getCommands();
-	std::cout << "******************************************" << std::endl;
 	for (size_t i = 0 ; i < allCmds.size() ;i++)
 	{
-		splitCmd(allCmds[i],oneCmdParsed);
-		std::cout << "            Command " << i << ":" << std::endl;
-		
+		splitCmd(allCmds[i],oneCmdParsed);	
 		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
 		{
 			std::cout << oneCmdParsed[i] << std::endl;
 		}
-		std::cout << "---------------------------------" << std::endl;
 		cmdExec(msg,oneCmdParsed);
 		oneCmdParsed.clear();
 	}
@@ -331,8 +325,6 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	User *user;
 
 	std::string test("NICK");
-	std::cout << "Im here" << std::endl;
-	std::cout << " cmd size " << cmd[0].size() << std::endl;
 	user = this->getUser(msg.getSender());
 	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
@@ -383,12 +375,9 @@ bool	Server::recv_send_msg(int fd)
 	memset(buffer,0,BUFF_SIZE);
 	do
 	{
-		//std::cout << "buff" << buff << std::endl;
-		// we should read until we get (CR or LF OR both IN THE BUFFER)
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
 			rc = recv(fd,buffer, sizeof(buffer), 0);
-			std::cout << "rc = " << rc << std::endl;
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -404,13 +393,9 @@ bool	Server::recv_send_msg(int fd)
 				return (false);
 			}
 			buffer[rc] = '\0';
-
 			buff += buffer;
-			std::cout << "buffer size " << buff.size() << std::endl;
-			std::cout << "buffer  " << buff << std::endl;
-
 		}
-		std::cout << " >>>>> MSG : "<< buffer << std::endl;
+		std::cout << " >>>>> "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");
 		buff = buff.substr(0, pos);
 		user->setMsgRemainder(remain);

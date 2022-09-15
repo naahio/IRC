@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/13 11:21:35 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/15 10:27:39 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,16 @@ std::string const	stringBuilder(int n, ...) {
 	str += "\n";
 	va_end(ptr);
 	return (str);
+}
+
+void	sendReplay(int fd,std::string replay)
+{
+	size_t total = 0;
+	while (total != replay.length())
+	{
+		size_t nb = send(fd,replay.c_str() + total,replay.length()-total,0);
+		if (nb == -1)
+			std::cout << "sending error" << std::endl; // to check later 
+		total += nb;
+	}
 }
