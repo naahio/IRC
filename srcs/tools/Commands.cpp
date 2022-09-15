@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 10:35:04 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 13:53:09 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,17 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getUser(fd);
 	if (user->isAuth())
-		throw myException(ERR_ALREADYREGISTRED);
+	{
+		sendReplay(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
+			" PASS ",err_reply(ERR_ALREADYREGISTRED).c_str()));
+		return ;
+	}
 	else if (cmd.size() < 2)
-		throw myException(ERR_NEEDMOREPARAMS);
+	{
+		sendReplay(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
+			" PASS ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
+		return ;
+	}
 	else
 	{
 		user->setPassword(cmd[1]);
@@ -137,9 +145,17 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return ;
 	if (user->isAuth())
-		throw myException(ERR_ALREADYREGISTRED);
+	{
+		sendReplay(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
+			" USER ",err_reply(ERR_ALREADYREGISTRED).c_str()));
+		return ;
+	}
 	else if (cmd.size() < 5)
-		throw myException(ERR_NEEDMOREPARAMS);
+	{
+		sendReplay(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
+			" USER ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
+		return ;
+	}
 	else
 	{
 		user->setUsername(cmd[1]);
@@ -151,18 +167,18 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			reply = stringBuilder(7,":irc.1337 001 ",user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",user->getNickname().c_str(),"!",
+			sendReplay(fd, stringBuilder(8,":irc!~irc1337 001 ",
+					user->getNickname().c_str(),
+					" :Welcome to the Internet Relay Network ",
+					user->getNickname().c_str(),"!",
 					user->getUsername().c_str(),
-					"@ll62-82-161-251-62.ll62.iam.net.ma");
-			send(fd, reply.c_str(),reply.length(), 0);
+					"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
 		{
-			send(fd, "hh password ghalat\n", 
-				sizeof("hh password ghalat\n"), 0);
-			this->clientDisconnect(user->getFd());
+			sendReplay(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			" PASS :",err_reply(ERR_PASSWDMISMATCH).c_str()));
 		}
 	}
 }
@@ -170,36 +186,49 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
-	std::string reply;
 
 	user = this->getUser(fd);
 	if (!user)
 		return;
 	if (cmd.size() < 2)
-		throw myException(ERR_NONICKNAMEGIVEN);
+	{
+		sendReplay(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NONICKNAMEGIVEN).c_str(),
+			" NICK :",err_reply(ERR_NONICKNAMEGIVEN).c_str()));
+		return ;
+	}
 	else
 	{
 		if (!paramsChecker(cmd[1]))
-			throw myException(ERR_ERRONEUSNICKNAME);
+		{
+			sendReplay(fd,stringBuilder(6,":irc!~irc1337 ",ft_tostring(ERR_ERRONEUSNICKNAME).c_str(),
+			" ",cmd[1].c_str()," ",err_reply(ERR_ERRONEUSNICKNAME).c_str()));
+			return ;
+		}
 		else if (this->getUser(cmd[1]))
-			throw myException(ERR_ERRONEUSNICKNAME);
+		{
+			sendReplay(fd,stringBuilder(6,":irc!~irc1337 ",ft_tostring(ERR_NICKNAMEINUSE).c_str(),
+			" ",cmd[1].c_str()," ",err_reply(ERR_NICKNAMEINUSE).c_str()));
+			return ;
+		}
 		user->setNickname(cmd[1]);
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			reply = stringBuilder(7,":irc.1337 001 ",user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",user->getNickname().c_str(),"!",
+			sendReplay(fd, stringBuilder(8,":irc!~irc1337 001 ",
+					user->getNickname().c_str(),
+					" :Welcome to the Internet Relay Network ",
+					user->getNickname().c_str(),"!",
 					user->getUsername().c_str(),
-					"@ll62-82-161-251-62.ll62.iam.net.ma");
-			send(fd, reply.c_str(),reply.length(), 0);
+					"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
 		{
-			send(fd, "hh u cant register\n", 
-				sizeof("hh u cant register\n"), 0);
+			sendReplay(fd,stringBuilder(4,":irc!~irc1337 ",
+			ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			" PASS :",err_reply(ERR_PASSWDMISMATCH).c_str()));
 			this->clientDisconnect(user->getFd());
 		}
 	}
@@ -277,8 +306,6 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 		throw myException(ERR_USERONCHANNEL);
 	channel->addInvitee(invit->getFd());
 	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
-	
-	
 }
 
 void    Server::kick(int fd, std::vector<std::string> &cmd)

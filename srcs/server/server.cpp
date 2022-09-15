@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 10:33:00 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 10:59:01 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -422,9 +422,6 @@ bool	Server::recv_send_msg(int fd)
 			buffer[rc] = '\0';
 
 			buff += buffer;
-			std::cout << "buffer size " << buff.size() << std::endl;
-			std::cout << "buffer  " << buff << std::endl;
-
 		}
 		std::cout << " >>>>> MSG : "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");

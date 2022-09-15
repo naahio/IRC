@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/15 10:22:28 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 11:00:44 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ std::string const	stringBuilder(int n, ...) {
 	return (str);
 }
 
-void	sendReplay(int fd,std::string &replay)
+void	sendReplay(int fd,const std::string &replay)
 {
 	size_t total = 0;
 	while (total != replay.length())

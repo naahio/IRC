@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 10:19:16 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 11:00:47 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,5 +43,5 @@ int		paramsChecker(const std::string &param);
 std::string const	ft_tostring(int n);
 std::string const	stringBuilder(int n, ...);
 
-void	sendReplay(int fd,std::string &replay);
+void	sendReplay(int fd,const std::string &replay);
 #endif
