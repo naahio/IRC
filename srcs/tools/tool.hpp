@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 11:02:37 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/15 10:19:16 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,4 +43,5 @@ int		paramsChecker(const std::string &param);
 std::string const	ft_tostring(int n);
 std::string const	stringBuilder(int n, ...);
 
+void	sendReplay(int fd,std::string &replay);
 #endif

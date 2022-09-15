@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 16:31:11 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/14 15:47:19 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	User *user;
 	std::vector<std::string> channels;
 	std::vector<std::string> keys;
+	std::string replay;
 
 	user = this->getUser(fd);
 	if (!user)
@@ -38,10 +39,12 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 				chan->addMember(user, keys[i]);
 			else
 				this->createChannel(channels[i], *user, keys[i]);
-            send(fd,"Mar7ba bik f channel ",
-                strlen("Mar7ba bik f channel "), 0);
-            send(fd,channels[i].c_str(),
-                channels[i].length(), 0);
+			replay = stringBuilder(7,user->getNickname().c_str(),"!~",
+			user->getUsername().c_str(),
+			"@",user->getIpAddress().c_str()," JOIN :",channels[i].c_str());
+            send(fd,replay.c_str(),
+                replay.length(), 0);
+			replay.clear();
 		}
 		catch (myException &e) {
 			send(fd, e.what(), strlen(e.what()), 0);
@@ -132,7 +135,7 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
-
+	std::string reply;
 	user = this->getUser(fd);
 	if (!user)
 		return ;
@@ -151,8 +154,11 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			send(fd, "you have been registered\n",
-				sizeof("you have been registered\n"), 0);
+			reply = stringBuilder(7,":irc.1337 001 ",user->getNickname().c_str(),
+					" :Welcome to the Internet Relay Network ",user->getNickname().c_str(),"!",
+					user->getUsername().c_str(),
+					"@ll62-82-161-251-62.ll62.iam.net.ma");
+			send(fd, reply.c_str(),reply.length(), 0);
 			user->setRegistered();
 		}
 		else
@@ -167,6 +173,7 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
+	std::string reply;
 
 	user = this->getUser(fd);
 	if (!user)
@@ -185,8 +192,11 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			send(fd, "you have been registered\n", 
-				sizeof("you have been registered\n"), 0);
+			reply = stringBuilder(7,":irc.1337 001 ",user->getNickname().c_str(),
+					" :Welcome to the Internet Relay Network ",user->getNickname().c_str(),"!",
+					user->getUsername().c_str(),
+					"@ll62-82-161-251-62.ll62.iam.net.ma");
+			send(fd, reply.c_str(),reply.length(), 0);
 			user->setRegistered();
 		}
 		else
@@ -269,7 +279,7 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 	if (channel->getMember(invit->getFd()))
 		throw myException(ERR_USERONCHANNEL);
 	channel->addInvitee(invit->getFd());
-	// here we send RPL_INVITING reply
+	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
 	
 	
 }

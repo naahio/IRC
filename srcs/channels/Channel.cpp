@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/12 13:35:09 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/14 11:25:21 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,12 +252,6 @@ void	Channel::removeModerator(int fd) {
 }
 
 void	Channel::addInvitee(int fd) {
-	User *	member;
-	
-	member = this->getMember(fd);
-	if (member == NULL) {
-		throw myException(ERR_USERNOTINCHANNEL);
-	}
 	this->invitees.push_back(fd);
 }
 

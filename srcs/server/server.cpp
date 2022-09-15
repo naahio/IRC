@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 13:40:37 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 10:13:16 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -287,9 +287,29 @@ bool	Server::accept_connections(void)
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
-		send(new_fd, "Log in to use the full server's Command !\n", sizeof("Log in to use the full server's Command !\n"), 0);
-		send(new_fd, "********************\n", sizeof("********************\n"), 0);
-		send(new_fd, "user the command *HELP* for more information\n", sizeof("user the command *HELP* for more information\n"), 0);
+		size_t total = 0;
+		std::string buff(  ":irc.133 NOTICE AUTH :*** Looking up your hostname...\n");
+		while (total != buff.length())
+		{
+			size_t nb = send(new_fd,buff.c_str() + total,buff.length()-total,0);
+			if (nb == -1)
+				std::cout << "sending error " << std::endl;
+			total += nb;
+		}
+		total = 0;
+		buff.clear();
+		buff = ":irc.133 NOTICE AUTH :*** Found your hostname, cached\n";
+		while (total != buff.length())
+		{
+			size_t nb = send(new_fd,buff.c_str() + total,buff.length()-total,0);
+			if (nb == -1)
+				std::cout << "sending error " << std::endl;
+			total += nb;
+		}
+		//send(new_fd, "Log in to use the full server's Command !\n", sizeof("Log in to use the full server's Command !\n"), 0);
+		// send(new_fd, "********************\n", sizeof("********************\n"), 0);
+		// send(new_fd, "user the command *HELP* for more information\n", sizeof("user the command *HELP* for more information\n"), 0);
+		//send(new_fd,":irc.133 NOTICE AUTH :*** Found your hostname, cached\n",sizeof(":irc.133 NOTICE AUTH :*** Found your hostname, cached\n"),0);
 	} while (new_fd != -1);
 	return (true);
 }	
@@ -332,9 +352,6 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
 	User *user;
 
-	std::string test("NICK");
-	std::cout << "Im here" << std::endl;
-	std::cout << " cmd size " << cmd[0].size() << std::endl;
 	user = this->getUser(msg.getSender());
 	try{
 		for (int i = 0 ; cmd[0][i] ; i++)
@@ -353,6 +370,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				PRIVMSGcmd(msg.getSender(), cmd);
 			if (!cmd[0].compare("JOIN"))
 				JOINcmd(msg.getSender(), cmd);
+			if (!cmd[0].compare("INVIT"))
+				INVITcmd(msg.getSender(), cmd);
 		}
 		if (!cmd[0].compare("KICK"))
 			kick(cmd, msg.getSender());
