@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 16:00:09 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 16:22:12 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -502,3 +502,20 @@ void	Server::mode(int fd, std::vector<std::string> & cmd) {
 
 // 	if (cmd.size() > 1)
 // }
+
+
+void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
+{
+	std::string reply;
+	User *user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	if (!cmd[1].empty())
+		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", cmd[1].c_str(), ")");
+	else
+		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", user->getNickname().c_str(), ")");
+	sendReply(fd,reply);
+	this->clientDisconnect(fd);
+}

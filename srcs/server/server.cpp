@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 15:55:59 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 16:21:02 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -337,6 +337,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			NICKcmd(msg.getSender(), cmd);
 		else if (!cmd[0].compare("PASS"))
 			PASScmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("QUIT"))
+			QUITcmd(msg.getSender(), cmd);
 		else if (user && user->isAuth())
 		{
 			if (!cmd[0].compare("PRIVMSG"))
