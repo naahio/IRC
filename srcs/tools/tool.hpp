@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 11:00:47 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 14:37:24 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,13 @@ class myException : public std::exception {
 		}
 };
 
-bool	isNumeric(std::string const &str);
-void	split(std::string const &s1, char delim,
-			std::vector<std::string> &out);
-int		paramsChecker(const std::string &param);
+bool				isNumeric(std::string const &str);
+void				split(std::string const &s1, char delim, std::vector<std::string> &out);
+int					paramsChecker(const std::string &param);
 
 std::string const	ft_tostring(int n);
 std::string const	stringBuilder(int n, ...);
+void				sendReply(int fd, const std::string &reply);
 
-void	sendReplay(int fd,const std::string &replay);
+//void	sendReply(int fd,const std::string &replay);
 #endif

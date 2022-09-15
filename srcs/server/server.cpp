@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 10:59:01 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 14:40:21 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,29 +286,8 @@ bool	Server::accept_connections(void)
 		this->fds[this->nfds].fd = new_fd;
 		this->fds[this->nfds].events = POLLIN;
 		this->nfds++;
-		size_t total = 0;
-		std::string buff(  ":irc.133 NOTICE AUTH :*** Looking up your hostname...\n");
-		while (total != buff.length())
-		{
-			size_t nb = send(new_fd,buff.c_str() + total,buff.length()-total,0);
-			if (nb == -1)
-				std::cout << "sending error " << std::endl;
-			total += nb;
-		}
-		total = 0;
-		buff.clear();
-		buff = ":irc.133 NOTICE AUTH :*** Found your hostname, cached\n";
-		while (total != buff.length())
-		{
-			size_t nb = send(new_fd,buff.c_str() + total,buff.length()-total,0);
-			if (nb == -1)
-				std::cout << "sending error " << std::endl;
-			total += nb;
-		}
-		//send(new_fd, "Log in to use the full server's Command !\n", sizeof("Log in to use the full server's Command !\n"), 0);
-		// send(new_fd, "********************\n", sizeof("********************\n"), 0);
-		// send(new_fd, "user the command *HELP* for more information\n", sizeof("user the command *HELP* for more information\n"), 0);
-		//send(new_fd,":irc.133 NOTICE AUTH :*** Found your hostname, cached\n",sizeof(":irc.133 NOTICE AUTH :*** Found your hostname, cached\n"),0);
+		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
+		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
 	} while (new_fd != -1);
 	return (true);
 }	
@@ -330,22 +309,17 @@ void	Server::parsExecCommands(Msg &msg)
 	std::vector<std::string> oneCmdParsed;
 
 	allCmds = msg.getCommands();
-	std::cout << "******************************************" << std::endl;
 	for (size_t i = 0 ; i < allCmds.size() ;i++)
 	{
-		splitCmd(allCmds[i],oneCmdParsed);
-		std::cout << "            Command " << i << ":" << std::endl;
-		
+		splitCmd(allCmds[i],oneCmdParsed);	
 		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
 		{
 			std::cout << oneCmdParsed[i] << std::endl;
 		}
-		std::cout << "---------------------------------" << std::endl;
 		cmdExec(msg,oneCmdParsed);
 		oneCmdParsed.clear();
 	}
 }
-
 
 void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
@@ -375,6 +349,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				part(msg.getSender(), cmd);
 			else if (!cmd[0].compare("MODE"))
 				mode(msg.getSender(), cmd);
+			else if (!cmd[0].compare("LIST"))
+				list(msg.getSender(), cmd);
 		}
 	} catch(std::exception & e) {
 		send(msg.getSender(), e.what(), strlen(e.what()), 0);
@@ -399,12 +375,9 @@ bool	Server::recv_send_msg(int fd)
 	memset(buffer,0,BUFF_SIZE);
 	do
 	{
-		//std::cout << "buff" << buff << std::endl;
-		// we should read until we get (CR or LF OR both IN THE BUFFER)
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
 			rc = recv(fd,buffer, sizeof(buffer), 0);
-			std::cout << "rc = " << rc << std::endl;
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -420,10 +393,9 @@ bool	Server::recv_send_msg(int fd)
 				return (false);
 			}
 			buffer[rc] = '\0';
-
 			buff += buffer;
 		}
-		std::cout << " >>>>> MSG : "<< buffer << std::endl;
+		std::cout << " >>>>> "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");
 		buff = buff.substr(0, pos);
 		user->setMsgRemainder(remain);

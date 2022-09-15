@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/15 10:32:23 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 14:37:24 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -300,7 +300,7 @@ void	Channel::broadCastMessage(std::string & message, int fd) {
 		throw myException(ERR_CANNOTSENDTOCHAN);
 	}
 	for (it = this->members.begin(); it != this->members.end(); ++it) {
-		if (fd != it->second->getFd())
-			send(it->second->getFd(), message.c_str(), message.length(), 0);
+		// if (fd != it->second->getFd())
+			sendReply(it->second->getFd(), message);
 	}
 }

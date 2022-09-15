@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/15 11:00:44 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 14:40:46 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,14 +63,15 @@ std::string const	stringBuilder(int n, ...) {
 	return (str);
 }
 
-void	sendReplay(int fd,const std::string &replay)
+void	sendReply(int fd,const std::string &reply)
 {
 	size_t total = 0;
-	while (total != replay.length())
+	while (total != reply.length())
 	{
-		size_t nb = send(fd,replay.c_str() + total,replay.length()-total,0);
+		size_t nb = send(fd,reply.c_str() + total,reply.length()-total,0);
 		if (nb == -1)
 			std::cout << "sending error" << std::endl; // to check later 
 		total += nb;
 	}
 }
+

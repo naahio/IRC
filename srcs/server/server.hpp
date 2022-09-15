@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/14 13:20:06 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/15 12:53:05 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,9 @@ class Server
 		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);
 		void    part(int fd, std::vector<std::string> &cmd);
+		void	list(int fd_u, std::vector<std::string> &cmd);
 		void    mode(int fd_u, std::vector<std::string> &cmd);
+		void    names(int fd_u, std::vector<std::string> &cmd);
 };
 
 #endif

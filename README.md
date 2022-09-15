@@ -51,3 +51,9 @@
                 |-> erro => server->error
             |-> receiver :
                 |-> succ => :send_nick
+
+
+
+
+:user!~user@10.13.6.10 JOIN :#A
+:user!~user@10.13.6.10 JOIN :#b

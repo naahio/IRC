@@ -12,3 +12,26 @@
         ->   *channels* banned users_list needed . 
         ->   *Commands* complete the join and PRIVMSG cmd, correct the server's answers.
         ->   *Commands* complete the other commands .
+
+
+        CMD Lists : 
+
+        <PASS> *
+        <USER> *
+        <NICK> *
+        <JOIN>  *
+        <KICK>  *
+        <PART>  *
+        <PRIVMSG> *
+        <MODE> 
+        <USERMODES>  
+        <LIST>  
+        <INVITE>  
+        <VERSION> 
+        <TIME> 
+        <ADMIN> 
+        <INFO>  
+        <KILL> 
+
+
+        <LIST>  '<#>channel name' 'server'
