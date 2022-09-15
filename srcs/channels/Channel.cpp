@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/15 11:02:01 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/15 13:27:41 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -306,7 +306,7 @@ void	Channel::broadCastMessage(std::string & message, int fd) {
 		throw myException(ERR_CANNOTSENDTOCHAN);
 	}
 	for (it = this->members.begin(); it != this->members.end(); ++it) {
-		if (fd != it->second->getFd())
+		// if (fd != it->second->getFd())
 			sendReplay(it->second->getFd(), message);
 	}
 }

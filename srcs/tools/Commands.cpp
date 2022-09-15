@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 12:36:07 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/15 13:37:57 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,11 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 				chan->addMember(user, keys[i]);
 			else
 				this->createChannel(channels[i], *user);
-           	reply = stringBuilder(9, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
-				"@10.13.6.10 ", cmd[0].c_str(), " ", channels[i].c_str(), "\n");
+           	reply = stringBuilder(8, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+				"@10.13.6.10 ", cmd[0].c_str(), " :", channels[i].c_str());
+			std::cout << reply << std::endl;
 			this->getChannel(channels[i])->broadCastMessage(reply);
-
+			reply.clear();
 		}
 		catch (myException &e) {
 			send(fd, e.what(), strlen(e.what()), 0);
@@ -259,7 +260,6 @@ void    Server::kick(int fd, std::vector<std::string> &cmd)
     user = this->getUser(cmd[2]);
     if (!user || !channel->getMember(user->getFd()))
         throw myException(ERR_NOSUCHNICK);
-	// erply = stringBuilder(12,  user->getNickname().c_str(), "!~",user->getUsername().c_str(), "@10.13.6.10 ", cmd[0].c_str(), " ", cmd[1].c_str(), " ", cmd[2].c_str(), " :", user->getNickname().c_str(), "\n");
 	erply = stringBuilder(9, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@10.13.6.10 ", cmd[0].c_str(), " ", channel->getName().c_str(), "\n");
 	channel->getMembers().erase(user->getFd());
@@ -300,7 +300,7 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 	int							i = 0;
 	Channel						*chans;
 
-	reply = stringBuilder(3, ":irc!~irc1337@10.13.6.10 321 ", " :Channel :Users  Name", "\n");
+	reply = stringBuilder(2, ":irc!~irc1337@10.13.6.10 321 ", " :Channel :Users  Name");
 	sendReplay(fd, reply);
 	if (cmd.size() == 1)
 	{
@@ -309,9 +309,9 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 		for (it = this->channels.begin(); it != this->channels.end(); ++it)
 		{
 			if (!it->second->isPrivate())
-				reply = stringBuilder(9, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str(), "\n");
+				reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
 			else
-				reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", "\n");
+				reply = stringBuilder(7, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
 			sendReplay(fd, reply);
 		}
 	}
@@ -324,15 +324,15 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 			if (chans)
 			{
 				if (!chans->isPrivate())
-					reply = stringBuilder(9, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str(), "\n");
+					reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
 				else
-					reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", "\n");
+					reply = stringBuilder(7, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
 				sendReplay(fd, reply);
 			}
 			i++;
 		}
 	}
-	reply = stringBuilder(4, ":irc!~irc1337@10.13.6.10 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST","\n");
+	reply = stringBuilder(3, ":irc!~irc1337@10.13.6.10 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
 	sendReplay(fd, reply);
 }
 
@@ -458,3 +458,13 @@ void	Server::mode(int fd, std::vector<std::string> & cmd) {
 		throw myException(std::string(e.what()));
 	}
 }
+
+// void	Server::names(int fd_u, std::vector<std::string> &cmd)
+// {
+// 	std::string					reply;
+// 	std::vector<std::string>	channel;
+// 	Channel						*chans;
+// 	int							i = 0;
+
+// 	if (cmd.size() > 1)
+// }
