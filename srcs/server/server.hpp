@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 13:41:35 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/14 13:20:06 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ class Server
 		void	addUser(int fd,char *ip);
 		void	clientDisconnect(int fd);
 
-		void	createChannel(std::string name, User & op, std::string key);
+		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		
 		void	parsExecCommands(Msg &msg);
@@ -104,10 +104,10 @@ class Server
 		void	PRIVMSGcmd(int fd,std::vector<std::string> &cmd);
 		void	INVITcmd(int fd,std::vector<std::string> &cmd);
 
-		void    kick(std::vector<std::string> &cmd, int fd_u);
+		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);
-		void    part(std::vector<std::string> &cmd,int fd);
-		void    mode(Channel &channel);
+		void    part(int fd, std::vector<std::string> &cmd);
+		void    mode(int fd_u, std::vector<std::string> &cmd);
 };
 
 #endif

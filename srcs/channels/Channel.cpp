@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/14 11:25:21 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 10:32:23 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,9 @@ Channel::Channel(std::string _name) {
 	this->topic = "";
 	this->key = "";
 	this->membersLimit = 0;
-	this->memberChatOnly = true;
+	this->_private = false;
+	this->secret = false;
+	this->memberChatOnly = false;
 	this->inviteOnly = false;
 	this->moderated = false;
 	this->topicSettable = true;
@@ -49,6 +51,14 @@ std::string const &	Channel::getKey(void) const {
 
 size_t	Channel::getMembersLimit(void) const {
 	return (this->membersLimit);
+}
+
+bool	Channel::isPrivate(void) const {
+	return (this->_private);
+}
+
+bool	Channel::isSecret(void) const {
+	return (this->secret);
 }
 
 bool	Channel::isMemberChatOnly(void) const {
@@ -100,7 +110,20 @@ void	Channel::setKey(std::string _key, int fd) {
 void	Channel::setLimit(size_t limit, int fd) {
 	if (!this->getOperator(fd))
 		throw myException(ERR_CHANOPRIVSNEEDED);
-	this->membersLimit = limit;
+	if (limit)
+		this->membersLimit = limit;
+}
+
+void	Channel::setPrivate(bool option, int fd) {
+	if (!this->getOperator(fd))
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	this->_private = option;
+}
+
+void	Channel::setSecret(bool option, int fd) {
+	if (!this->getOperator(fd))
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	this->secret = option;
 }
 
 void	Channel::setMemberChatOnly(bool option, int fd) {
