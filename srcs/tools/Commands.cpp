@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 13:37:57 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/15 17:32:33 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -336,123 +336,169 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 	sendReplay(fd, reply);
 }
 
+void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
+	Channel *			channel;
+	User *				user;
+	std::stringstream	ss;
+	int					sign = 1;
+	int					argId = 3;
+
+	channel = this->getChannel(cmd[1]);
+	if (!channel)
+		throw myException(ERR_NOSUCHCHANNEL);
+	if (!channel->getOperator(fd))
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	for (int i = 0; i < cmd[2].length(); i++) {
+		try {
+			switch (cmd[2][i]) {
+				case '+':
+					sign = 1;
+					break;
+				case '-':
+					sign = 0;
+					break;
+				case 'o':
+					if (cmd.size() < 3)
+						break;
+					user = this->getUser(cmd[argId++]);
+					if (!user)
+						throw myException(ERR_NOSUCHNICK);
+					if (sign == 1) {
+						channel->addOperator(user->getFd());
+					} else if (sign == 0) {
+						channel->removeOperator(user->getFd());
+					}
+					break;
+				case 'p':
+					if (sign == 1) {
+						channel->setPrivate(true, fd);
+					} else if (sign == 0) {
+						channel->setPrivate(false, fd);
+					}
+					break;
+				case 's':
+					if (sign == 1) {
+						channel->setSecret(true, fd);
+					} else if (sign == 0) {
+						channel->setSecret(false, fd);
+					}
+					break;
+				case 'i':
+					if (sign == 1) {
+						channel->setInviteOnly(true, fd);
+					} else if (sign == 0) {
+						channel->setInviteOnly(false, fd);
+					}
+					break;
+				case 't':
+					if (sign == 1) {
+						channel->setTopicSettable(true, fd);
+					} else if (sign == 0) {
+						channel->setTopicSettable(false, fd);
+					}
+					break;
+				case 'n':
+					if (sign == 1) {
+						channel->setMemberChatOnly(true, fd);
+					} else if (sign == 0) {
+						channel->setMemberChatOnly(false, fd);
+					}
+					break;
+				case 'm':
+					if (sign == 1) {
+						channel->setModerated(true, fd);
+					} else if (sign == 0) {
+						channel->setModerated(false, fd);
+					}
+					break;
+				case 'l':
+					if (cmd.size() < 3)
+						throw myException(ERR_NEEDMOREPARAMS);
+					if (sign == 1) {
+						int	limit;
+						ss << cmd[argId++];
+						ss >> limit;
+						channel->setLimit(limit, fd);
+					} else if (sign == 0) {
+						channel->setLimit(-1, fd);
+					}
+					break;
+				// case 'b':
+					// ban masks
+				case 'v':
+					if (cmd.size() < 3)
+						break;
+					user = this->getUser(cmd[argId++]);
+					if (!user)
+						throw myException(ERR_NOSUCHNICK);
+					if (sign == 1) {
+						channel->addModerator(user->getFd());
+					} else if (sign == 0) {
+						channel->removeModerator(user->getFd());
+					}
+					break;
+				case 'k':
+					if (cmd.size() < 3)
+						break;
+					if (sign == 1) {
+						channel->setKey(cmd[argId++], fd);
+					} else if (sign == 0) {
+						channel->setKey("", fd);
+					}
+					break;
+				default:
+					throw myException(ERR_UNKNOWNMODE);
+			}
+		} catch (std::exception & e) {
+			send(fd, e.what(), strlen(e.what()), 0);
+		}
+	}
+}
+
+void	Server::userModes(int fd, std::vector<std::string> & cmd) {
+	User *				user;
+	std::stringstream	ss;
+	int					sign = 1;
+	int					argId = 3;
+
+	user = this->getUser(cmd[1]);
+	if (!user)
+		throw myException(ERR_NOSUCHCHANNEL);
+	if (user->getFd() != fd)
+		throw myException(ERR_USERSDONTMATCH);
+	for (int i = 0; i < cmd[2].length(); i++) {
+		try {
+			switch (cmd[2][i]) {
+				case '+':
+					sign = 1;
+					break;
+				case '-':
+					sign = 0;
+					break;
+				case 'i':
+					if (sign == 1) {
+						user->setVisibility(true);
+					} else if (sign == 0) {
+						user->setVisibility(false);
+					}
+					break;
+				default:
+					throw myException(ERR_UMODEUNKNOWNFLAG);
+			}
+		} catch (std::exception & e) {
+			send(fd, e.what(), strlen(e.what()), 0);
+		}
+	}
+}
+
 void	Server::mode(int fd, std::vector<std::string> & cmd) {
 	try {
-		Channel *			channel;
-		User *				user;
-		int					sign = 1;
-		int					argId = 3;
-		std::stringstream	ss;
-
 		if (cmd.size() < 2)
 			throw myException(ERR_NEEDMOREPARAMS);
-		channel = this->getChannel(cmd[1]);
-		if (!channel)
-			throw myException(ERR_NOSUCHCHANNEL);
-		if (!channel->getOperator(fd))
-			throw myException(ERR_CHANOPRIVSNEEDED);
-		for (int i = 0; i < cmd[2].length(); i++) {
-			try {
-				switch (cmd[2][i]) {
-					case '+':
-						sign = 1;
-						break;
-					case '-':
-						sign = 0;
-						break;
-					case 'o':
-						if (cmd.size() < 3)
-							break;
-						user = this->getUser(cmd[argId++]);
-						if (!user)
-							throw myException(ERR_NOSUCHNICK);
-						if (sign == 1) {
-							channel->addOperator(user->getFd());
-						} else if (sign == 0) {
-							channel->removeOperator(user->getFd());
-						}
-						break;
-					case 'p':
-						if (sign == 1) {
-							channel->setPrivate(true, fd);
-						} else if (sign == 0) {
-							channel->setPrivate(false, fd);
-						}
-						break;
-					case 's':
-						if (sign == 1) {
-							channel->setSecret(true, fd);
-						} else if (sign == 0) {
-							channel->setSecret(false, fd);
-						}
-						break;
-					case 'i':
-						if (sign == 1) {
-							channel->setInviteOnly(true, fd);
-						} else if (sign == 0) {
-							channel->setInviteOnly(false, fd);
-						}
-						break;
-					case 't':
-						if (sign == 1) {
-							channel->setTopicSettable(true, fd);
-						} else if (sign == 0) {
-							channel->setTopicSettable(false, fd);
-						}
-						break;
-					case 'n':
-						if (sign == 1) {
-							channel->setMemberChatOnly(true, fd);
-						} else if (sign == 0) {
-							channel->setMemberChatOnly(false, fd);
-						}
-						break;
-					case 'm':
-						if (sign == 1) {
-							channel->setModerated(true, fd);
-						} else if (sign == 0) {
-							channel->setModerated(false, fd);
-						}
-						break;
-					case 'l':
-						if (cmd.size() < 3)
-							throw myException(ERR_NEEDMOREPARAMS);
-						ss << cmd[argId++];
-						int	limit;
-						ss >> limit;
-						if (sign == 1) {
-							channel->setLimit(limit, fd);
-						} else if (sign == 0) {
-							channel->setLimit(-1, fd);
-						}
-						break;
-					case 'b':
-						if (cmd.size() < 3)
-							break;
-						user = this->getUser(cmd[argId++]);
-						if (!user)
-							throw myException(ERR_NOSUCHNICK);
-						if (sign == 1) {
-							channel->addModerator(user->getFd());
-						} else if (sign == 0) {
-							channel->removeModerator(user->getFd());
-						}
-						break;
-					case 'k':
-						if (cmd.size() < 3)
-							break;
-						if (sign == 1) {
-							channel->setKey(cmd[argId++], fd);
-						} else if (sign == 0) {
-							channel->setKey("", fd);
-						}
-						break;
-					default:
-						throw myException(ERR_UNKNOWNMODE);
-				}
-			} catch (std::exception & e) {
-				send(fd, e.what(), strlen(e.what()), 0);
-			}
+		if (cmd[1][0] == '#') {
+			channelModes(fd, cmd);
+		} else {
+			userModes(fd, cmd);
 		}
 	} catch (std::exception & e) {
 		throw myException(std::string(e.what()));

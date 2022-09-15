@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 12:39:16 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/15 14:15:02 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,14 @@ User::User(int _fd,char *ip)
 	this->fd			= _fd;
 	this->username		= "";
 	this->nickname		= "";
-	this->servName 		= "";
-	this->fullName	 	= "";
-	this->hostName   	= "";
+	this->servName		= "";
+	this->fullName		= "";
+	this->hostName		= "";
+	this->msgRemainder	= "";
+	this->ipAddress		= ip;
 	this->registered	= false;
 	this->connected		= false;
-	this->msgRemainder		= "";
-	this->ipAddress = ip;
+	this->visible		= false;
 }
 
 User::~User()
@@ -134,9 +135,12 @@ void	User::setRegistered(void)
 }
 
 void	User::setConnected(void)
-
 {
 	this->connected = true;
+}
+
+void	User::setVisibility(bool option) {
+	this->visible = option;
 }
 
 /*****************************[ Member Functions ]*****************************/
@@ -153,6 +157,10 @@ bool	User::isRegistered(void)
 bool	User::isConnected(void)
 {
 	return	this->connected;
+}
+
+bool	User::isVisible(void) {
+	return	this->visible;
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {
