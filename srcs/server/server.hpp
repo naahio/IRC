@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 17:34:29 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/16 17:06:57 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@
 # include "../pars/msg.hpp"
 # include "../tools/Commands.hpp"
 
+#define OPER1 "penguin"
+
 
 # define BUFF_SIZE		1024
 # define MAX_CONN		32
@@ -47,6 +49,7 @@ class Server
 	private:
 		std::map <int, User *>				users;
 		std::map <std::string, Channel *>	channels;
+		std::map <std::string, std::string> operators;
 		
 		int				socket_fd;
 		struct pollfd	fds[MAX_CONN];
@@ -68,9 +71,10 @@ class Server
 		int					getPort(void) const;
 		std::string const &	getPass(void) const;
 
-		std::map <int, User *> &			getUsers(void);
-		std::map <std::string, Channel *> &	getChannels(void);
-
+		std::map <int, User *> &			        getUsers(void);
+		std::map <std::string, Channel *> &	        getChannels(void);
+		std::map <std::string, std::string> &  		getOperators(void);
+	
 		User	*	getUser(int fd);
 		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
@@ -104,6 +108,7 @@ class Server
 		void	PRIVMSGcmd(int fd, std::vector<std::string> &cmd);
 		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
 		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
+		void	OPERcmd(int fd,    std::vector<std::string> &cmd);
 
 		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);

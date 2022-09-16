@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 11:23:14 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/16 16:26:42 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,7 +273,7 @@ void    Server::helps(int fd)
     send(fd, "|=> <KILL> 'nickname' 'reason' \n", sizeof("|=> <KILL> 'nickname' 'reason' \n"), 0);
     send(fd, "Cient to client / channel commandes : \n", sizeof("Cient to client / channel commandes : \n"), 0);
     send(fd, "|-> <PRIVMSG> 'receiver' 'message' \n", sizeof("|-> <PRIVMSG> 'receiver' 'message' \n"), 0);
-
+	// add QUIT 
 }
 
 void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
@@ -614,7 +614,7 @@ void	Server::names(int fd_u, std::vector<std::string> &cmd)
 }
 
 
-void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
+void    Server::QUITcmd(int fd, std::vector<std::string> & cmd)
 {
 	std::string reply;
 	User *user;
@@ -628,4 +628,30 @@ void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
 		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", user->getNickname().c_str(), ")");
 	sendReply(fd,reply);
 	this->clientDisconnect(fd);
+}
+
+void	Server::OPERcmd(int fd, std::vector<std::string> &cmd)
+{
+	User *user;
+	user = this->getUser(fd);
+	if (!user)
+		return;
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	std::map <std::string, std::string>::iterator it;
+	it = this->getOperators().find(cmd[1]);
+	if (it == this->getOperators().end())
+		return ;
+	else
+	{
+		if (it->second == cmd[2])
+		{
+			user->setIsOperator();
+			sendReply(fd, stringBuilder(5,":irc!~irc1337 381 ",
+						user->getNickname().c_str()," :You are now an IRC operator"));
+		}
+		else
+			throw myException(ERR_PASSWDMISMATCH);
+	}
+	
 }

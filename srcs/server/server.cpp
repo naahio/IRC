@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 10:55:32 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/16 17:15:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@ Server::Server(int _port, std::string _password)
 	this->port = _port;
 	this->password = _password;
 	this->nfds = 0;
+	this->operators.insert(std::pair<std::string,std::string>("penguin","messi123"));
+	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
+	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -73,6 +76,10 @@ std::map<int, User *> &	Server::getUsers(void) {
 
 std::map<std::string, Channel *> &	Server::getChannels(void) {
 	return (this->channels);
+}
+
+std::map <std::string, std::string> &  Server::getOperators(void){
+	return (this->operators);
 }
 
 User *	Server::getUser(int fd) {
