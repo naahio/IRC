@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 16:21:02 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/16 10:55:32 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -353,6 +353,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				mode(msg.getSender(), cmd);
 			else if (!cmd[0].compare("LIST"))
 				list(msg.getSender(), cmd);
+			else if (!cmd[0].compare("NAMES"))
+				names(msg.getSender(), cmd);
 		}
 	} catch(std::exception & e) {
 		send(msg.getSender(), e.what(), strlen(e.what()), 0);

@@ -3,14 +3,33 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 17:34:02 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/16 11:23:14 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include  "../server/server.hpp"
+
+// function for NAMES command , It helps in join too
+
+void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel)
+{
+	std::map<int, User *>::iterator	it;
+	std::map <int, User *>			chanMembers;
+	std::string						members;
+
+	chanMembers = chan->getMembers();
+	for (it = chanMembers.begin();it != chanMembers.end();it++)
+	{
+		if (it->second->isVisible())
+			members += (it->second->getNickname() + " ");
+	}
+	sendReply(fd, stringBuilder(6,":irc!~irc1337 353 ",
+			user->getNickname().c_str()," = ",channel.c_str(),
+			" : ", members.c_str()));
+}
 
 void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 {
@@ -43,6 +62,12 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 				"@10.13.6.10 ", cmd[0].c_str(), " :", channels[i].c_str());
 			std::cout << reply << std::endl;
 			this->getChannel(channels[i])->broadCastMessage(reply);
+			sendChannelUsers(fd, this->getChannel(channels[i]), user, 
+					this->getChannel(channels[i])->getName());
+			sendReply(fd, stringBuilder(5, ":irc!~irc1337 366 ",
+						user->getNickname().c_str(), " ", 
+						this->getChannel(channels[i])->getName().c_str(),
+						" :End of /NAMES list."));
 			reply.clear();
 		}
 		catch (myException &e) {
@@ -539,15 +564,54 @@ void	Server::mode(int fd, std::vector<std::string> & cmd) {
 	}
 }
 
-// void	Server::names(int fd_u, std::vector<std::string> &cmd)
-// {
-// 	std::string					reply;
-// 	std::vector<std::string>	channel;
-// 	Channel						*chans;
-// 	int							i = 0;
 
-// 	if (cmd.size() > 1)
-// }
+void	Server::names(int fd_u, std::vector<std::string> &cmd)
+{
+	std::string						reply;
+	std::vector<std::string>		channel;
+	std::map <int, User *>			chanMembers;
+	User							*user;
+	Channel							*chan;
+
+	user = this->getUser(fd_u);
+	if (!user)
+		return ;
+	if (cmd.size() > 1)
+		split(cmd[1],',',channel);
+	if (channel.size() > 0)
+	{
+		for (size_t i = 0; i < channel.size(); i++)
+		{
+			chan = this->getChannel(channel[i]);
+			if (chan && !chan->isPrivate() && !chan->isSecret())
+			{
+				sendChannelUsers(fd_u, chan, user,channel[i]);
+
+				sendReply(fd_u, stringBuilder(5, ":irc!~irc1337 366 ",
+						user->getNickname().c_str(), " ", channel[i].c_str(),
+						" :End of /NAMES list."));
+			}
+			else
+				sendReply(fd_u, stringBuilder(5, ":irc!~irc1337 366 ",
+					user->getNickname().c_str(), " ", channel[i].c_str(),
+					" :End of /NAMES list."));
+		}
+	}
+	else
+	{
+		std::map <std::string, Channel *>::iterator	  it ;
+		std::map <std::string, Channel *> serverChannels =  this->getChannels();
+		
+		for (it = serverChannels.begin(); it != serverChannels.end(); it++)
+		{
+			if (!it->second->isPrivate() && !it->second->isSecret())
+				sendChannelUsers(fd_u, it->second, user,it->second->getName());
+		}
+		sendReply(fd_u, stringBuilder(4, ":irc!~irc1337 366 ",
+					user->getNickname().c_str(), " * ",
+					" :End of /NAMES list."));
+	}
+}
 
 
 void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)

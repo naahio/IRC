@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 14:15:02 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/16 11:00:15 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ User::User(int _fd,char *ip)
 	this->ipAddress		= ip;
 	this->registered	= false;
 	this->connected		= false;
-	this->visible		= false;
+	this->visible		= true;
 }
 
 User::~User()
