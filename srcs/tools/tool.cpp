@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/15 15:54:47 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/16 11:08:28 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ void	sendReply(int fd,const std::string &reply)
 	size_t total = 0;
 	while (total != reply.length())
 	{
-		size_t nb = send(fd,reply.c_str() + total,reply.length()-total,0);
+		ssize_t nb = send(fd,reply.c_str() + total,reply.length() - total, 0);
 		if (nb == -1)
 			std::cout << "sending error" << std::endl; // to check later 
 		total += nb;
