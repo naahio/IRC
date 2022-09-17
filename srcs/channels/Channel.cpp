@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/15 15:56:23 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/17 11:13:55 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,6 +183,7 @@ User *	Channel::getInvitee(int fd) {
 	std::vector<int>::iterator	it;
 
 	it = std::find(this->invitees.begin(), this->invitees.end(), fd);
+	std::cout << *it << std::endl;
 	if (it != this->invitees.end())
 		return (this->getMember(fd));
 	return (NULL);

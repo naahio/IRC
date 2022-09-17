@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 17:06:57 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/17 11:50:11 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,9 +35,6 @@
 # include "../tools/tool.hpp"
 # include "../pars/msg.hpp"
 # include "../tools/Commands.hpp"
-
-#define OPER1 "penguin"
-
 
 # define BUFF_SIZE		1024
 # define MAX_CONN		32
@@ -109,6 +106,7 @@ class Server
 		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
 		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
 		void	OPERcmd(int fd,    std::vector<std::string> &cmd);
+		void	KILLcmd(int fd,    std::vector<std::string> &cmd);
 
 		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);

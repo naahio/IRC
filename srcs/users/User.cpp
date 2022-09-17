@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 16:13:57 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/17 09:44:40 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ User::User(int _fd,char *ip)
 	this->registered	= false;
 	this->connected		= false;
 	this->visible		= true;
-	this->operator		= false;
+	this->isoperator		= false;
 }
 
 User::~User()

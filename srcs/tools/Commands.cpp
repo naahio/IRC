@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 16:26:42 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/17 12:55:59 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,7 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 		{
 			sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
+			this->clientDisconnect(user->getFd());
 		}
 	}
 }
@@ -278,8 +279,7 @@ void    Server::helps(int fd)
 
 void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 {
-	User *user;
-	User *invit;
+	User *user,*invit;
 	Channel *channel;
 
 	user = this->getUser(fd);
@@ -300,9 +300,9 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 	if (channel->getMember(invit->getFd()))
 		throw myException(ERR_USERONCHANNEL);
 	channel->addInvitee(invit->getFd());
+	std::cout << channel->getInvitee(invit->getFd()) << std::endl;
 	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
 	// here we send RPL_INVITING reply
-
 }
 
 void    Server::kick(int fd, std::vector<std::string> &cmd)
@@ -647,7 +647,7 @@ void	Server::OPERcmd(int fd, std::vector<std::string> &cmd)
 		if (it->second == cmd[2])
 		{
 			user->setIsOperator();
-			sendReply(fd, stringBuilder(5,":irc!~irc1337 381 ",
+			sendReply(fd, stringBuilder(3,":irc!~irc1337 381 ",
 						user->getNickname().c_str()," :You are now an IRC operator"));
 		}
 		else
@@ -655,3 +655,25 @@ void	Server::OPERcmd(int fd, std::vector<std::string> &cmd)
 	}
 	
 }
+
+
+void	Server::KILLcmd(int fd,    std::vector<std::string> &cmd)
+{
+	User * user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	else if (!user->isOperator())
+		throw myException(ERR_NOPRIVILEGES);
+	else if (!this->getUser(cmd[1]))
+		throw myException(ERR_NOSUCHNICK);
+	sendReply(this->getUser(cmd[1])->getFd(),
+		stringBuilder(5,":irc!~irc1337 ERROR Closing Link: (Killed ( ",// to change with the command error
+				user->getNickname().c_str(), " ) ( " ,cmd[1].c_str()," ) )"));
+	this->clientDisconnect(this->getUser(cmd[2])->getFd());
+}
+
+
