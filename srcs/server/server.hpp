@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 17:34:29 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/17 12:57:37 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@
 
 
 # define BUFF_SIZE		1024
-# define MAX_CONN		32
+# define MAX_CONN		2
 # define TIMEOUT		3 * 60 * 1000
 # define SERVNAME 		
 
@@ -54,6 +54,7 @@ class Server
 		int				on;
 		int				port;
 		std::string		password;
+		std::string		name;
 
 		Server(void) {}
 
@@ -67,6 +68,7 @@ class Server
 		void				setNfds(int nfds);
 		int					getPort(void) const;
 		std::string const &	getPass(void) const;
+		std::string const &	getName(void) const;
 
 		std::map <int, User *> &			getUsers(void);
 		std::map <std::string, Channel *> &	getChannels(void);
@@ -104,6 +106,7 @@ class Server
 		void	PRIVMSGcmd(int fd, std::vector<std::string> &cmd);
 		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
 		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
+		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
 
 		void    kick(int fd_u, std::vector<std::string> &cmd);
 		void    helps(int fd);

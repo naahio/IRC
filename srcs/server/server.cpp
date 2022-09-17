@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 10:55:32 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/17 13:00:26 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Server::Server(int _port, std::string _password)
 	this->port = _port;
 	this->password = _password;
 	this->nfds = 0;
+	this->name = "irc!~irc1337 ";
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -104,6 +105,10 @@ Channel *	Server::getChannel(std::string name) {
 		return (channel->second);
 	}
 	return (NULL);
+}
+
+std::string const &	Server::getName(void) const {
+	return (this->name);
 }
 
 /*****************************[ Users Management ]*****************************/
@@ -282,12 +287,20 @@ bool	Server::accept_connections(void)
 		char str[INET_ADDRSTRLEN];
 		inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
-		this->addUser(new_fd,str);
-		this->fds[this->nfds].fd = new_fd;
-		this->fds[this->nfds].events = POLLIN;
-		this->nfds++;
-		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
-		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
+		if (this->nfds <MAX_CONN)
+		{
+			this->addUser(new_fd,str);
+			this->fds[this->nfds].fd = new_fd;
+			this->fds[this->nfds].events = POLLIN;
+			this->nfds++;
+			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
+			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
+		}
+		else
+		{
+			sendReply(new_fd, ":irc!~irc1337 ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
+			close(new_fd);
+		}
 	} while (new_fd != -1);
 	return (true);
 }	
@@ -355,6 +368,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				list(msg.getSender(), cmd);
 			else if (!cmd[0].compare("NAMES"))
 				names(msg.getSender(), cmd);
+			else if (!cmd[0].compare("INVITE"))
+				INVITcmd(msg.getSender(), cmd);
 		}
 	} catch(std::exception & e) {
 		send(msg.getSender(), e.what(), strlen(e.what()), 0);
