@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 14:14:50 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/17 09:44:22 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class User
 		bool	registered;
 		bool	connected;
 		bool	visible;
+		bool    isoperator;
 		
 		std::map <std::string, Channel *>	channels;
 
@@ -71,11 +72,13 @@ class User
 		void	setRegistered(void);
 		void	setConnected(void);
 		void	setVisibility(bool option);
+		void	setIsOperator(void);
 
 		bool	isAuth(void);
 		bool	isRegistered(void);
 		bool	isConnected(void);
 		bool	isVisible(void);
+		bool	isOperator(void);
 
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);

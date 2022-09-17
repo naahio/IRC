@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:00:26 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/17 13:22:10 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@ Server::Server(int _port, std::string _password)
 	this->port = _port;
 	this->password = _password;
 	this->nfds = 0;
+	this->operators.insert(std::pair<std::string,std::string>("penguin","messi123"));
+	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
+	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
 	this->name = "irc!~irc1337 ";
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
@@ -74,6 +77,10 @@ std::map<int, User *> &	Server::getUsers(void) {
 
 std::map<std::string, Channel *> &	Server::getChannels(void) {
 	return (this->channels);
+}
+
+std::map <std::string, std::string> &  Server::getOperators(void){
+	return (this->operators);
 }
 
 User *	Server::getUser(int fd) {
@@ -368,8 +375,12 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				list(msg.getSender(), cmd);
 			else if (!cmd[0].compare("NAMES"))
 				names(msg.getSender(), cmd);
-			else if (!cmd[0].compare("INVITE"))
+			else if (!cmd[0].compare("INVIT"))
 				INVITcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("OPER"))
+				OPERcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("KILL"))
+				KILLcmd(msg.getSender(), cmd);
 		}
 	} catch(std::exception & e) {
 		send(msg.getSender(), e.what(), strlen(e.what()), 0);

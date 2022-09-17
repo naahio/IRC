@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 12:37:19 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/17 13:21:25 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,13 +264,12 @@ void    Server::helps(int fd)
     send(fd, "|=> <KILL> 'nickname' 'reason' \n", sizeof("|=> <KILL> 'nickname' 'reason' \n"), 0);
     send(fd, "Cient to client / channel commandes : \n", sizeof("Cient to client / channel commandes : \n"), 0);
     send(fd, "|-> <PRIVMSG> 'receiver' 'message' \n", sizeof("|-> <PRIVMSG> 'receiver' 'message' \n"), 0);
-
+	// add QUIT 
 }
 
 void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 {
-	User *user;
-	User *invit;
+	User *user,*invit;
 	Channel *channel;
 
 	user = this->getUser(fd);
@@ -291,9 +290,9 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 	if (channel->getMember(invit->getFd()))
 		throw myException(ERR_USERONCHANNEL);
 	channel->addInvitee(invit->getFd());
+	std::cout << channel->getInvitee(invit->getFd()) << std::endl;
 	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
 	// here we send RPL_INVITING reply
-
 }
 
 void    Server::kick(int fd, std::vector<std::string> &cmd)
@@ -604,7 +603,7 @@ void	Server::names(int fd_u, std::vector<std::string> &cmd)
 }
 
 
-void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
+void    Server::QUITcmd(int fd, std::vector<std::string> & cmd)
 {
 	std::string reply;
 	User *user;
@@ -619,3 +618,51 @@ void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
 	sendReply(fd,reply);
 	this->clientDisconnect(fd);
 }
+
+void	Server::OPERcmd(int fd, std::vector<std::string> &cmd)
+{
+	User *user;
+	user = this->getUser(fd);
+	if (!user)
+		return;
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	std::map <std::string, std::string>::iterator it;
+	it = this->getOperators().find(cmd[1]);
+	if (it == this->getOperators().end())
+		return ;
+	else
+	{
+		if (it->second == cmd[2])
+		{
+			user->setIsOperator();
+			sendReply(fd, stringBuilder(3,":irc!~irc1337 381 ",
+						user->getNickname().c_str()," :You are now an IRC operator"));
+		}
+		else
+			throw myException(ERR_PASSWDMISMATCH);
+	}
+	
+}
+
+
+void	Server::KILLcmd(int fd,    std::vector<std::string> &cmd)
+{
+	User * user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	else if (!user->isOperator())
+		throw myException(ERR_NOPRIVILEGES);
+	else if (!this->getUser(cmd[1]))
+		throw myException(ERR_NOSUCHNICK);
+	sendReply(this->getUser(cmd[1])->getFd(),
+		stringBuilder(5,":irc!~irc1337 ERROR Closing Link: (Killed ( ",// to change with the command error
+				user->getNickname().c_str(), " ) ( " ,cmd[1].c_str()," ) )"));
+	this->clientDisconnect(this->getUser(cmd[2])->getFd());
+}
+
+

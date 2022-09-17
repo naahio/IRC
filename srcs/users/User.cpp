@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 11:00:15 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/17 09:44:40 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ User::User(int _fd,char *ip)
 	this->registered	= false;
 	this->connected		= false;
 	this->visible		= true;
+	this->isoperator		= false;
 }
 
 User::~User()
@@ -92,6 +93,7 @@ Channel *	User::getChannel(std::string name) {
 	return (NULL);
 }
 
+
 void	User::setFd(int _fd) {
 	this->fd = _fd;
 }
@@ -143,6 +145,10 @@ void	User::setVisibility(bool option) {
 	this->visible = option;
 }
 
+void	User::setIsOperator(void){
+	this->isoperator = true;
+}
+
 /*****************************[ Member Functions ]*****************************/
 
 bool	User::isAuth(void) {
@@ -161,6 +167,10 @@ bool	User::isConnected(void)
 
 bool	User::isVisible(void) {
 	return	this->visible;
+}
+
+bool	User::isOperator(void){
+	return this->isoperator;
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {

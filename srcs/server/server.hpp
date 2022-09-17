@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 12:57:37 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/17 13:22:22 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@
 # include "../pars/msg.hpp"
 # include "../tools/Commands.hpp"
 
-
 # define BUFF_SIZE		1024
 # define MAX_CONN		2
 # define TIMEOUT		3 * 60 * 1000
@@ -47,6 +46,7 @@ class Server
 	private:
 		std::map <int, User *>				users;
 		std::map <std::string, Channel *>	channels;
+		std::map <std::string, std::string> operators;
 		
 		int				socket_fd;
 		struct pollfd	fds[MAX_CONN];
@@ -70,9 +70,10 @@ class Server
 		std::string const &	getPass(void) const;
 		std::string const &	getName(void) const;
 
-		std::map <int, User *> &			getUsers(void);
-		std::map <std::string, Channel *> &	getChannels(void);
-
+		std::map <int, User *> &			        getUsers(void);
+		std::map <std::string, Channel *> &	        getChannels(void);
+		std::map <std::string, std::string> &  		getOperators(void);
+	
 		User	*	getUser(int fd);
 		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
@@ -106,6 +107,8 @@ class Server
 		void	PRIVMSGcmd(int fd, std::vector<std::string> &cmd);
 		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
 		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
+		void	OPERcmd(int fd,    std::vector<std::string> &cmd);
+		void	KILLcmd(int fd,    std::vector<std::string> &cmd);
 		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
 
 		void    kick(int fd_u, std::vector<std::string> &cmd);
