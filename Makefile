@@ -6,7 +6,7 @@
 #    By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/12 13:16:51 by mbabela          ###   ########.fr        #
+#    Updated: 2022/09/17 10:24:40 by mbabela          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,15 +31,15 @@ SRCS		=	srcs/main.cpp\
 
 OBJS		=	$(SRCS:.cpp=.o)
 
-# FLAGS		=	-Wall -Wextra -Werror -std=c++98
+FLAGS		=	-Wall -Wextra -Werror -std=c++98
 
 RM			=	rm -f
 
 %.o:%.cpp	$(HEADERS)
-			@c++ $(FLAGS) -c $< -o $@
+			c++ $(FLAGS) -c $< -o $@
 
 $(NAME):	$(OBJS) $(HEADERS)
-			@c++ $(FLAGS) $(OBJS) -o $(NAME)
+			c++ $(FLAGS) $(OBJS) -o $(NAME)
 
 all:		$(NAME)
 
