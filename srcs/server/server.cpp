@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:32:25 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/18 13:49:53 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ Server::Server(int _port, std::string _password)
 	this->operators.insert(std::pair<std::string,std::string>("penguin","messi123"));
 	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
 	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
-	this->name = "irc!~irc1337 ";
+	this->name = ":irc!~irc1337 ";
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -382,9 +382,13 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				OPERcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("KILL"))
 				KILLcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("TOPIC"))
+				topic(msg.getSender(), cmd);
 		}
-	} catch(std::exception & e) {
-		send(msg.getSender(), e.what(), strlen(e.what()), 0);
+	} catch(myException & e) {
+		sendReply(msg.getSender(),stringBuilder(9, this->getName().c_str()," ",
+		ft_tostring(e.getERROR_NO()).c_str(), " ", this->getUser(msg.getSender())->getNickname().c_str()," "
+		,cmd[0].c_str(), e.what()));
 	}
 }
 
@@ -404,7 +408,7 @@ bool	Server::recv_send_msg(int fd)
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
 	memset(buffer,0,BUFF_SIZE);
-	do
+	do 
 	{
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{

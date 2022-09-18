@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:39:13 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/18 14:17:44 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,25 +245,25 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 void    Server::helps(int fd)
 {
     sendReply(fd, ":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <PASS> 'password' \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <NICK> 'nickname' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> PASS password \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> NICK nickname \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> USER username hostname ervername realname \n");
     sendReply(fd, ":IRC_1337 NOTICE HELP :Channel commands : \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <USER> 'username' 'hostname' 'servername' 'realname' \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <JOIN>  '<#>channel name'. . . 'key'. . . \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <KICK>  '<#>channel name'. . . 'user'. . . \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <PART>  '<#>channel name' \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <MODE>  '<#>channel name' <mode> \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <USERMODES>  'mode' \n", sizeof(":IRC_1337 NOTICE HELP :|->|-> <USERMODES>  'mode' \n"), 0);
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <LIST>  '<#>channel name' 'server' \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <INVITE>  'nickname' '<#>channel name' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> PRIVMSG receiver :message \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> JOIN  #channel1,channel2... key1,key2. . . \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> KICK  #channel user \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> PART  #channel \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> MODE  #channel mode \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> USERMODES  mode \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> LIST  null/#channel \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> topic  #channel :TOPIC\n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> INVITE  nickname #channel \n");
     sendReply(fd, ":IRC_1337 NOTICE HELP :Server commands : \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <VERSION> \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <TIME>  \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <ADMIN> \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <INFO>  \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <KILL> 'nickname' 'reason' \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :Cient to client / channel commandes : \n");
-    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <PRIVMSG> 'receiver' 'message' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> VERSION \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> TIME  \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> ADMIN \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> INFO  \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> KILL nickname reason \n");
 }
 
 void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
@@ -322,16 +322,21 @@ void   Server::part(int fd, std::vector<std::string> &cmd)
 	User						*member;
 	std::string					reply ;
 	std::vector<std::string>	chans;
-	size_t						i = 0;
+	size_t						i;
 
     if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
 	split(cmd[1], ',', chans);
-	while (i < chans.size())
+	for (i=0; i < chans.size(); i++)
 	{
 		channel = this->getChannel(chans[i]);
 		if (!channel)
-			throw myException(ERR_NOSUCHCHANNEL);
+		{
+			sendReply(fd,stringBuilder(10,":",this->getName().c_str()," ",
+			ft_tostring(ERR_NOSUCHCHANNEL).c_str(), " ", this->getUser(fd)->getNickname().c_str()," ",chans[i].c_str(),
+			" :",err_reply(ERR_NOSUCHCHANNEL).c_str()));
+			continue;
+		}
 		member = channel->getMember(fd);
 		if (!member)
 			throw myException(ERR_NOTONCHANNEL);
@@ -339,7 +344,6 @@ void   Server::part(int fd, std::vector<std::string> &cmd)
 				"@",member->getIpAddress().c_str()," ", cmd[0].c_str(), " ", chans[i].c_str());
 		channel->broadCastMessage(reply, fd);
 		channel->getMembers().erase(fd);
-		i++;
 	}
 }
 
@@ -350,8 +354,9 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 	size_t							i = 0;
 	Channel						*chans;
 
-	reply = stringBuilder(6, ":", this->getName().c_str()," 321 ", " :Channel :Users  Name");
+	reply = stringBuilder(3,this->getName().c_str()," 321 ", " :Channel :Users  Name");
 	sendReply(fd, reply);
+	reply.clear();
 	if (cmd.size() == 1)
 	{
 		std::map <std::string, Channel *>::iterator	it;
@@ -359,11 +364,15 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 		for (it = this->channels.begin(); it != this->channels.end(); ++it)
 		{
 			if (!it->second->isPrivate())
-				reply = stringBuilder(12, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
+				reply = stringBuilder(10, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
 			else
-				reply = stringBuilder(11, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
+				reply = stringBuilder(9, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
 			sendReply(fd, reply);
+			reply.clear();
 		}
+	}
+	else
+	{
 		split(cmd[1], ',', channel);
 		while (i < channel.size())
 		{	
@@ -371,16 +380,18 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 			if (chans)
 			{
 				if (!chans->isPrivate())
-					reply = stringBuilder(12, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
+					reply = stringBuilder(10, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
 				else
-					reply = stringBuilder(11, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
+					reply = stringBuilder(9, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
 				sendReply(fd, reply);
+				reply.clear();
 			}
 			i++;
 		}
 	}
-	reply = stringBuilder(7, ":", this->getName().c_str()," 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
+	reply = stringBuilder(5, ":", this->getName().c_str()," 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
 	sendReply(fd, reply);
+	reply.clear();
 }
 
 void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
@@ -644,7 +655,6 @@ void	Server::OPERcmd(int fd, std::vector<std::string> &cmd)
 	
 }
 
-
 void	Server::KILLcmd(int fd,    std::vector<std::string> &cmd)
 {
 	User * user;
@@ -664,4 +674,22 @@ void	Server::KILLcmd(int fd,    std::vector<std::string> &cmd)
 	this->clientDisconnect(this->getUser(cmd[2])->getFd());
 }
 
+void	Server::topic(int fd, std::vector<std::string> &cmd)
+{
+	User		*user;
+	Channel		*channel;
+	std::string	reply;
 
+	channel = this->getChannel(cmd[1]);
+	if (!channel)
+		throw myException(ERR_NOSUCHCHANNEL);
+	user = this->getUser(fd);
+	if (!channel->getOperator(fd))
+		throw myException(ERR_NOPRIVILEGES);
+	if (!channel->getMember(fd))
+		throw myException(ERR_NOTONCHANNEL);
+	channel->setTopic(cmd[2], fd);
+	reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+					"@",user->getIpAddress().c_str(), "NOTICE TOPIC ", cmd[1].c_str(), " :", cmd[2].c_str());
+	sendReply(fd, reply);
+}
