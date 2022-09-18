@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 17:07:39 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/18 18:28:23 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ Server::Server(int _port, std::string _password)
 	this->operators.insert(std::pair<std::string,std::string>("penguin","messi123"));
 	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
 	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
-	this->name = "irc!~irc1337 ";
+	this->name = ":irc!~irc1337 ";
 	this->version = "1.0 ";
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
@@ -148,7 +148,7 @@ void	Server::clientDisconnect(int fd) {
 			delete user->second;
 			this->users.erase(user);
 		}
-	} catch (std::exception & e) {}
+	} catch (myException & e) {}
 }
 
 /****************************[ Channels Management ]***************************/
@@ -163,8 +163,8 @@ void	Server::createChannel(std::string name, User & op) {
 			return ;
 		}
 		delete channel;
-	} catch (std::exception & e) {
-		throw myException(std::string(e.what()));
+	} catch (myException & e) {
+		throw myException(e.getERROR_NO());
 	}
 }
 
@@ -399,7 +399,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				topic(msg.getSender(), cmd);
 		}
 	} catch(myException & e) {
-		sendReply(msg.getSender(),stringBuilder(9, this->getName().c_str()," ",
+		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str()," ",
 		ft_tostring(e.getERROR_NO()).c_str(), " ", this->getUser(msg.getSender())->getNickname().c_str()," "
 		,cmd[0].c_str(), e.what()));
 	}
