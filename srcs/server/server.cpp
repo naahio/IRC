@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:22:10 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/18 13:52:52 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ Server::Server(int _port, std::string _password)
 	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
 	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
 	this->name = "irc!~irc1337 ";
+	this->version = "1.0 ";
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -116,6 +117,12 @@ Channel *	Server::getChannel(std::string name) {
 
 std::string const &	Server::getName(void) const {
 	return (this->name);
+}
+
+
+std::string const & Server::getVersion(void) const
+{
+	return (this->version);
 }
 
 /*****************************[ Users Management ]*****************************/
@@ -359,6 +366,12 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			PASScmd(msg.getSender(), cmd);
 		else if (!cmd[0].compare("QUIT"))
 			QUITcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("VERSION"))
+			VERSIONcmd(msg.getSender());
+		else if (!cmd[0].compare("TIME"))
+			TIMEcmd(msg.getSender());
+		else if (!cmd[0].compare("ADMIN"))
+			ADMINcmd(msg.getSender());
 		else if (user && user->isAuth())
 		{
 			if (!cmd[0].compare("PRIVMSG"))

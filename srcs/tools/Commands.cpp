@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:21:25 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/18 14:08:19 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -666,3 +666,47 @@ void	Server::KILLcmd(int fd,    std::vector<std::string> &cmd)
 }
 
 
+void	Server::VERSIONcmd(int fd)
+{
+	sendReply(fd, stringBuilder(9,this->getName().c_str(),
+				ft_tostring(RPL_VERSION).c_str()," ",
+				this->getUser(fd)->getNickname().c_str()," ",
+				this->getName().c_str(),"-",
+				this->getVersion().c_str(),":Good server"));
+				 
+}
+
+void	Server::TIMEcmd(int fd)
+{
+	time_t now = time(0);
+   	char* dt = ctime(&now);
+
+	sendReply(fd, stringBuilder(8,this->getName().c_str(),
+					ft_tostring(RPL_TIME).c_str()," ",
+					this->getUser(fd)->getNickname().c_str()," ",
+					this->getName().c_str()," :",dt));
+}
+
+void	Server::ADMINcmd(int fd)
+{
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),
+				ft_tostring(RPL_ADMINME).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str()," ",
+				this->getName().c_str(),":Administrative info"));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINLOC1).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :The Server is in Morocco,Khouribga"));
+	
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINLOC2).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :The Server is being hosted in 1337 school and "
+				 "running by mbabela,hel-makh and ybensell"));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINEMAIL).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :hh@dontemailme.com"));
+}
