@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:21:25 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/17 13:39:13 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,27 +244,26 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 
 void    Server::helps(int fd)
 {
-    send(fd, ":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n", sizeof(":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n"), 0);
-    send(fd, "|-> <PASS> 'password' \n", sizeof("|-> <PASS> 'password' \n"), 0);
-    send(fd, "|-> <USER> 'username' 'hostname' 'servername' 'realname' \n", sizeof("|-> <USER> 'username' 'hostname' 'servername' 'realname' \n"), 0);
-    send(fd, "|-> <NICK> 'nickname' \n", sizeof("|-> <NICK> 'nickname' \n"), 0);
-    send(fd, "Channel commands : \n", sizeof("Channel commands : \n"), 0);
-    send(fd, "|-> <JOIN>  '<#>channel name'. . . 'key'. . . \n", sizeof("|-> <JOIN>  '<#>channel name'. . . 'key'. . . \n"), 0);
-    send(fd, "|-> <KICK>  '<#>channel name'. . . 'user'. . . \n", sizeof("|-> <KICK>  '<#>channel name'. . . 'user'. . . \n"), 0);
-    send(fd, "|-> <PART>  '<#>channel name' \n", sizeof("|-> <PART>  '<#>channel name' \n"), 0);
-    send(fd, "|-> <MODE>  '<#>channel name' <mode> \n", sizeof("|-> <MODE>  '<#>channel name' <mode> \n"), 0);
-    send(fd, "|-> <USERMODES>  'mode' \n", sizeof("|-> <USERMODES>  'mode' \n"), 0);
-    send(fd, "|-> <LIST>  '<#>channel name' 'server' \n", sizeof("|-> <LIST>  '<#>channel name' 'server' \n"), 0);
-    send(fd, "|-> <INVITE>  'nickname' '<#>channel name' \n", sizeof("|-> <INVITE>  'nickname' '<#>channel name' \n"), 0);
-    send(fd, "Server commands : \n", sizeof("Server commands : \n"), 0);
-    send(fd, "|=> <VERSION> \n", sizeof("|=> <VERSION> \n"), 0);
-    send(fd, "|=> <TIME>  \n", sizeof("|=> <TIME>  \n"), 0);
-    send(fd, "|=> <ADMIN> \n", sizeof("|=> <ADMINE> \n"), 0);
-    send(fd, "|=> <INFO>  \n", sizeof("|=> <INFO>  \n"), 0);
-    send(fd, "|=> <KILL> 'nickname' 'reason' \n", sizeof("|=> <KILL> 'nickname' 'reason' \n"), 0);
-    send(fd, "Cient to client / channel commandes : \n", sizeof("Cient to client / channel commandes : \n"), 0);
-    send(fd, "|-> <PRIVMSG> 'receiver' 'message' \n", sizeof("|-> <PRIVMSG> 'receiver' 'message' \n"), 0);
-	// add QUIT 
+    sendReply(fd, ":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <PASS> 'password' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <NICK> 'nickname' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :Channel commands : \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <USER> 'username' 'hostname' 'servername' 'realname' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <JOIN>  '<#>channel name'. . . 'key'. . . \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <KICK>  '<#>channel name'. . . 'user'. . . \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <PART>  '<#>channel name' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <MODE>  '<#>channel name' <mode> \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <USERMODES>  'mode' \n", sizeof(":IRC_1337 NOTICE HELP :|->|-> <USERMODES>  'mode' \n"), 0);
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <LIST>  '<#>channel name' 'server' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <INVITE>  'nickname' '<#>channel name' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :Server commands : \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <VERSION> \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <TIME>  \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <ADMIN> \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <INFO>  \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|=> <KILL> 'nickname' 'reason' \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :Cient to client / channel commandes : \n");
+    sendReply(fd, ":IRC_1337 NOTICE HELP :|-> <PRIVMSG> 'receiver' 'message' \n");
 }
 
 void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
