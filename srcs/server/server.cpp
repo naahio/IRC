@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 13:52:52 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/18 17:07:39 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,6 +313,7 @@ bool	Server::accept_connections(void)
 		else
 		{
 			sendReply(new_fd, ":irc!~irc1337 ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
+			std::cout << "Connection rejected : no space left ! " << new_fd << std::endl;
 			close(new_fd);
 		}
 	} while (new_fd != -1);
@@ -394,9 +395,13 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				OPERcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("KILL"))
 				KILLcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("TOPIC"))
+				topic(msg.getSender(), cmd);
 		}
-	} catch(std::exception & e) {
-		send(msg.getSender(), e.what(), strlen(e.what()), 0);
+	} catch(myException & e) {
+		sendReply(msg.getSender(),stringBuilder(9, this->getName().c_str()," ",
+		ft_tostring(e.getERROR_NO()).c_str(), " ", this->getUser(msg.getSender())->getNickname().c_str()," "
+		,cmd[0].c_str(), e.what()));
 	}
 }
 
@@ -416,7 +421,7 @@ bool	Server::recv_send_msg(int fd)
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
 	memset(buffer,0,BUFF_SIZE);
-	do
+	do 
 	{
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{

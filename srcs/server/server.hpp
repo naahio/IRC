@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 13:45:34 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/18 17:07:10 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@
 # include "../tools/Commands.hpp"
 
 # define BUFF_SIZE		1024
-# define MAX_CONN		32
+# define MAX_CONN		50
 # define TIMEOUT		3 * 60 * 1000
 # define SERVNAME 		
 
@@ -116,12 +116,13 @@ class Server
 		void	TIMEcmd(int		fd);
 		void	ADMINcmd(int	fd);
 
-		void    kick(int fd_u, std::vector<std::string> &cmd);
+		void    kick(int fd, std::vector<std::string> &cmd);
 		void    helps(int fd);
 		void    part(int fd, std::vector<std::string> &cmd);
-		void	list(int fd_u, std::vector<std::string> &cmd);
-		void    mode(int fd_u, std::vector<std::string> &cmd);
-		void    names(int fd_u, std::vector<std::string> &cmd);
+		void	list(int fd, std::vector<std::string> &cmd);
+		void    mode(int fd, std::vector<std::string> &cmd);
+		void    names(int fd, std::vector<std::string> &cmd);
+		void    topic(int fd, std::vector<std::string> &cmd);
 
 		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
 		void	channelModes(int fd, std::vector<std::string> & cmd);
