@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 18:51:45 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/19 09:46:34 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,19 +121,9 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getUser(fd);
 	if (user->isAuth())
-	{
-		// sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
-		// 	" PASS ",err_reply(ERR_ALREADYREGISTRED).c_str()));
 		throw myException(ERR_ALREADYREGISTRED);
-		return ;
-	}
 	else if (cmd.size() < 2)
-	{
-		// sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
-		// 	" PASS ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
 		throw myException(ERR_NEEDMOREPARAMS);
-		return ;
-	}
 	else
 	{
 		user->setPassword(cmd[1]);
@@ -149,19 +139,9 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return ;
 	if (user->isAuth())
-	{
-		// sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
-		// 	" USER ",err_reply(ERR_ALREADYREGISTRED).c_str()));
 		throw myException(ERR_ALREADYREGISTRED);
-		return ;
-	}
 	else if (cmd.size() < 5)
-	{
-		// sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
-		// 	" USER ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
 		throw myException(ERR_NEEDMOREPARAMS);
-		return ;
-	}
 	else
 	{
 		user->setUsername(cmd[1]);
@@ -185,7 +165,8 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 		{
 			sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
-			this->clientDisconnect(user->getFd());
+			cmd[1] = "BAD PASSWORD";
+			QUITcmd(fd,cmd);
 		}
 	}
 }
@@ -198,29 +179,13 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return;
 	if (cmd.size() < 2)
-	{
-		// sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_NONICKNAMEGIVEN).c_str(),
-		// 	" NICK :",err_reply(ERR_NONICKNAMEGIVEN).c_str()));
 		throw myException(ERR_NONICKNAMEGIVEN);
-
-		return ;
-	}
 	else
 	{
 		if (!paramsChecker(cmd[1]))
-		{
-			// sendReply(fd,stringBuilder(8,":",this->getName().c_str()," ",ft_tostring(ERR_ERRONEUSNICKNAME).c_str(),
-			// " ",cmd[1].c_str()," ",err_reply(ERR_ERRONEUSNICKNAME).c_str()));
 			throw myException(ERR_ERRONEUSNICKNAME);
-			return ;
-		}
 		else if (this->getUser(cmd[1]))
-		{
-			// sendReply(fd,stringBuilder(8,":",this->getName().c_str()," ",ft_tostring(ERR_NICKNAMEINUSE).c_str(),
-			// " ",cmd[1].c_str()," ",err_reply(ERR_NICKNAMEINUSE).c_str()));
 			throw myException(ERR_NICKNAMEINUSE);
-			return ;
-		}
 		if (user->isAuth())
 			sendReply(fd,stringBuilder(7,":",user->getNickname().c_str(),"!~",this->getName().c_str(),
 											cmd[0].c_str()," :",cmd[1].c_str()));
@@ -243,7 +208,8 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",
 			ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
-			this->clientDisconnect(user->getFd());
+			cmd[1] = "BAD PASSWORD";
+			QUITcmd(fd,cmd);
 		}
 	}
 }
