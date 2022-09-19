@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 14:17:44 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/19 10:17:47 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 		return ;
 	if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
-    // join chan1 " "
 	split(cmd[1],',',channels);  // vector of channels;
 	if (cmd.size() > 2)
 		split(cmd[2],',',keys);	// vector of the keys on the input if they exist
@@ -54,10 +53,12 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	{
 		try {
 			Channel *chan = this->getChannel(channels[i]);
-			if (chan)
+			if (chan && !chan->getMember(fd))
 				chan->addMember(user, keys[i]);
-			else
+			else if (!chan)
 				this->createChannel(channels[i], *user);
+			else
+				continue;
            	reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " :", channels[i].c_str());
 			std::cout << reply << std::endl;
@@ -71,7 +72,10 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			reply.clear();
 		}
 		catch (myException &e) {
-			send(fd, e.what(), strlen(e.what()), 0);
+				sendReply(fd,stringBuilder(9, this->getName().c_str()," ",
+				ft_tostring(e.getERROR_NO()).c_str(), " ",
+				user->getNickname().c_str()," "
+				,channels[i].c_str()," ", e.what()));
 		}
 	}
 }
@@ -93,29 +97,19 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (chan)
 		{	
-			try {
-				std::string reply;
-				reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(), "@",user->getIpAddress().c_str(), " PRIVMSG ", chan->getName().c_str(), " :", cmd[2].c_str()), 
-				chan->broadCastMessage(reply, user->getFd());
-			}
-			catch (myException &e )
-			{
-				send(fd,e.what(),strlen(e.what()),0);
-			}
+			std::string reply;
+			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(), "@",user->getIpAddress().c_str(), " PRIVMSG ", chan->getName().c_str(), " :", cmd[2].c_str()), 
+			chan->broadCastMessage(reply, user->getFd());
 		}
 		else if (target)
 		{
 			std::string	reply;
 			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 					"@",user->getIpAddress().c_str(), " PRIVMSG ", target->getNickname().c_str(), " :", cmd[2].c_str());
-			if (send(target->getFd(),reply.c_str(), reply.length(), 0) == -1)
-				std::cout << "sending error" << std::endl;
+			sendReply(target->getFd(),reply);
 		}
 		else if (!target && !chan)
-		{
-			send(fd, err_reply(ERR_NOSUCHNICK).c_str(),
-			err_reply(ERR_NOSUCHNICK).length(), 0);
-		}
+			throw myException(ERR_NOSUCHNICK);
 	}
 
 }
@@ -126,17 +120,9 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getUser(fd);
 	if (user->isAuth())
-	{
-		sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
-			" PASS ",err_reply(ERR_ALREADYREGISTRED).c_str()));
-		return ;
-	}
+		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
-	{
-		sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
-			" PASS ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
-		return ;
-	}
+		throw myException(ERR_NEEDMOREPARAMS);
 	else
 	{
 		user->setPassword(cmd[1]);
@@ -152,17 +138,9 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return ;
 	if (user->isAuth())
-	{
-		sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
-			" USER ",err_reply(ERR_ALREADYREGISTRED).c_str()));
-		return ;
-	}
+		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 5)
-	{
-		sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
-			" USER ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
-		return ;
-	}
+		throw myException(ERR_NEEDMOREPARAMS);
 	else
 	{
 		user->setUsername(cmd[1]);
@@ -174,19 +152,21 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			sendReply(fd, stringBuilder(10,":",this->getName().c_str()," 001 ",
-					user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",
-					user->getNickname().c_str(),"!",
-					user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str()));
+			welcomeReplay(fd);
+			// sendReply(fd, stringBuilder(10,":",this->getName().c_str()," 001 ",
+			// 		user->getNickname().c_str(),
+			// 		" :Welcome to the Internet Relay Network ",
+			// 		user->getNickname().c_str(),"!",
+			// 		user->getUsername().c_str(),
+			// 		"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
 		{
 			sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
-			this->clientDisconnect(user->getFd());
+			cmd[1] = "BAD PASSWORD";
+			QUITcmd(fd,cmd);
 		}
 	}
 }
@@ -199,45 +179,38 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return;
 	if (cmd.size() < 2)
-	{
-		sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_NONICKNAMEGIVEN).c_str(),
-			" NICK :",err_reply(ERR_NONICKNAMEGIVEN).c_str()));
-		return ;
-	}
+		throw myException(ERR_NONICKNAMEGIVEN);
 	else
 	{
 		if (!paramsChecker(cmd[1]))
-		{
-			sendReply(fd,stringBuilder(8,":",this->getName().c_str()," ",ft_tostring(ERR_ERRONEUSNICKNAME).c_str(),
-			" ",cmd[1].c_str()," ",err_reply(ERR_ERRONEUSNICKNAME).c_str()));
-			return ;
-		}
+			throw myException(ERR_ERRONEUSNICKNAME);
 		else if (this->getUser(cmd[1]))
-		{
-			sendReply(fd,stringBuilder(8,":",this->getName().c_str()," ",ft_tostring(ERR_NICKNAMEINUSE).c_str(),
-			" ",cmd[1].c_str()," ",err_reply(ERR_NICKNAMEINUSE).c_str()));
-			return ;
-		}
+			throw myException(ERR_NICKNAMEINUSE);
+		if (user->isAuth())
+			sendReply(fd,stringBuilder(7,":",user->getNickname().c_str(),"!~",this->getName().c_str(),
+											cmd[0].c_str()," :",cmd[1].c_str()));
 		user->setNickname(cmd[1]);
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			sendReply(fd, stringBuilder(10,":",this->getName().c_str()," 001 ",
-					user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",
-					user->getNickname().c_str(),"!",
-					user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str()));
+			welcomeReplay(fd);
+			// sendReply(fd, stringBuilder(9,this->getName().c_str()," 001 ",
+			// 		user->getNickname().c_str(),
+			// 		" :Welcome to the Internet Relay Network ",
+			// 		user->getNickname().c_str(),"!",
+			// 		user->getUsername().c_str(),
+			// 		"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
 		{
-			sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",
+			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",
 			ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
-			this->clientDisconnect(user->getFd());
+			cmd[1] = "BAD PASSWORD";
+			QUITcmd(fd,cmd);
 		}
 	}
 }
@@ -692,4 +665,76 @@ void	Server::topic(int fd, std::vector<std::string> &cmd)
 	reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 					"@",user->getIpAddress().c_str(), "NOTICE TOPIC ", cmd[1].c_str(), " :", cmd[2].c_str());
 	sendReply(fd, reply);
+}
+
+void	Server::VERSIONcmd(int fd)
+{
+	sendReply(fd, stringBuilder(8,this->getName().c_str(),
+				ft_tostring(RPL_VERSION).c_str()," ",
+				this->getUser(fd)->getNickname().c_str()," ",
+				this->getName().c_str(),
+				this->getVersion().c_str(),":Beta Version"));
+				 
+}
+
+void	Server::TIMEcmd(int fd)
+{
+	time_t now = time(0);
+   	char* dt = ctime(&now);
+
+	sendReply(fd, stringBuilder(8,this->getName().c_str(),
+					ft_tostring(RPL_TIME).c_str()," ",
+					this->getUser(fd)->getNickname().c_str()," ",
+					this->getName().c_str()," :",dt));
+}
+
+void	Server::ADMINcmd(int fd)
+{
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),
+				ft_tostring(RPL_ADMINME).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str()," ",
+				this->getName().c_str(),":Administrative info"));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINLOC1).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :The Server is in Morocco,Khouribga"));
+	
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINLOC2).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :The Server is being hosted in 1337 school and "
+				 "running by mbabela,hel-makh and ybensell"));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINEMAIL).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :hh@dontemailme.com"));
+}
+
+void	Server::welcomeReplay(int fd)
+{
+	User *user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	
+	sendReply(fd, stringBuilder(9,this->getName().c_str(),"001 ",
+				user->getNickname().c_str(),
+				" :Welcome to the Internet Relay Network ",
+				user->getNickname().c_str(),"!",
+				user->getUsername().c_str(),
+				"@",user->getIpAddress().c_str()));
+
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),"002 ",
+				user->getNickname().c_str(),
+				" :Your host is ",
+				this->getName().c_str(), "running on version ",
+				this->getVersion().c_str()));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),"003 ",
+				user->getNickname().c_str(),
+				" :This server was created :",this->creationTime));
+
 }

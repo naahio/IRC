@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 13:49:53 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/19 10:36:16 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,10 @@ Server::Server(int _port, std::string _password)
 	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
 	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
 	this->name = ":irc!~irc1337 ";
+	this->version = "1.0 ";
+
+	time_t now = time(0);
+   	this->creationTime = ctime(&now);
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -118,6 +122,12 @@ std::string const &	Server::getName(void) const {
 	return (this->name);
 }
 
+
+std::string const & Server::getVersion(void) const
+{
+	return (this->version);
+}
+
 /*****************************[ Users Management ]*****************************/
 
 void	Server::addUser(int fd,char *ip) {
@@ -141,7 +151,7 @@ void	Server::clientDisconnect(int fd) {
 			delete user->second;
 			this->users.erase(user);
 		}
-	} catch (std::exception & e) {}
+	} catch (myException & e) {}
 }
 
 /****************************[ Channels Management ]***************************/
@@ -156,8 +166,8 @@ void	Server::createChannel(std::string name, User & op) {
 			return ;
 		}
 		delete channel;
-	} catch (std::exception & e) {
-		throw myException(std::string(e.what()));
+	} catch (myException & e) {
+		throw myException(e.getERROR_NO());
 	}
 }
 
@@ -314,14 +324,17 @@ bool	Server::accept_connections(void)
 }	
 /********************************[ Parsing ]**********************************/
 
-void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+int Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 {
 	std::vector<std::string> collonSplit;  
 
 	split(cmd,':',collonSplit);
+	if (!collonSplit.size())
+		return 0;
 	split(collonSplit[0],' ',oneCmdParsed);
-	for (size_t i = 1 ; i < collonSplit.size();i++)
+	for (size_t i = 1 ; i < collonSplit.size(); i++)
 		oneCmdParsed.push_back(collonSplit[i]);
+	return 1;
 }
 
 void	Server::parsExecCommands(Msg &msg)
@@ -332,7 +345,8 @@ void	Server::parsExecCommands(Msg &msg)
 	allCmds = msg.getCommands();
 	for (size_t i = 0 ; i < allCmds.size() ;i++)
 	{
-		splitCmd(allCmds[i],oneCmdParsed);	
+		if (!splitCmd(allCmds[i],oneCmdParsed))
+			return ;	
 		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
 		{
 			std::cout << oneCmdParsed[i] << std::endl;
@@ -360,6 +374,12 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			PASScmd(msg.getSender(), cmd);
 		else if (!cmd[0].compare("QUIT"))
 			QUITcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("VERSION"))
+			VERSIONcmd(msg.getSender());
+		else if (!cmd[0].compare("TIME"))
+			TIMEcmd(msg.getSender());
+		else if (!cmd[0].compare("ADMIN"))
+			ADMINcmd(msg.getSender());
 		else if (user && user->isAuth())
 		{
 			if (!cmd[0].compare("PRIVMSG"))
@@ -386,9 +406,9 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				topic(msg.getSender(), cmd);
 		}
 	} catch(myException & e) {
-		sendReply(msg.getSender(),stringBuilder(9, this->getName().c_str()," ",
+		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),
 		ft_tostring(e.getERROR_NO()).c_str(), " ", this->getUser(msg.getSender())->getNickname().c_str()," "
-		,cmd[0].c_str(), e.what()));
+		,cmd[0].c_str()," ", e.what()));
 	}
 }
 

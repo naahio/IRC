@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 14:44:31 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/19 10:35:46 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 # include <fcntl.h>
 # include <arpa/inet.h>
 # include <sstream>
+# include <ctime>
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
@@ -55,6 +56,8 @@ class Server
 		int				port;
 		std::string		password;
 		std::string		name;
+		std::string		version;
+   		char 			*creationTime;
 
 		Server(void) {}
 
@@ -69,6 +72,7 @@ class Server
 		int					getPort(void) const;
 		std::string const &	getPass(void) const;
 		std::string const &	getName(void) const;
+		std::string const & getVersion(void) const;
 
 		std::map <int, User *> &			        getUsers(void);
 		std::map <std::string, Channel *> &	        getChannels(void);
@@ -86,7 +90,7 @@ class Server
 		
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
-		void	splitCmd(std::string &cmd,
+		int		splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
 
 		int		Create_socket(void);
@@ -100,16 +104,18 @@ class Server
 
 		//**************** Commands : 
 
-		void	USERcmd(int fd,    std::vector<std::string> &cmd);
-		void	NICKcmd(int fd,    std::vector<std::string> &cmd);
-		void	PASScmd(int fd,    std::vector<std::string> &cmd);
-		void	JOINcmd(int fd,    std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(int fd, std::vector<std::string> &cmd);
-		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
-		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
-		void	OPERcmd(int fd,    std::vector<std::string> &cmd);
-		void	KILLcmd(int fd,    std::vector<std::string> &cmd);
-		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
+		void	USERcmd(int		fd,  std::vector<std::string> &cmd);
+		void	NICKcmd(int		fd,	std::vector<std::string> &cmd);
+		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
+		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd);
+		void	INVITcmd(int	fd,	std::vector<std::string> &cmd);
+		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
+		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);
+		void	KILLcmd(int		fd,	std::vector<std::string> &cmd);
+		void	VERSIONcmd(int	fd);
+		void	TIMEcmd(int		fd);
+		void	ADMINcmd(int	fd);
 
 		void    kick(int fd, std::vector<std::string> &cmd);
 		void    helps(int fd);
@@ -119,6 +125,8 @@ class Server
 		void    names(int fd, std::vector<std::string> &cmd);
 		void    topic(int fd, std::vector<std::string> &cmd);
 
+		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
+		void	welcomeReplay(int fd);
 		void	channelModes(int fd, std::vector<std::string> & cmd);
 		void	userModes(int fd, std::vector<std::string> & cmd);
 };
