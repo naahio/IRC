@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 09:46:34 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/19 10:17:47 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 		return ;
 	if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
-    // join chan1 " "
 	split(cmd[1],',',channels);  // vector of channels;
 	if (cmd.size() > 2)
 		split(cmd[2],',',keys);	// vector of the keys on the input if they exist
@@ -153,12 +152,13 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			sendReply(fd, stringBuilder(10,":",this->getName().c_str()," 001 ",
-					user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",
-					user->getNickname().c_str(),"!",
-					user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str()));
+			welcomeReplay(fd);
+			// sendReply(fd, stringBuilder(10,":",this->getName().c_str()," 001 ",
+			// 		user->getNickname().c_str(),
+			// 		" :Welcome to the Internet Relay Network ",
+			// 		user->getNickname().c_str(),"!",
+			// 		user->getUsername().c_str(),
+			// 		"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
@@ -195,12 +195,13 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			sendReply(fd, stringBuilder(9,this->getName().c_str()," 001 ",
-					user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",
-					user->getNickname().c_str(),"!",
-					user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str()));
+			welcomeReplay(fd);
+			// sendReply(fd, stringBuilder(9,this->getName().c_str()," 001 ",
+			// 		user->getNickname().c_str(),
+			// 		" :Welcome to the Internet Relay Network ",
+			// 		user->getNickname().c_str(),"!",
+			// 		user->getUsername().c_str(),
+			// 		"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
@@ -709,4 +710,31 @@ void	Server::ADMINcmd(int fd)
 				ft_tostring(RPL_ADMINEMAIL).c_str(), " ",
 				this->getUser(fd)->getNickname().c_str(),
 				" :hh@dontemailme.com"));
+}
+
+void	Server::welcomeReplay(int fd)
+{
+	User *user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	
+	sendReply(fd, stringBuilder(9,this->getName().c_str(),"001 ",
+				user->getNickname().c_str(),
+				" :Welcome to the Internet Relay Network ",
+				user->getNickname().c_str(),"!",
+				user->getUsername().c_str(),
+				"@",user->getIpAddress().c_str()));
+
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),"002 ",
+				user->getNickname().c_str(),
+				" :Your host is ",
+				this->getName().c_str(), "running on version ",
+				this->getVersion().c_str()));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),"003 ",
+				user->getNickname().c_str(),
+				" :This server was created :",this->creationTime));
+
 }

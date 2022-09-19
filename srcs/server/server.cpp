@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 09:33:56 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/19 10:36:16 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,9 @@ Server::Server(int _port, std::string _password)
 	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
 	this->name = ":irc!~irc1337 ";
 	this->version = "1.0 ";
+
+	time_t now = time(0);
+   	this->creationTime = ctime(&now);
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -321,14 +324,17 @@ bool	Server::accept_connections(void)
 }	
 /********************************[ Parsing ]**********************************/
 
-void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+int Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 {
 	std::vector<std::string> collonSplit;  
 
 	split(cmd,':',collonSplit);
+	if (!collonSplit.size())
+		return 0;
 	split(collonSplit[0],' ',oneCmdParsed);
-	for (size_t i = 1 ; i < collonSplit.size();i++)
+	for (size_t i = 1 ; i < collonSplit.size(); i++)
 		oneCmdParsed.push_back(collonSplit[i]);
+	return 1;
 }
 
 void	Server::parsExecCommands(Msg &msg)
@@ -339,7 +345,8 @@ void	Server::parsExecCommands(Msg &msg)
 	allCmds = msg.getCommands();
 	for (size_t i = 0 ; i < allCmds.size() ;i++)
 	{
-		splitCmd(allCmds[i],oneCmdParsed);	
+		if (!splitCmd(allCmds[i],oneCmdParsed))
+			return ;	
 		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
 		{
 			std::cout << oneCmdParsed[i] << std::endl;
