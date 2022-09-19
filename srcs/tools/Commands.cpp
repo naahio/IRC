@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 10:49:32 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/19 14:04:04 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	Server::sendChannelUsers(int fd, Channel *chan,User *user,const std::string
 		if (it->second->isVisible())
 			members += (it->second->getNickname() + " ");
 	}
-	sendReply(fd, stringBuilder(8,":",this->getName().c_str()," 353 ",
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),"353 ",
 			user->getNickname().c_str()," = ",channel.c_str(),
 			" : ", members.c_str()));
 }
@@ -65,7 +65,7 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			this->getChannel(channels[i])->broadCastMessage(reply);
 			sendChannelUsers(fd, this->getChannel(channels[i]), user, 
 					this->getChannel(channels[i])->getName());
-			sendReply(fd, stringBuilder(7, ":",this->getName().c_str()," 366 ",
+			sendReply(fd, stringBuilder(6,this->getName().c_str()," 366 ",
 						user->getNickname().c_str(), " ", 
 						this->getChannel(channels[i])->getName().c_str(),
 						" :End of /NAMES list."));
@@ -153,17 +153,11 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
 			welcomeReplay(fd);
-			// sendReply(fd, stringBuilder(10,":",this->getName().c_str()," 001 ",
-			// 		user->getNickname().c_str(),
-			// 		" :Welcome to the Internet Relay Network ",
-			// 		user->getNickname().c_str(),"!",
-			// 		user->getUsername().c_str(),
-			// 		"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
 		{
-			sendReply(fd,stringBuilder(6,":",this->getName().c_str()," ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
 			cmd[1] = "BAD PASSWORD";
 			QUITcmd(fd,cmd);
@@ -196,12 +190,6 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
 			welcomeReplay(fd);
-			// sendReply(fd, stringBuilder(9,this->getName().c_str()," 001 ",
-			// 		user->getNickname().c_str(),
-			// 		" :Welcome to the Internet Relay Network ",
-			// 		user->getNickname().c_str(),"!",
-			// 		user->getUsername().c_str(),
-			// 		"@",user->getIpAddress().c_str()));
 			user->setRegistered();
 		}
 		else
@@ -283,7 +271,7 @@ void    Server::kick(int fd, std::vector<std::string> &cmd)
     user = this->getUser(cmd[2]);
     if (!user || !channel->getMember(user->getFd()))
         throw myException(ERR_NOSUCHNICK);
-	erply = stringBuilder(9, user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+	erply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " ", channel->getName().c_str());
 	channel->getMembers().erase(user->getFd());
     channel->broadCastMessage(erply, fd);
@@ -305,7 +293,7 @@ void   Server::part(int fd, std::vector<std::string> &cmd)
 		channel = this->getChannel(chans[i]);
 		if (!channel)
 		{
-			sendReply(fd,stringBuilder(10,":",this->getName().c_str()," ",
+			sendReply(fd,stringBuilder(9,this->getName().c_str()," ",
 			ft_tostring(ERR_NOSUCHCHANNEL).c_str(), " ", this->getUser(fd)->getNickname().c_str()," ",chans[i].c_str(),
 			" :",err_reply(ERR_NOSUCHCHANNEL).c_str()));
 			continue;
@@ -313,7 +301,7 @@ void   Server::part(int fd, std::vector<std::string> &cmd)
 		member = channel->getMember(fd);
 		if (!member)
 			throw myException(ERR_NOTONCHANNEL);
-		reply = stringBuilder(9, member->getNickname().c_str(), "!~", member->getUsername().c_str(),
+		reply = stringBuilder(10, ":",member->getNickname().c_str(), "!~", member->getUsername().c_str(),
 				"@", member->getIpAddress().c_str(), " ", cmd[0].c_str(), " ", chans[i].c_str());
 		channel->broadCastMessage(reply, fd);
 		channel->getMembers().erase(fd);
@@ -559,12 +547,12 @@ void	Server::names(int fd_u, std::vector<std::string> &cmd)
 			{
 				sendChannelUsers(fd_u, chan, user,channel[i]);
 
-				sendReply(fd_u, stringBuilder(7, ":",this->getName().c_str()," 366 ",
+				sendReply(fd_u, stringBuilder(6,this->getName().c_str(),"366 ",
 						user->getNickname().c_str(), " ", channel[i].c_str(),
 						" :End of /NAMES list."));
 			}
 			else
-				sendReply(fd_u, stringBuilder(7, ":",this->getName().c_str()," 366 ",
+				sendReply(fd_u, stringBuilder(6,this->getName().c_str(),"366 ",
 					user->getNickname().c_str(), " ", channel[i].c_str(),
 					" :End of /NAMES list."));
 		}
@@ -579,7 +567,7 @@ void	Server::names(int fd_u, std::vector<std::string> &cmd)
 			if (!it->second->isPrivate() && !it->second->isSecret())
 				sendChannelUsers(fd_u, it->second, user,it->second->getName());
 		}
-		sendReply(fd_u, stringBuilder(6, ":",this->getName().c_str()," 366 ",
+		sendReply(fd_u, stringBuilder(5,this->getName().c_str(),"366 ",
 					user->getNickname().c_str(), " * ",
 					" :End of /NAMES list."));
 	}
@@ -643,8 +631,8 @@ void	Server::KILLcmd(int fd,    std::vector<std::string> &cmd)
 		throw myException(ERR_NOSUCHNICK);
 	sendReply(this->getUser(cmd[1])->getFd(),
 		stringBuilder(5,":irc!~irc1337 ERROR Closing Link: (Killed ( ",// to change with the command error
-				user->getNickname().c_str(), " ) ( " ,cmd[1].c_str()," ) )"));
-	this->clientDisconnect(this->getUser(cmd[2])->getFd());
+				user->getNickname().c_str(), " ) ( " ,cmd[2].c_str()," ) )"));
+	close(this->getUser(cmd[1])->getFd());
 }
 
 void	Server::topic(int fd, std::vector<std::string> &cmd)
@@ -654,17 +642,34 @@ void	Server::topic(int fd, std::vector<std::string> &cmd)
 	std::string	reply;
 
 	channel = this->getChannel(cmd[1]);
+	user = this->getUser(fd);
+	if (cmd.size() < 2)
+		throw myException(ERR_NEEDMOREPARAMS);
 	if (!channel)
 		throw myException(ERR_NOSUCHCHANNEL);
-	user = this->getUser(fd);
-	if (!channel->getOperator(fd))
-		throw myException(ERR_NOPRIVILEGES);
-	if (!channel->getMember(fd))
-		throw myException(ERR_NOTONCHANNEL);
-	channel->setTopic(cmd[2], fd);
-	reply = stringBuilder(9, user->getNickname().c_str(), "!~", user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str(), "NOTICE TOPIC ", cmd[1].c_str(), " :", cmd[2].c_str());
-	sendReply(fd, reply);
+	if (cmd.size() == 2)
+	{
+		if (channel->getTopic().empty())
+			throw myException(RPL_NOTOPIC);
+		else
+		{
+			std::cout << "TOPIC : " << channel->getTopic() <<std::endl;
+			reply = stringBuilder(7, this->getName().c_str(), "332 ", user->getNickname().c_str(),
+			" ", channel->getName().c_str(), " :",channel->getTopic().c_str());
+			sendReply(fd, reply);
+		}
+	}
+	else
+	{
+		if (!channel->getOperator(fd))
+			throw myException(ERR_NOPRIVILEGES);
+		if (!channel->getMember(fd))
+			throw myException(ERR_NOTONCHANNEL);
+		channel->setTopic(cmd[2], fd);
+		reply = stringBuilder(9, user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+						"@",user->getIpAddress().c_str(), " NOTICE TOPIC ", cmd[1].c_str(), " :", cmd[2].c_str());
+		sendReply(fd, reply);
+	}
 }
 
 void	Server::VERSIONcmd(int fd)
