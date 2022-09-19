@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 10:17:47 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/19 10:49:32 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,11 +270,11 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 void    Server::kick(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
+	std::string	erply;
 
     if (cmd.size() < 3)
         throw myException(ERR_NEEDMOREPARAMS);
     Channel *channel = this->getChannel(cmd[1]);
-	std::string	erply = ":";
     if (!channel)
         throw myException(ERR_NOSUCHCHANNEL);
 	user = channel->getOperator(fd);
@@ -283,7 +283,7 @@ void    Server::kick(int fd, std::vector<std::string> &cmd)
     user = this->getUser(cmd[2]);
     if (!user || !channel->getMember(user->getFd()))
         throw myException(ERR_NOSUCHNICK);
-	erply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+	erply = stringBuilder(9, user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " ", channel->getName().c_str());
 	channel->getMembers().erase(user->getFd());
     channel->broadCastMessage(erply, fd);
@@ -313,8 +313,8 @@ void   Server::part(int fd, std::vector<std::string> &cmd)
 		member = channel->getMember(fd);
 		if (!member)
 			throw myException(ERR_NOTONCHANNEL);
-		reply = stringBuilder(10, ":",member->getNickname().c_str(), "!~", member->getUsername().c_str(),
-				"@",member->getIpAddress().c_str()," ", cmd[0].c_str(), " ", chans[i].c_str());
+		reply = stringBuilder(9, member->getNickname().c_str(), "!~", member->getUsername().c_str(),
+				"@", member->getIpAddress().c_str(), " ", cmd[0].c_str(), " ", chans[i].c_str());
 		channel->broadCastMessage(reply, fd);
 		channel->getMembers().erase(fd);
 	}
@@ -327,7 +327,7 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 	size_t							i = 0;
 	Channel						*chans;
 
-	reply = stringBuilder(3,this->getName().c_str()," 321 ", " :Channel :Users  Name");
+	reply = stringBuilder(3, this->getName().c_str(), " 321 ", " :Channel :Users  Name");
 	sendReply(fd, reply);
 	reply.clear();
 	if (cmd.size() == 1)
@@ -337,9 +337,9 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 		for (it = this->channels.begin(); it != this->channels.end(); ++it)
 		{
 			if (!it->second->isPrivate())
-				reply = stringBuilder(10, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
+				reply = stringBuilder(9, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
 			else
-				reply = stringBuilder(9, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
+				reply = stringBuilder(8, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
 			sendReply(fd, reply);
 			reply.clear();
 		}
@@ -353,16 +353,16 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 			if (chans)
 			{
 				if (!chans->isPrivate())
-					reply = stringBuilder(10, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
+					reply = stringBuilder(9, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
 				else
-					reply = stringBuilder(9, ":", this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
+					reply = stringBuilder(8, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
 				sendReply(fd, reply);
 				reply.clear();
 			}
 			i++;
 		}
 	}
-	reply = stringBuilder(5, ":", this->getName().c_str()," 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
+	reply = stringBuilder(4, this->getName().c_str()," 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
 	sendReply(fd, reply);
 	reply.clear();
 }
@@ -662,7 +662,7 @@ void	Server::topic(int fd, std::vector<std::string> &cmd)
 	if (!channel->getMember(fd))
 		throw myException(ERR_NOTONCHANNEL);
 	channel->setTopic(cmd[2], fd);
-	reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+	reply = stringBuilder(9, user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 					"@",user->getIpAddress().c_str(), "NOTICE TOPIC ", cmd[1].c_str(), " :", cmd[2].c_str());
 	sendReply(fd, reply);
 }
