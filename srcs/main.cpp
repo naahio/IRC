@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/13 11:28:07 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/20 10:58:29 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 		|| !serv.listen_from_socket())
 		close_server(serv, EXIT_FAILURE);
 
+	// std::system("php -f /bot/bot.php");
 	serv.poll_trait();
 
 	do
