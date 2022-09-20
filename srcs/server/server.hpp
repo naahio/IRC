@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 10:35:46 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/20 13:16:30 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,9 @@ class Server
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		int		splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
+
+		bool	ctcpMessage(std::string &cmd,std::vector<std::string> &vec);
+		void	fileTransfer(int fd,std::string & nick,std::vector<std::string> &vec);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 11:54:05 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/20 14:09:02 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -324,7 +324,22 @@ bool	Server::accept_connections(void)
 }	
 /********************************[ Parsing ]**********************************/
 
-int Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+bool	Server::ctcpMessage(std::string &cmd,
+					std::vector<std::string> &vec)
+{
+	split(cmd,' ',vec);
+	if (vec.size() >= 5 && vec[0][0] == 0x01 && 
+		vec[0].find("DCC") != std::string::npos 
+		&& !vec[1].compare("SEND"))
+	{
+		std::cout << "Im here" << std::endl;
+		return true;
+	}
+	std::cout << "Im here 1" << std::endl;
+	return false;
+}
+
+int		Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 {
 	std::vector<std::string> collonSplit;  
 

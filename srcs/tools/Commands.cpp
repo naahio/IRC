@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 14:04:04 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/20 15:33:17 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include  "../server/server.hpp"
+#include <unistd.h>
 
 // function for NAMES command , It helps in join too
 
@@ -24,7 +25,11 @@ void	Server::sendChannelUsers(int fd, Channel *chan,User *user,const std::string
 	for (it = chanMembers.begin();it != chanMembers.end();it++)
 	{
 		if (it->second->isVisible())
+		{
+			if (chan->getOperator(it->second->getFd()))
+				members += '@';
 			members += (it->second->getNickname() + " ");
+		}
 	}
 	sendReply(fd, stringBuilder(7,this->getName().c_str(),"353 ",
 			user->getNickname().c_str()," = ",channel.c_str(),
@@ -103,6 +108,9 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 		}
 		else if (target)
 		{
+			std::vector<std::string> vec;
+			if (ctcpMessage(cmd[2],vec))
+				fileTransfer(fd,cmd[1],vec);
 			std::string	reply;
 			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 					"@",user->getIpAddress().c_str(), " PRIVMSG ", target->getNickname().c_str(), " :", cmd[2].c_str());
@@ -741,5 +749,104 @@ void	Server::welcomeReplay(int fd)
 	sendReply(fd, stringBuilder(5,this->getName().c_str(),"003 ",
 				user->getNickname().c_str(),
 				" :This server was created :",this->creationTime));
+
+}
+
+void	Server::fileTransfer(int fd,std::string &nick,std::vector<std::string> &vec)
+{
+
+	std::string rply;
+ 	User *reciever;
+ 	reciever = this->getUser(nick);
+ 	if (!reciever)
+
+	rply = "NOTICE ";
+	rply += nick;
+	rply += " :";
+	rply += 0x01;
+	rply += "DCC GET ";
+	rply += this->getUser(fd)->getNickname();
+	rply += " ";
+	rply += vec[2];
+	rply += 0x01;
+	sendReply(fd,rply);
+
+
+// 	std::cout << "Im here 2" << std::endl;
+// 	u_int32_t ip_sender;
+// 	pid_t	  frk;
+// //	struct in_addr ip_addr;
+// 	struct sockaddr_in addr, addr1;
+// 	std::stringstream ss;
+// 	int senderPort;
+// 	int fileSize;
+
+		
+// 	// converting string containing decimal ip address to u_int32
+// 	ss << vec[3];
+// 	ss >> ip_sender;
+//     //ip_addr.s_addr = ip;
+
+// 	ss.clear();
+// 	ss << vec[4];
+// 	ss >> senderPort;
+
+// 	ss.clear();
+// 	ss << vec[5];
+// 	ss >> fileSize;
+
+// 	ss.clear();
+// 	frk = fork();
+// 	if (frk == 0)
+// 	{
+// 		u_int32_t ipAddr;
+// 		ss << reciever->getIpAddress();
+// 		ss >> ipAddr;
+// 		int rc;
+// 		char buffer[fileSize];
+// 		int client = socket(AF_INET, SOCK_STREAM,0);
+
+
+// 		if (client < 0)
+// 			std::cout << "client error"  << std::endl; // error handling later
+// 		else
+// 			std::cout << "client created"  << std::endl;
+
+// 		addr.sin_family = AF_INET;
+// 		addr.sin_addr.s_addr = INADDR_ANY;
+// 		addr.sin_port = htons(10000);
+// 		addr.sin_addr.s_addr = ipAddr;
+
+// 		addr1.sin_family = AF_INET;
+// 		addr1.sin_addr.s_addr = INADDR_ANY;
+// 		addr1.sin_port = htons(senderPort);
+// 		addr.sin_addr.s_addr = ip_sender;
+		
+// 		if (bind(client,(struct sockaddr *) &addr1, sizeof(struct sockaddr_in)) == 0)
+// 			std::cout << "Binded succesuffly " << std::endl;
+// 		else
+// 			std::cout << strerror(errno) << std::endl;
+// 		while (1);
+// 		while (true)
+// 		{
+// 			rc = recv(fd,buffer,sizeof(buffer),0);
+// 			if (rc != 0 )
+// 				std::cout << "Im receiving files data" << std::endl;
+// 			else if (rc == 0)
+// 			{
+// 				std::cout << "error" << std::endl;
+// 				return ;
+// 			}
+// 			else if (rc == -1)
+// 			{
+// 				std::cout << " error " << std::endl;
+// 				return ;
+// 			}
+
+// 		}
+// 	}
+// 	else
+// 		return ;
+	
 
 }
