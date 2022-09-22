@@ -6,12 +6,12 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/20 15:33:17 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/22 13:07:00 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include  "../server/server.hpp"
-#include <unistd.h>
+
 
 // function for NAMES command , It helps in join too
 
@@ -770,83 +770,91 @@ void	Server::fileTransfer(int fd,std::string &nick,std::vector<std::string> &vec
 	rply += vec[2];
 	rply += 0x01;
 	sendReply(fd,rply);
-
-
-// 	std::cout << "Im here 2" << std::endl;
-// 	u_int32_t ip_sender;
-// 	pid_t	  frk;
-// //	struct in_addr ip_addr;
-// 	struct sockaddr_in addr, addr1;
-// 	std::stringstream ss;
-// 	int senderPort;
-// 	int fileSize;
-
-		
-// 	// converting string containing decimal ip address to u_int32
-// 	ss << vec[3];
-// 	ss >> ip_sender;
-//     //ip_addr.s_addr = ip;
-
-// 	ss.clear();
-// 	ss << vec[4];
-// 	ss >> senderPort;
-
-// 	ss.clear();
-// 	ss << vec[5];
-// 	ss >> fileSize;
-
-// 	ss.clear();
-// 	frk = fork();
-// 	if (frk == 0)
-// 	{
-// 		u_int32_t ipAddr;
-// 		ss << reciever->getIpAddress();
-// 		ss >> ipAddr;
-// 		int rc;
-// 		char buffer[fileSize];
-// 		int client = socket(AF_INET, SOCK_STREAM,0);
-
-
-// 		if (client < 0)
-// 			std::cout << "client error"  << std::endl; // error handling later
-// 		else
-// 			std::cout << "client created"  << std::endl;
-
-// 		addr.sin_family = AF_INET;
-// 		addr.sin_addr.s_addr = INADDR_ANY;
-// 		addr.sin_port = htons(10000);
-// 		addr.sin_addr.s_addr = ipAddr;
-
-// 		addr1.sin_family = AF_INET;
-// 		addr1.sin_addr.s_addr = INADDR_ANY;
-// 		addr1.sin_port = htons(senderPort);
-// 		addr.sin_addr.s_addr = ip_sender;
-		
-// 		if (bind(client,(struct sockaddr *) &addr1, sizeof(struct sockaddr_in)) == 0)
-// 			std::cout << "Binded succesuffly " << std::endl;
-// 		else
-// 			std::cout << strerror(errno) << std::endl;
-// 		while (1);
-// 		while (true)
-// 		{
-// 			rc = recv(fd,buffer,sizeof(buffer),0);
-// 			if (rc != 0 )
-// 				std::cout << "Im receiving files data" << std::endl;
-// 			else if (rc == 0)
-// 			{
-// 				std::cout << "error" << std::endl;
-// 				return ;
-// 			}
-// 			else if (rc == -1)
-// 			{
-// 				std::cout << " error " << std::endl;
-// 				return ;
-// 			}
-
-// 		}
-// 	}
-// 	else
-// 		return ;
-	
-
 }
+
+// SEND USER FILE SIZE
+void	Server::SENDcmd(int		fd, std::vector<std::string> &cmd)
+{
+	User *sender;
+	User *receiver;
+	std::stringstream ss;
+ 	__int64_t	fileSize;
+
+	sender = this->getUser(fd);
+	if (!sender)
+		return ;
+	if (cmd.size() < 4)
+		throw myException(ERR_NEEDMOREPARAMS);
+	receiver = this->getUser(cmd[1]);
+	if (!receiver)
+		throw myException(ERR_NOSUCHNICK);
+	
+	ss << cmd[3];
+	ss >> fileSize;
+
+	if (fileSize > 50000000)
+	{
+		std::cout << "File is too big" << std::endl;
+		return ;
+	}
+	sender->setFiles(cmd[2]);
+	sendReply(receiver->getFd(),stringBuilder(7,this->getName().c_str(),"NOTICE SEND ",cmd[2].c_str()," :**** ",
+					sender->getNickname().c_str()," is sending the file ",
+					cmd[2].c_str()));
+}
+
+// ACCEPT FILE USER
+
+void	Server::RESPONDcmd(int	fd, std::vector<std::string> &cmd)
+{
+	User *sender;
+
+	sender = this->getUser(cmd[2]);
+	if (cmd.size() < 2)
+		throw myException(ERR_NEEDMOREPARAMS);
+	if (!sender)
+		throw myException(ERR_NOSUCHNICK);
+
+	std::vector<std::string> files;
+	std::vector<std::string>::iterator it;
+
+	files = sender->getFiles();
+	it = std::find(files.begin(),files.end(),cmd[1]);
+	if (it == files.end())
+	{
+		std::cout << "file not found" << std::endl;
+		return ;
+	}
+	if (!cmd[0].compare("ACCEPT"))
+	{
+		std::cout << "accepted" << std::endl;
+		std::cout << "File : " << *it <<  std::endl;
+		sendReply(sender->getFd(),stringBuilder(6,this->getName().c_str(),"NOTICE SEND ",cmd[1].c_str()," ACCEPT : ",
+					this->getUser(fd)->getNickname().c_str()," ACCEPTED the file"));
+		sendReply(sender->getFd(),stringBuilder(5,this->getName().c_str(),"NOTICE SEND ",cmd[1].c_str()," ACCEPTED : ",
+					" fill will start sending "));
+		//User *reciever = this->getUser(fd);
+		//sendingFile(sender,reciever,cmd[1]);
+		// call sending function;
+	}
+	else if (!cmd[0].compare("DECLINE"))
+	{
+		sendReply(sender->getFd(),stringBuilder(6,this->getName().c_str(),"NOTICE SEND" ,cmd[1].c_str(), " DECLINED : ",
+					this->getUser(fd)->getNickname().c_str()," DECLINED the file"));
+		sender->removeFile(cmd[1]);
+	}
+}
+
+// void	Server::sendingFile(User *sender,User *reciever, std::string &file)
+// {
+// 	// pid_t id;
+// 	// int fd = sender->getFiles().find(file)->second;
+
+// 	// id = fork();
+// 	// if (id == 0)
+// 	// {
+// 	// 	size_t offset;
+// 	// 	size_t count;
+// 	// }
+
+// }

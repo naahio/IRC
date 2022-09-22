@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/20 14:09:02 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/21 11:17:44 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -419,6 +419,11 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				KILLcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("TOPIC"))
 				topic(msg.getSender(), cmd);
+			else if (!cmd[0].compare("SEND"))
+				SENDcmd(msg.getSender(),cmd);
+			else if (!cmd[0].compare("ACCEPT")||
+					!cmd[0].compare("DECLINE"))
+				RESPONDcmd(msg.getSender(),cmd);
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),

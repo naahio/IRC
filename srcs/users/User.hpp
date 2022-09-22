@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 09:44:22 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/22 11:21:11 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ class User
 		bool    isoperator;
 		
 		std::map <std::string, Channel *>	channels;
-
+		std::vector<std::string> files;
 		User(void) {}
 
 	public:
@@ -60,6 +60,8 @@ class User
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
+		std::vector<std::string> & 
+							getFiles(void) ;
 
 		void	setFd(int _fd);
 		void	setUsername(std::string user_name);
@@ -73,6 +75,7 @@ class User
 		void	setConnected(void);
 		void	setVisibility(bool option);
 		void	setIsOperator(void);
+		void	setFiles(std::string &filename);
 
 		bool	isAuth(void);
 		bool	isRegistered(void);
@@ -80,6 +83,7 @@ class User
 		bool	isVisible(void);
 		bool	isOperator(void);
 
+		void	removeFile(std::string &file);
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);
 };

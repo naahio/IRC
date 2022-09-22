@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:30:27 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/22 11:24:30 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,10 @@ Channel *	User::getChannel(std::string name) {
 	return (NULL);
 }
 
+std::vector<std::string> & User::getFiles(void)
+{
+	return (this->files);
+}
 
 void	User::setFd(int _fd) {
 	this->fd = _fd;
@@ -149,6 +153,11 @@ void	User::setIsOperator(void){
 	this->isoperator = true;
 }
 
+void	User::setFiles(std::string &filename)
+{
+	this->files.push_back(filename);
+}
+
 /*****************************[ Member Functions ]*****************************/
 
 bool	User::isAuth(void) {
@@ -171,6 +180,15 @@ bool	User::isVisible(void) {
 
 bool	User::isOperator(void){
 	return this->isoperator;
+}
+
+void	User::removeFile(std::string &file)
+{
+	std::vector<std::string>::iterator it;
+
+	it = std::find(this->files.begin(),this->files.end(),file);
+	if (it != this->files.end())
+		this->files.erase(it);
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {
