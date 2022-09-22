@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 11:54:05 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/22 09:08:13 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,10 +130,10 @@ std::string const & Server::getVersion(void) const
 
 /*****************************[ Users Management ]*****************************/
 
-void	Server::addUser(int fd,char *ip) {
+void	Server::addUser(int fd,char *ip, char *postname) {
 	User *	user;
 
-	user = new User(fd,ip);
+	user = new User(fd, ip, postname);
 	this->users.insert(std::pair<int, User *>(fd, user));
 }
 
@@ -303,10 +303,15 @@ bool	Server::accept_connections(void)
 		struct in_addr ipAddr = addr.sin_addr; 
 		char str[INET_ADDRSTRLEN];
 		inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
+        struct hostent *hp;
+
+
+  		hp = gethostbyaddr((const void *)&ipAddr, sizeof ipAddr, AF_INET);
+		
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
 		if (this->nfds <MAX_CONN)
 		{
-			this->addUser(new_fd,str);
+			this->addUser(new_fd,str, hp->h_name);
 			this->fds[this->nfds].fd = new_fd;
 			this->fds[this->nfds].events = POLLIN;
 			this->nfds++;
@@ -404,6 +409,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				KILLcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("TOPIC"))
 				topic(msg.getSender(), cmd);
+			else if (!cmd[0].compare("PONG"))
+				sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),

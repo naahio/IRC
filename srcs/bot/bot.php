@@ -1,6 +1,5 @@
 <?php
 
-
 set_time_limit(0);
 
 $channels   = array('General', 'Random');
@@ -25,7 +24,7 @@ foreach($channels as $channel)  {
 while (1)
 {
     while ($data = fgets($socket, 1024)) {
-        echo $data; //data = :naahio!~naahio@127.0.0.1 PRIVMSG ∂bot/lily :!help
+        echo $data;
         flush();
         $ex = explode(' ', $data);
         $part = explode("!", $ex[0]);
@@ -73,3 +72,4 @@ while (1)
         }
     }
 }
+?>

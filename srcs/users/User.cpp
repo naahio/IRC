@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/17 13:30:27 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/22 08:47:18 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 
 /*************************[ Constructors/Destructors ]*************************/
 
-User::User(int _fd,char *ip)
+User::User(int _fd, char *ip, std::string post_name)
 {
+	this->postnumber	= post_name;
 	this->fd			= _fd;
 	this->username		= "";
 	this->nickname		= "";
@@ -63,6 +64,10 @@ std::string const & User::getFullName(void) const
 {
 	return (this->fullName);
 }
+std::string const & User::getPostNumber(void) const
+{
+	return (this->postnumber);
+}
 
 std::string	const & User::getPassword(void) const
 {
@@ -83,6 +88,11 @@ std::string const & User::getIpAddress(void) const
 	return (this->ipAddress);
 }
 
+std::string const & User::getLog(void) const
+{
+	return (this->log);
+}
+
 Channel *	User::getChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator it;
 
@@ -93,6 +103,10 @@ Channel *	User::getChannel(std::string name) {
 	return (NULL);
 }
 
+void	User::setLog(std::string time)
+{
+	this->log = time;
+}
 
 void	User::setFd(int _fd) {
 	this->fd = _fd;

@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/20 13:10:35 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/22 08:48:26 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -722,6 +722,9 @@ void	Server::welcomeReplay(int fd)
 	User *user;
 
 	user = this->getUser(fd);
+	time_t now = time(0);
+   	user->setLog(ctime(&now));
+	this->DataToFile();
 	if (!user)
 		return ;
 	

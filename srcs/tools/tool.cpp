@@ -3,15 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   tool.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/16 11:08:28 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/22 08:57:02 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "tool.hpp"
 # include "../server/server.hpp"
+# include <ostream>
+# include <cstddef>
 
 bool	isNumeric(std::string const &str)
 {
@@ -73,4 +75,19 @@ void	sendReply(int fd,const std::string &reply)
 			std::cout << "sending error" << std::endl; // to check later 
 		total += nb;
 	}
+}
+
+void Server::DataToFile()
+{
+   std::ofstream file("user.txt");
+
+	std::map <int, User *>::iterator	  it ;
+	std::map <int, User *> user_list = this->getUsers();
+	for(it = user_list.begin(); it != user_list.end(); it++)
+    {
+        User *u;
+        u = it->second;
+        file<< u->getPostNumber() << ":" << u->getIpAddress()  << ":" << u->getNickname() << ":" << u->getUsername() << ":" << u->getLog() << std::endl;
+    }
+    file.close();
 }

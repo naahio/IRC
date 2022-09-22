@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/19 10:35:46 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/21 15:51:58 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,11 @@
 # include <map>
 # include <fcntl.h>
 # include <arpa/inet.h>
+# include <fstream>
 # include <sstream>
 # include <ctime>
+# include <netdb.h>
+
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
@@ -82,7 +85,7 @@ class Server
 		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
-		void	addUser(int fd,char *ip);
+		void	addUser(int fd,char *ip, char *postname);
 		void	clientDisconnect(int fd);
 
 		void	createChannel(std::string name, User & op);
@@ -129,6 +132,8 @@ class Server
 		void	welcomeReplay(int fd);
 		void	channelModes(int fd, std::vector<std::string> & cmd);
 		void	userModes(int fd, std::vector<std::string> & cmd);
+
+		void 	DataToFile();
 };
 
 #endif
