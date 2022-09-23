@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 11:37:51 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/22 14:28:59 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ class Server
 		void	ADMINcmd(int	fd);
 		void	SENDcmd(int		fd, std::vector<std::string> &cmd);
 		void	RESPONDcmd(int	fd, std::vector<std::string> &cmd);
-		void	sendingFile(User *sender,User *reciever, std::string &file);
+		void	sendingFile(User *sender,User *reciever,size_t fileSize);
 		
 		void    kick(int fd, std::vector<std::string> &cmd);
 		void    helps(int fd);

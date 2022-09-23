@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 11:24:30 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/22 14:15:33 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ Channel *	User::getChannel(std::string name) {
 	return (NULL);
 }
 
-std::vector<std::string> & User::getFiles(void)
+std::map<std::string,size_t> & User::getFiles(void)
 {
 	return (this->files);
 }
@@ -153,11 +153,10 @@ void	User::setIsOperator(void){
 	this->isoperator = true;
 }
 
-void	User::setFiles(std::string &filename)
+void	User::setFiles(std::string &filename,size_t fileSize)
 {
-	this->files.push_back(filename);
+	this->files.insert(std::pair<std::string,size_t>(filename,fileSize));
 }
-
 /*****************************[ Member Functions ]*****************************/
 
 bool	User::isAuth(void) {
@@ -184,9 +183,9 @@ bool	User::isOperator(void){
 
 void	User::removeFile(std::string &file)
 {
-	std::vector<std::string>::iterator it;
+	std::map<std::string,size_t>::iterator it;
 
-	it = std::find(this->files.begin(),this->files.end(),file);
+	it = this->files.find(file);
 	if (it != this->files.end())
 		this->files.erase(it);
 }

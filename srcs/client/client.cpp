@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/22 13:17:07 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/22 16:57:43 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,26 +22,81 @@ void reciveFile(int sock,std::vector<std::string> &vec)
     pid = fork();
     if (pid == 0)
     {
-        
+        std::stringstream ss;
+        size_t fileSize;    
+        int fd;
+
+        ss << vec[4];
+        ss >> fileSize;
+        vec[3] = vec[3] + ".txt";
+        fd = open(vec[3].c_str(),777,O_RDWR | O_CREAT | O_TRUNC);
+        std::cout << "getting file ..."  << std::endl;
+        char buff[fileSize];
+        if (!fd)
+        {
+            std::cout << "Error while creating a file " << std::endl;
+            return ;
+        }
+        size_t rc = 0;
+		while (rc != fileSize)
+			rc = recv(sock,buff,fileSize,0);
+        for (size_t i = 0 ; i < fileSize ; i++)
+        {
+            write(fd,buff + i, 1);
+        }
+
     }
 }
 
 void sendFile(int sock,std::vector<std::string> &vec)
 {
+    pid_t pid;
 
+    pid = fork();
+    // to change later 
+    if (pid == 0)
+    {   
+        std::cout << "sending file  from Client ..."  << std::endl;
+        size_t  fileSize;
+        struct stat buf;
+        
+        fstat(openFiles[0],&buf);
+        fileSize = buf.st_size; 
+        std::cout << "filesize : " << fileSize << std::endl;
+        int reading = 0;
+        int offset = 0;
+        char buff[fileSize];
+
+        while ((reading = read(openFiles[0],buff,fileSize)) > 0)
+        {
+            std::cout << "reading : " << reading << std::endl;
+        }
+        std::cout << "Buffer " << buff << std::endl;
+        size_t total = 0;
+        while (total != fileSize)
+        {
+            ssize_t nb = send(sock,buff + total,reading - total, 0);
+            if (nb == -1)
+                std::cout << "sending error" << std::endl; // to check later 
+            total += nb;
+        }
+    }
 }
 
 void  checkFileSending(int sock,std::string &reply)
 {
     std::vector<std::string> vec;
+    std::stringstream ss;
 
+    size_t fileSize;
+    
     split(reply,' ',vec);
     if (!vec[1].compare("NOTICE") && !vec[2].compare("SEND"))
     {
         if (!vec[4].compare("ACCEPT"))
-            reciveFile(sock,vec);
-        else if (!vec[4].compare("ACCEPTED"))
             sendFile(sock,vec);
+        else if (!vec[5].compare("ACCEPTED"))
+            reciveFile(sock,vec);
     }
 }
 
@@ -52,7 +107,7 @@ bool checkPayload(std::string &payload)
     std::stringstream ss;
 
     split(payload,' ',vec);
-    if (!vec[0].compare("SEND"))
+    if ( vec[0].length() != 0 && (!vec[0].compare("SEND")))
     {
         if (vec.size() < 3)
         {
@@ -144,7 +199,7 @@ int main(int argc,char **argv)
         if (!checkPayload(payload))
         {
             payload.clear();
-            continue;
+             continue;
         }
         payload += "\r\n";
         std::cout << "payload :" <<  payload << std::endl;
