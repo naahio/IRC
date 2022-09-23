@@ -6,13 +6,12 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/23 14:20:34 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/23 16:06:37 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../server/server.hpp"
 
-std::vector<int> openFiles;
 int flag = 1;
 
 //:irc!~irc1337 NOTICE SEND tmp ip port size ACCEPTED :  fill will start sending 
@@ -27,7 +26,8 @@ void reciveFile(std::vector<std::string> &vec)
         sleep(1);
         std::stringstream ss;
         size_t fileSize;    
-        FILE *fp;
+       //FILE *fp;
+        int fd;
 
         ss << vec[6];
         ss >> fileSize;
@@ -39,7 +39,7 @@ void reciveFile(std::vector<std::string> &vec)
         ss >> port;
         ss.clear();
 
-        //vec[3] = "recev.txt";
+        vec[3] = "recev.jpeg";
         std::cout << "port : " << port << std::endl;
         std::cout << "ip address :  " << vec[4].c_str() << std::endl;
         if ((client = socket(AF_INET,SOCK_STREAM,0)) < 0)
@@ -47,7 +47,7 @@ void reciveFile(std::vector<std::string> &vec)
             std::cout << "Error while creating sockets " << std::endl;
             return ;
         }
-        
+    
         memset(&addr,0,sizeof(addr));
         addr.sin_family = AF_INET;
         if (inet_pton(AF_INET, vec[4].c_str(),&(addr.sin_addr)) < 0)
@@ -65,30 +65,35 @@ void reciveFile(std::vector<std::string> &vec)
         std::cout << "connected " << std::endl;
         int n;
         size_t nb;
-        fp  = fopen(vec[3].c_str(),"w");
-        if (!fp)
+        fd  = open(vec[3].c_str(),O_RDWR | O_CREAT | O_APPEND,0777);
+        if (!fd)
         {
             std::cout << "cannot open the file" << std::endl;
         }
-        char buffer[fileSize];
-            nb = 0;
-            while (nb < fileSize)
+        
+        char buffer[1];
+        nb = 0;
+      
+        while (nb < fileSize)
+        {  
+            memset(buffer,0,sizeof(buffer));
+            n = recv(client,buffer,1,0);
+            if (n <= 0)
             {
-                n = recv(client,buffer,fileSize,0);
-                if (n <= 0)
-                {
-                    std::cout << "errno " << strerror(errno) << std::endl;
-                    return ;
-                }
-                nb += n;
-                std::cout << "readead " << n << std::endl;
-                std::cout << "buffer " << buffer << std::endl;
+                std::cout << "errno " << strerror(errno) << std::endl;
+                return ;
             }
-            std::cout << "Im here" << std::endl;
-            fwrite(buffer,1,fileSize,fp);
-            fclose(fp);
-            close (client);
-            exit (0);
+            nb += n;
+            std::cout << "readead " << n << std::endl;
+            write(fd,buffer,1);
+           
+        }
+        std::cout << "total byte readed " << nb << std::endl;
+        std::cout << "Im here" << std::endl;
+        // fwrite(buffer,1,fileSize,fp);
+        close(fd);
+        close (client);
+        exit (0);
     }
 }
 
@@ -103,8 +108,9 @@ void sendFile(std::vector<std::string> &vec)
         std::cout << "sending file  from Client ..."  << std::endl;
         int server,client;
         struct sockaddr_in serverAdrr,clientAdrr;
-        FILE *fp;
 
+        //FILE *fp;
+        int fd;
         socklen_t addr_size;
         // char hostname[256];
         // struct hostent *host;
@@ -140,30 +146,38 @@ void sendFile(std::vector<std::string> &vec)
             std::cout << "cannot get connection";
         }
         std::cout << "Connection established " << std::endl;
-        fp = fopen(vec[3].c_str(),"r");
-        if (!fp)
+        fd = open(vec[3].c_str(),O_RDONLY);
+        if (!fd)
         {
             std::cout << "Cannot open file" << std::endl;
             return ;
         }
-        fseek(fp,0,SEEK_END);
-        long long fileSize = ftell(fp);
-         fseek(fp,0,SEEK_SET);
+    
+        __int64_t	fileSize;
+        struct stat buf;
+        fstat(fd,&buf);
+    
+        fileSize = buf.st_size;;
 
         int n ;
-        char data[fileSize];
-        memset(data,0,sizeof(data));
-        fread(data,1,fileSize,fp);
-
+        char data[1];
+       
+        n = 1;
         size_t total = 0;
-        while (total != fileSize)
+        while ((read(fd,data,1)) != 0)
         {
-            ssize_t nb = send(client,data + total,fileSize - total, 0);
-            if (nb == -1)
-                std::cout << "sending error" << std::endl; // to check later 
-            total += nb;
+            // while (total != fileSize)
+            // {
+                ssize_t nb = send(client,data ,1, 0);
+                if (nb == -1)
+                    std::cout << "sending error" << std::endl; // to check later 
+                total += nb; 
+                memset(data,0,sizeof(data));
+           // }
         }
-        fclose(fp);
+        std::cout << "File size      : " << fileSize << std::endl;
+        std::cout << "Total byte sent " << total << std::endl;
+        close(fd);
         close(client);
         close(server);
         exit (0);
@@ -216,7 +230,7 @@ bool checkPayload(std::string &payload)
 
         payload += " 5555 "; 
         payload +=  fsize;
-        openFiles.push_back(fd);
+        close(fd);
     }
     return true;
 
