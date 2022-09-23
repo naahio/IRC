@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/22 16:57:43 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/23 14:20:34 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,40 +15,84 @@
 std::vector<int> openFiles;
 int flag = 1;
 
-void reciveFile(int sock,std::vector<std::string> &vec)
+//:irc!~irc1337 NOTICE SEND tmp ip port size ACCEPTED :  fill will start sending 
+
+void reciveFile(std::vector<std::string> &vec)
 {
     pid_t pid;
 
     pid = fork();
     if (pid == 0)
     {
+        sleep(1);
         std::stringstream ss;
         size_t fileSize;    
-        int fd;
+        FILE *fp;
 
-        ss << vec[4];
+        ss << vec[6];
         ss >> fileSize;
-        vec[3] = vec[3] + ".txt";
-        fd = open(vec[3].c_str(),777,O_RDWR | O_CREAT | O_TRUNC);
-        std::cout << "getting file ..."  << std::endl;
-        char buff[fileSize];
-        if (!fd)
+        struct sockaddr_in addr;
+        int client,rc;
+        uint16_t port;
+        ss.clear();
+        ss << vec[5];
+        ss >> port;
+        ss.clear();
+
+        //vec[3] = "recev.txt";
+        std::cout << "port : " << port << std::endl;
+        std::cout << "ip address :  " << vec[4].c_str() << std::endl;
+        if ((client = socket(AF_INET,SOCK_STREAM,0)) < 0)
         {
-            std::cout << "Error while creating a file " << std::endl;
+            std::cout << "Error while creating sockets " << std::endl;
             return ;
         }
-        size_t rc = 0;
-		while (rc != fileSize)
-			rc = recv(sock,buff,fileSize,0);
-        for (size_t i = 0 ; i < fileSize ; i++)
+        
+        memset(&addr,0,sizeof(addr));
+        addr.sin_family = AF_INET;
+        if (inet_pton(AF_INET, vec[4].c_str(),&(addr.sin_addr)) < 0)
         {
-            write(fd,buff + i, 1);
+            std::cout << "Server not availabe" << std::endl;
+            return ;
         }
-
+        addr.sin_port = htons(port);
+        
+        if ((rc = connect(client,(struct sockaddr *)&addr,sizeof(addr))) < 0)
+        {
+            std::cout << "can not connect to server" << std::endl;
+            return ;
+        }
+        std::cout << "connected " << std::endl;
+        int n;
+        size_t nb;
+        fp  = fopen(vec[3].c_str(),"w");
+        if (!fp)
+        {
+            std::cout << "cannot open the file" << std::endl;
+        }
+        char buffer[fileSize];
+            nb = 0;
+            while (nb < fileSize)
+            {
+                n = recv(client,buffer,fileSize,0);
+                if (n <= 0)
+                {
+                    std::cout << "errno " << strerror(errno) << std::endl;
+                    return ;
+                }
+                nb += n;
+                std::cout << "readead " << n << std::endl;
+                std::cout << "buffer " << buffer << std::endl;
+            }
+            std::cout << "Im here" << std::endl;
+            fwrite(buffer,1,fileSize,fp);
+            fclose(fp);
+            close (client);
+            exit (0);
     }
 }
 
-void sendFile(int sock,std::vector<std::string> &vec)
+void sendFile(std::vector<std::string> &vec)
 {
     pid_t pid;
 
@@ -57,46 +101,88 @@ void sendFile(int sock,std::vector<std::string> &vec)
     if (pid == 0)
     {   
         std::cout << "sending file  from Client ..."  << std::endl;
-        size_t  fileSize;
-        struct stat buf;
-        
-        fstat(openFiles[0],&buf);
-        fileSize = buf.st_size; 
-        std::cout << "filesize : " << fileSize << std::endl;
-        int reading = 0;
-        int offset = 0;
-        char buff[fileSize];
+        int server,client;
+        struct sockaddr_in serverAdrr,clientAdrr;
+        FILE *fp;
 
-        while ((reading = read(openFiles[0],buff,fileSize)) > 0)
+        socklen_t addr_size;
+        // char hostname[256];
+        // struct hostent *host;
+
+        server = socket(AF_INET,SOCK_STREAM,0);
+        if (server == -1)
         {
-            std::cout << "reading : " << reading << std::endl;
+            std::cout << "Error while creating socket" << std::endl;
         }
-        std::cout << "Buffer " << buff << std::endl;
+        memset(&serverAdrr,0,sizeof(serverAdrr));
+        serverAdrr.sin_family = AF_INET;
+        serverAdrr.sin_port = htons(5555);
+
+        // gethostname(hostname,sizeof(hostname));
+        // host = gethostbyname(hostname);
+        // to retrieve Ip address We use gethostname and we get the ip from our host
+        serverAdrr.sin_addr.s_addr = INADDR_ANY;
+        if ((bind(server,(struct sockaddr *)&serverAdrr,sizeof(serverAdrr))) == -1)
+        {
+            std::cout << "Error while creating sockets" << std::endl;
+            return;
+        }
+        std::cout << "server created " << std::endl;
+        if ((listen(server,2)) == -1)
+        {
+            std::cout << "Error while listening to connectitons"  << std::endl;
+            return ;
+        }
+        addr_size = sizeof(clientAdrr);
+        client = accept(server,(struct sockaddr *)&clientAdrr,&addr_size);
+        if (client == -1)
+        {
+            std::cout << "cannot get connection";
+        }
+        std::cout << "Connection established " << std::endl;
+        fp = fopen(vec[3].c_str(),"r");
+        if (!fp)
+        {
+            std::cout << "Cannot open file" << std::endl;
+            return ;
+        }
+        fseek(fp,0,SEEK_END);
+        long long fileSize = ftell(fp);
+         fseek(fp,0,SEEK_SET);
+
+        int n ;
+        char data[fileSize];
+        memset(data,0,sizeof(data));
+        fread(data,1,fileSize,fp);
+
         size_t total = 0;
         while (total != fileSize)
         {
-            ssize_t nb = send(sock,buff + total,reading - total, 0);
+            ssize_t nb = send(client,data + total,fileSize - total, 0);
             if (nb == -1)
                 std::cout << "sending error" << std::endl; // to check later 
             total += nb;
         }
+        fclose(fp);
+        close(client);
+        close(server);
+        exit (0);
     }
 }
 
-void  checkFileSending(int sock,std::string &reply)
+void  checkFileSending(std::string &reply)
 {
     std::vector<std::string> vec;
     std::stringstream ss;
-
     size_t fileSize;
-    
+
     split(reply,' ',vec);
     if (!vec[1].compare("NOTICE") && !vec[2].compare("SEND"))
     {
         if (!vec[4].compare("ACCEPT"))
-            sendFile(sock,vec);
-        else if (!vec[5].compare("ACCEPTED"))
-            reciveFile(sock,vec);
+            sendFile(vec);
+        else if (!vec[7].compare("ACCEPTED"))
+            reciveFile(vec);
     }
 }
 
@@ -127,7 +213,9 @@ bool checkPayload(std::string &payload)
         ss << buf.st_size;
         std::string fsize;
         ss >> fsize;
-        payload += " " + fsize;
+
+        payload += " 5555 "; 
+        payload +=  fsize;
         openFiles.push_back(fd);
     }
     return true;
@@ -144,7 +232,8 @@ int main(int argc,char **argv)
     uint16_t port;
     std::string payload;
     char buff[1024];
-
+    pid_t pid;
+    std::string reply;
 
     ss << argv[2];
     ss >> port;
@@ -169,8 +258,7 @@ int main(int argc,char **argv)
         std::cout << "can not connect to server" << std::endl;
         return 1;
     }
-    pid_t pid;
-    std::string reply;
+
     pid = fork();
     if (pid == 0)
     {
@@ -188,9 +276,7 @@ int main(int argc,char **argv)
             }
             std::cout << buff << std::endl ;
             reply = buff;
-            checkFileSending(sock,reply);
-
-
+            checkFileSending(reply);
         }
     }
     while (flag)
