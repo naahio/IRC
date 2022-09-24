@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 08:47:18 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/24 12:00:40 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,13 @@ std::map<std::string, Channel *> &	User::getChannels(void) {
 std::string const & User::getIpAddress(void) const
 {
 	return (this->ipAddress);
+}
+
+std::string const	User::getIdentifier(void) const {
+	std::string	ident;
+
+	ident = this->nickname + "!" + this->username + "@" + this->ipAddress;
+	return (ident);
 }
 
 std::string const & User::getLog(void) const

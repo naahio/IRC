@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 09:08:13 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/24 12:39:46 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,6 +189,71 @@ void	Server::deleteChannel(std::string name) {
 	}
 	delete channel->second;
 	this->channels.erase(channel);
+}
+
+void	Server::listChannelModes(Channel * channel, int fd) {
+	User *				user;
+	std::string			reply;
+	std::string			reply2;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	reply = ":irc!~irc1337 " + ft_tostring(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
+	if (channel->isPrivate())
+		reply += "p";
+	if (channel->isSecret())
+		reply += "s";
+	if (channel->isInviteOnly())
+		reply += "i";
+	if (!channel->isTopicSettable())
+		reply += "t";
+	if (channel->isMemberChatOnly())
+		reply += "n";
+	if (channel->isModerated())
+		reply += "m";
+	if (channel->getMembersLimit() != 0) {
+		reply += "l";
+		reply2 += " " + ft_tostring(channel->getMembersLimit());
+	}
+	if (channel->getKey() != "") {
+		reply += "k";
+		reply2 += " " + channel->getKey();
+	}
+	reply2 += "\n";
+	sendReply(fd, reply + reply2);
+	sendReply(fd, ":irc!~irc1337 "
+		+ ft_tostring(RPL_CREATIONTIME) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ ft_tostring(channel->getCreationTimestamp()) + "\n");
+}
+
+void	Server::listChannelBans(Channel * channel, int fd) {
+	User *							user;
+	std::string						replyMessage;
+	std::vector<t_bans>				bans;
+	std::vector<t_bans>::iterator	it;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	bans = channel->getBans();
+	for (it = bans.begin(); it != bans.end(); ++it) {
+		replyMessage += ":irc!~irc1337 "
+			+ ft_tostring(RPL_BANLIST) + " "
+			+ user->getNickname() + " "
+			+ channel->getName() + " "
+			+ it->banMask + " "
+			+ it->banMod + " "
+			+ ft_tostring(it->banTimestamp) + "\n";
+	}
+	replyMessage += ":irc!~irc1337 "
+		+ ft_tostring(RPL_ENDOFBANLIST) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ reply(RPL_ENDOFBANLIST) + "\n";
+	sendReply(fd, replyMessage);
 }
 
 /*****************************[ Server Management ]****************************/
@@ -409,8 +474,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				KILLcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("TOPIC"))
 				topic(msg.getSender(), cmd);
-			else if (!cmd[0].compare("PONG"))
-				sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
+			// else if (!cmd[0].compare("PONG"))
+			// 	sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),

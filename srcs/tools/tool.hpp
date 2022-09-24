@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 11:28:05 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/24 11:59:56 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,12 @@
 # include <sys/socket.h>
 # include <stdarg.h>
 # include "replies.hpp"
+
+typedef struct s_ident {
+	std::string	nickname;
+	std::string	username;
+	std::string	hostname;
+}	t_ident;
 
 class myException : public std::exception {
 	private:
@@ -42,7 +48,8 @@ class myException : public std::exception {
 bool				isNumeric(std::string const &str);
 void				split(std::string const &s1, char delim, std::vector<std::string> &out);
 int					paramsChecker(const std::string &param);
-
+bool				wcMatch(std::string const & pat, std::string const & target);
+t_ident				parseIdentifier(std::string identifier);
 std::string const	ft_tostring(int n);
 std::string const	stringBuilder(int n, ...);
 void				sendReply(int fd, const std::string &reply);

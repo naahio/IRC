@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 08:46:46 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/24 11:59:28 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ class User
 		std::string	const & getPassword(void) const;
 		std::string const & getMsgRemainder(void) const;
 		std::string const & getIpAddress(void) const;
+		std::string const	getIdentifier(void) const;
 		std::string const & getPostNumber(void) const;
 		std::string const & getLog(void) const;
 		std::map <std::string, Channel *> &
