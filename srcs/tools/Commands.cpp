@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/23 11:18:45 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/24 11:50:31 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -777,38 +777,29 @@ void	Server::SENDcmd(int		fd, std::vector<std::string> &cmd)
 {
 	User *sender;
 	User *receiver;
-
 	std::stringstream ss;
  	__int64_t	fileSize;
 
 	sender = this->getUser(fd);
 	if (!sender)
 		return ;
-	if (cmd.size() < 4)
-		throw myException(ERR_NEEDMOREPARAMS);
 	receiver = this->getUser(cmd[1]);
 	if (!receiver)
 		throw myException(ERR_NOSUCHNICK);
+	if (cmd.size() < 4)
+		throw myException(ERR_NEEDMOREPARAMS);
 	
 	ss << cmd[4];
 	ss >> fileSize;
 	if (fileSize > 50000000)
 	{
-		std::cout << "File is too big" << std::endl;
+		sendReply (fd, stringBuilder(5,this->getName().c_str(),sender->getNickname().c_str(),
+							" ERROR SEND ",cmd[2].c_str()," :file is too big"));
 		return ;
 	}
 	sender->setFiles(cmd[2],fileSize);
-
-
-	std::map<std::string,size_t>::iterator it;
-
-	it = sender->getFiles().find(cmd[2]);
-	std::cout << "filename before : " << it->first << std::endl;
-	// :irc!~irc1337 NOTICE SEND ToDo ACCEPT : peng ACCEPTED the file
-
-	sendReply(receiver->getFd(),stringBuilder(12,this->getName().c_str(),"NOTICE SEND ",cmd[2].c_str()," ",
-					sender->getIpAddress().c_str()," ",cmd[3].c_str()," ", cmd[4].c_str()," :**** ",
-					sender->getNickname().c_str()," is sending the file ",
+	sendReply(receiver->getFd(),stringBuilder(6,this->getName().c_str(),receiver->getNickname().c_str(),
+					" NOTICE SEND :**** ", sender->getNickname().c_str()," is sending the file : ",
 					cmd[2].c_str()));
 }
 
@@ -819,10 +810,10 @@ void	Server::RESPONDcmd(int	fd, std::vector<std::string> &cmd)
 	User *sender;
 
 	sender = this->getUser(cmd[2]);
-	if (cmd.size() < 2)
-		throw myException(ERR_NEEDMOREPARAMS);
 	if (!sender)
 		throw myException(ERR_NOSUCHNICK);
+	if (cmd.size() < 2)
+		throw myException(ERR_NEEDMOREPARAMS);
 
 	 // :irc!~irc1337 NOTICE SEND ToDo ACCEPT : peng ACCEPTED the file
 	 
@@ -834,22 +825,28 @@ void	Server::RESPONDcmd(int	fd, std::vector<std::string> &cmd)
 
 	if (it == files.end())
 	{
-		std::cout << "file not found" << std::endl;
+		sendReply (fd, stringBuilder(7,this->getName().c_str(),
+					this->getUser(fd)->getNickname().c_str(),
+					" ERROR SEND ",cmd[1].c_str()," :",sender->getNickname().c_str(),
+					"Is not sending that file"));
 		return ;
 	}
 	if (!cmd[0].compare("ACCEPT"))
 	{
-
 		std::stringstream ss;
 		std::string fsize;
 
 		ss << it->second;
 		ss >> fsize;
-		std::cout << "File : " << it->first <<  std::endl;
-		sendReply(sender->getFd(),stringBuilder(5,this->getName().c_str(),"NOTICE SEND ",cmd[1].c_str()," ACCEPT : ",
-					this->getUser(fd)->getNickname().c_str()," ACCEPTED the file"));
-		sendReply(fd,stringBuilder(9,this->getName().c_str(),"NOTICE SEND ",cmd[1].c_str()," " ,sender->getIpAddress().c_str()," 5555 ",fsize.c_str()," ",
-										" ACCEPTED : "," fill will start sending "));
+		sendReply(sender->getFd(),stringBuilder(5,this->getName().c_str(),
+						"NOTICE SEND ",cmd[1].c_str()," ACCEPT : ",
+						this->getUser(fd)->getNickname().c_str(),
+						" ACCEPTED the file. The sending Proccess will begin"));
+		
+		sendReply(fd,stringBuilder(8,this->getName().c_str(),"NOTICE SEND ",
+						cmd[1].c_str()," " ,sender->getIpAddress().c_str(),
+						" 5555 ",fsize.c_str()," ACCEPTED : file will start sending... "));
+		sender->removeFile(cmd[1]);
 	}
 	else if (!cmd[0].compare("DECLINE"))
 	{

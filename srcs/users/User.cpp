@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 14:15:33 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/24 11:20:47 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ void	User::setIsOperator(void){
 	this->isoperator = true;
 }
 
-void	User::setFiles(std::string &filename,size_t fileSize)
+void	User::setFiles(std::string filename,size_t fileSize)
 {
 	this->files.insert(std::pair<std::string,size_t>(filename,fileSize));
 }
@@ -181,13 +181,12 @@ bool	User::isOperator(void){
 	return this->isoperator;
 }
 
-void	User::removeFile(std::string &file)
+void	User::removeFile(std::string file)
 {
 	std::map<std::string,size_t>::iterator it;
 
 	it = this->files.find(file);
-	if (it != this->files.end())
-		this->files.erase(it);
+	this->files.erase(it);
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {

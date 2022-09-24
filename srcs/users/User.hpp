@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 14:11:15 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/24 11:03:24 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ class User
 		void	setConnected(void);
 		void	setVisibility(bool option);
 		void	setIsOperator(void);
-		void	setFiles(std::string &filename,size_t filesize);
+		void	setFiles(std::string filename,size_t filesize);
 
 		bool	isAuth(void);
 		bool	isRegistered(void);
@@ -83,7 +83,7 @@ class User
 		bool	isVisible(void);
 		bool	isOperator(void);
 
-		void	removeFile(std::string &file);
+		void	removeFile(std::string file);
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);
 };
