@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/14 10:58:59 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/24 11:27:39 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,26 @@
 # include <vector>
 # include <map>
 # include <algorithm>
+# include <ctime>
 # include <sys/types.h>
 # include <sys/socket.h>
+# include <string.h>
 
 # include "../users/User.hpp"
 # include "../tools/tool.hpp"
+
+typedef struct s_bans {
+	std::string	banMask;
+	std::string	banMod;
+	std::time_t	banTimestamp;
+}	t_bans;
 
 class Channel {
 	private:
 		std::string				name;
 		std::string				topic;
 		std::string				key;
+		std::time_t				creationTimestamp;
 		size_t					membersLimit;
 		bool					_private;
 		bool					secret;
@@ -37,9 +46,10 @@ class Channel {
 		bool					topicSettable;
 
 		std::map <int, User *>	members;
+		std::map <int, User *>	invitees;
 		std::vector <int>		operators;
 		std::vector <int>		moderators;
-		std::vector <int>		invitees;
+		std::vector <t_bans>	bans;
 
 		Channel(void) {}
 	
@@ -50,6 +60,7 @@ class Channel {
 		std::string const &			getName(void) const;
 		std::string const &			getTopic(void) const;
 		std::string const &			getKey(void) const;
+		std::time_t					getCreationTimestamp(void) const;
 		size_t						getMembersLimit(void) const;
 		bool						isPrivate(void) const;
 		bool						isSecret(void) const;
@@ -59,9 +70,10 @@ class Channel {
 		bool						isTopicSettable(void) const;
 		
 		std::map <int, User *> &	getMembers(void);
+		std::map <int, User *> &	getInvitees(void);
 		std::vector <int> &			getOperators(void);
 		std::vector <int> &			getModerators(void);
-		std::vector <int> &			getInvitees(void);
+		std::vector <t_bans> &		getBans(void);
 
 		void	setTopic(std::string _topic, int fd);
 		void	setKey(std::string _key, int fd);
@@ -74,18 +86,23 @@ class Channel {
 		void	setTopicSettable(bool option, int fd);
 		
 		User *	getMember(int fd);
+		User *	getInvitee(int fd);
 		User *	getOperator(int fd);
 		User *	getModerator(int fd);
-		User *	getInvitee(int fd);
 
 		void	addMember(User * member, std::string _key = "");
 		void	removeMember(int fd);
-		void	addOperator(int fd);
-		void	removeOperator(int fd);
-		void	addModerator(int fd);
-		void	removeModerator(int fd);
-		void	addInvitee(int fd);
+		void	addInvitee(User * invitee);
 		void	removeInvitee(int fd);
+		void	addOperator(int fd, int opFd = -1);
+		void	removeOperator(int fd, int opFd = -1);
+		void	addModerator(int fd, int opFd = -1);
+		void	removeModerator(int fd, int opFd = -1);
+		void	addBan(std::string banMask, int fd);
+		void	removeBan(std::string banMask, int fd);
+
+		bool	isBanned(User * user);
+		bool	isBanned(std::string banMask);
 		
 		void	broadCastMessage(std::string & message, int fd = -1);
 };

@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 14:15:02 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/21 14:27:41 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,13 @@ std::map<std::string, Channel *> &	User::getChannels(void) {
 std::string const & User::getIpAddress(void) const
 {
 	return (this->ipAddress);
+}
+
+std::string const	User::getIdentifier(void) const {
+	std::string	ident;
+
+	ident = this->nickname + "!" + this->username + "@" + this->ipAddress;
+	return (ident);
 }
 
 Channel *	User::getChannel(std::string name) {

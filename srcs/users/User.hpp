@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 14:14:50 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/21 14:27:48 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class User
 		std::string	const & getPassword(void) const;
 		std::string const & getMsgRemainder(void) const;
 		std::string const & getIpAddress(void) const;
+		std::string const	getIdentifier(void) const;
 
 		std::map <std::string, Channel *> &
 							getChannels(void);

@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/15 17:34:29 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/16 13:34:48 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,8 @@ class Server
 
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
+		void	listChannelModes(Channel * channel, int fd);
+		void	listChannelBans(Channel * channel, int fd);
 		
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
