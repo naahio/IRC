@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/22 08:57:02 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/22 11:44:02 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,7 @@ void Server::DataToFile()
     {
         User *u;
         u = it->second;
-        file<< u->getPostNumber() << ":" << u->getIpAddress()  << ":" << u->getNickname() << ":" << u->getUsername() << ":" << u->getLog() << std::endl;
+        file << u->getFd()<< " " << u->getPostNumber() << " " << u->getIpAddress()  << " " << u->getNickname() << " " << u->getUsername() << std::endl;
     }
     file.close();
 }

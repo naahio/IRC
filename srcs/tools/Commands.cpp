@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 08:48:26 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/22 15:13:45 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -720,11 +720,15 @@ void	Server::ADMINcmd(int fd)
 void	Server::welcomeReplay(int fd)
 {
 	User *user;
-
+	User *bot;
 	user = this->getUser(fd);
+	
 	time_t now = time(0);
    	user->setLog(ctime(&now));
 	this->DataToFile();
+	bot = this->getUser("/lily");
+	if (bot)
+		sendReply(bot->getFd(), " : L_DAPET");
 	if (!user)
 		return ;
 	
