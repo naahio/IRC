@@ -6,11 +6,30 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/24 11:49:03 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/24 12:53:07 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include  "../server/server.hpp"
+
+// function for NAMES command , It helps in join too
+
+void	Server::sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel)
+{
+	std::map<int, User *>::iterator	it;
+	std::map <int, User *>			chanMembers;
+	std::string						members;
+
+	chanMembers = chan->getMembers();
+	for (it = chanMembers.begin();it != chanMembers.end();it++)
+	{
+		if (it->second->isVisible())
+			members += (it->second->getNickname() + " ");
+	}
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),"353 ",
+			user->getNickname().c_str()," = ",channel.c_str(),
+			" : ", members.c_str()));
+}
 
 void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 {
@@ -24,7 +43,6 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 		return ;
 	if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
-    // join chan1 " "
 	split(cmd[1],',',channels);  // vector of channels;
 	if (cmd.size() > 2)
 		split(cmd[2],',',keys);	// vector of the keys on the input if they exist
@@ -35,18 +53,29 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	{
 		try {
 			Channel *chan = this->getChannel(channels[i]);
-			if (chan)
+			if (chan && !chan->getMember(fd))
 				chan->addMember(user, keys[i]);
-			else
+			else if (!chan)
 				this->createChannel(channels[i], *user);
-           	reply = stringBuilder(8, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
-				"@10.13.6.10 ", cmd[0].c_str(), " :", channels[i].c_str());
+			else
+				continue;
+			reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " :", channels[i].c_str());
 			std::cout << reply << std::endl;
 			this->getChannel(channels[i])->broadCastMessage(reply);
+			sendChannelUsers(fd, this->getChannel(channels[i]), user, 
+					this->getChannel(channels[i])->getName());
+			sendReply(fd, stringBuilder(6,this->getName().c_str()," 366 ",
+						user->getNickname().c_str(), " ", 
+						this->getChannel(channels[i])->getName().c_str(),
+						" :End of /NAMES list."));
 			reply.clear();
 		}
 		catch (myException &e) {
-			send(fd, e.what(), strlen(e.what()), 0);
+				sendReply(fd,stringBuilder(9, this->getName().c_str()," ",
+				ft_tostring(e.getERROR_NO()).c_str(), " ",
+				user->getNickname().c_str()," "
+				,channels[i].c_str()," ", e.what()));
 		}
 	}
 }
@@ -68,39 +97,19 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (chan)
 		{	
-			try {
-				cmd[2] += "\n";
-				std::string reply;
-				reply = ":";
-				reply += user->getNickname();
-				reply += "!~";
-				reply += user->getUsername();
-				reply += "@10.13.6.10 ";
-				reply += "PRIVMSG ";
-				reply += chan->getName();
-				reply += " :";
-				reply += cmd[2].c_str();
-				chan->broadCastMessage(reply, user->getFd());
-			}
-			catch (myException &e )
-			{
-				send(fd,e.what(),strlen(e.what()),0);
-			}
+			std::string reply;
+			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(), "@",user->getIpAddress().c_str(), " PRIVMSG ", chan->getName().c_str(), " :", cmd[2].c_str()), 
+			chan->broadCastMessage(reply, user->getFd());
 		}
 		else if (target)
 		{
 			std::string	reply;
-			cmd[2] += '\n';
-			reply = stringBuilder(9, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
-					"@10.13.6.10 ", "PRIVMSG ", target->getNickname().c_str(), " :", cmd[2].c_str());
-			if (send(target->getFd(),reply.c_str(), reply.length(), 0) == -1)
-				std::cout << "sending error" << std::endl;
+			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+					"@",user->getIpAddress().c_str(), " PRIVMSG ", target->getNickname().c_str(), " :", cmd[2].c_str());
+			sendReply(target->getFd(),reply);
 		}
 		else if (!target && !chan)
-		{
-			send(fd, err_reply(ERR_NOSUCHNICK).c_str(),
-			err_reply(ERR_NOSUCHNICK).length(), 0);
-		}
+			throw myException(ERR_NOSUCHNICK);
 	}
 
 }
@@ -111,17 +120,9 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getUser(fd);
 	if (user->isAuth())
-	{
-		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
-			" PASS ",err_reply(ERR_ALREADYREGISTRED).c_str()));
-		return ;
-	}
+		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
-	{
-		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
-			" PASS ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
-		return ;
-	}
+		throw myException(ERR_NEEDMOREPARAMS);
 	else
 	{
 		user->setPassword(cmd[1]);
@@ -137,17 +138,9 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return ;
 	if (user->isAuth())
-	{
-		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_ALREADYREGISTRED).c_str(),
-			" USER ",err_reply(ERR_ALREADYREGISTRED).c_str()));
-		return ;
-	}
+		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 5)
-	{
-		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NEEDMOREPARAMS).c_str(),
-			" USER ",err_reply(ERR_NEEDMOREPARAMS).c_str()));
-		return ;
-	}
+		throw myException(ERR_NEEDMOREPARAMS);
 	else
 	{
 		user->setUsername(cmd[1]);
@@ -159,18 +152,15 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			sendReply(fd, stringBuilder(8,":irc!~irc1337 001 ",
-					user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",
-					user->getNickname().c_str(),"!",
-					user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str()));
+			welcomeReplay(fd);
 			user->setRegistered();
 		}
 		else
 		{
-			sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
+			cmd[1] = "BAD PASSWORD";
+			QUITcmd(fd,cmd);
 		}
 	}
 }
@@ -183,78 +173,63 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		return;
 	if (cmd.size() < 2)
-	{
-		sendReply(fd,stringBuilder(4,":irc!~irc1337 ",ft_tostring(ERR_NONICKNAMEGIVEN).c_str(),
-			" NICK :",err_reply(ERR_NONICKNAMEGIVEN).c_str()));
-		return ;
-	}
+		throw myException(ERR_NONICKNAMEGIVEN);
 	else
 	{
 		if (!paramsChecker(cmd[1]))
-		{
-			sendReply(fd,stringBuilder(6,":irc!~irc1337 ",ft_tostring(ERR_ERRONEUSNICKNAME).c_str(),
-			" ",cmd[1].c_str()," ",err_reply(ERR_ERRONEUSNICKNAME).c_str()));
-			return ;
-		}
+			throw myException(ERR_ERRONEUSNICKNAME);
 		else if (this->getUser(cmd[1]))
-		{
-			sendReply(fd,stringBuilder(6,":irc!~irc1337 ",ft_tostring(ERR_NICKNAMEINUSE).c_str(),
-			" ",cmd[1].c_str()," ",err_reply(ERR_NICKNAMEINUSE).c_str()));
-			return ;
-		}
+			throw myException(ERR_NICKNAMEINUSE);
+		if (user->isAuth())
+			sendReply(fd,stringBuilder(7,":",user->getNickname().c_str(),"!~",this->getName().c_str(),
+											cmd[0].c_str()," :",cmd[1].c_str()));
 		user->setNickname(cmd[1]);
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			sendReply(fd, stringBuilder(8,":irc!~irc1337 001 ",
-					user->getNickname().c_str(),
-					" :Welcome to the Internet Relay Network ",
-					user->getNickname().c_str(),"!",
-					user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str()));
+			welcomeReplay(fd);
 			user->setRegistered();
 		}
 		else
 		{
-			sendReply(fd,stringBuilder(4,":irc!~irc1337 ",
+			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",
 			ft_tostring(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
-			this->clientDisconnect(user->getFd());
+			cmd[1] = "BAD PASSWORD";
+			QUITcmd(fd,cmd);
 		}
 	}
 }
 
 void    Server::helps(int fd)
 {
-    send(fd, ":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n", sizeof(":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n"), 0);
-    send(fd, "|-> <PASS> 'password' \n", sizeof("|-> <PASS> 'password' \n"), 0);
-    send(fd, "|-> <USER> 'username' 'hostname' 'servername' 'realname' \n", sizeof("|-> <USER> 'username' 'hostname' 'servername' 'realname' \n"), 0);
-    send(fd, "|-> <NICK> 'nickname' \n", sizeof("|-> <NICK> 'nickname' \n"), 0);
-    send(fd, "Channel commands : \n", sizeof("Channel commands : \n"), 0);
-    send(fd, "|-> <JOIN>  '<#>channel name'. . . 'key'. . . \n", sizeof("|-> <JOIN>  '<#>channel name'. . . 'key'. . . \n"), 0);
-    send(fd, "|-> <KICK>  '<#>channel name'. . . 'user'. . . \n", sizeof("|-> <KICK>  '<#>channel name'. . . 'user'. . . \n"), 0);
-    send(fd, "|-> <PART>  '<#>channel name' \n", sizeof("|-> <PART>  '<#>channel name' \n"), 0);
-    send(fd, "|-> <MODE>  '<#>channel name' <mode> \n", sizeof("|-> <MODE>  '<#>channel name' <mode> \n"), 0);
-    send(fd, "|-> <USERMODES>  'mode' \n", sizeof("|-> <USERMODES>  'mode' \n"), 0);
-    send(fd, "|-> <LIST>  '<#>channel name' 'server' \n", sizeof("|-> <LIST>  '<#>channel name' 'server' \n"), 0);
-    send(fd, "|-> <INVITE>  'nickname' '<#>channel name' \n", sizeof("|-> <INVITE>  'nickname' '<#>channel name' \n"), 0);
-    send(fd, "Server commands : \n", sizeof("Server commands : \n"), 0);
-    send(fd, "|=> <VERSION> \n", sizeof("|=> <VERSION> \n"), 0);
-    send(fd, "|=> <TIME>  \n", sizeof("|=> <TIME>  \n"), 0);
-    send(fd, "|=> <ADMIN> \n", sizeof("|=> <ADMINE> \n"), 0);
-    send(fd, "|=> <INFO>  \n", sizeof("|=> <INFO>  \n"), 0);
-    send(fd, "|=> <KILL> 'nickname' 'reason' \n", sizeof("|=> <KILL> 'nickname' 'reason' \n"), 0);
-    send(fd, "Cient to client / channel commandes : \n", sizeof("Cient to client / channel commandes : \n"), 0);
-    send(fd, "|-> <PRIVMSG> 'receiver' 'message' \n", sizeof("|-> <PRIVMSG> 'receiver' 'message' \n"), 0);
-
+	sendReply(fd, ":IRC_1337 NOTICE HELP :use te following commands to register or log in : \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> PASS password \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> NICK nickname \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> USER username hostname ervername realname \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :Channel commands : \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> PRIVMSG receiver :message \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> JOIN  #channel1,channel2... key1,key2. . . \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> KICK  #channel user \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> PART  #channel \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> MODE  #channel mode \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> USERMODES  mode \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> LIST  null/#channel \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> topic  #channel :TOPIC\n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|-> INVITE  nickname #channel \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :Server commands : \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|=> VERSION \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|=> TIME  \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|=> ADMIN \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|=> INFO  \n");
+	sendReply(fd, ":IRC_1337 NOTICE HELP :|=> KILL nickname reason \n");
 }
 
 void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 {
-	User *user;
-	User *invit;
+	User *user,*invit;
 	Channel *channel;
 
 	user = this->getUser(fd);
@@ -277,29 +252,30 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 	channel->addInvitee(invit);
 	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
 	// here we send RPL_INVITING reply
-
 }
 
 void    Server::kick(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
-	std::string	erply;
+	std::string	reply;
 
-    if (cmd.size() < 3)
-        throw myException(ERR_NEEDMOREPARAMS);
-    Channel *channel = this->getChannel(cmd[1]);
-    if (!channel)
-        throw myException(ERR_NOSUCHCHANNEL);
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	Channel *channel = this->getChannel(cmd[1]);
+	if (!channel)
+		return throw myException(ERR_NOSUCHCHANNEL);
 	user = channel->getOperator(fd);
-    if (!user)
-        throw myException(ERR_CHANOPRIVSNEEDED);
-    user = this->getUser(cmd[2]);
-    if (!user || !channel->getMember(user->getFd()))
-        throw myException(ERR_NOSUCHNICK);
-	erply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+	if (!user)
+		return throw myException(ERR_CHANOPRIVSNEEDED);
+	user = this->getUser(cmd[2]);
+	if (!user || !channel->getMember(user->getFd()))
+		return throw myException(ERR_NOSUCHNICK);
+	reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " ", channel->getName().c_str());
-	channel->getMembers().erase(user->getFd());
-    channel->broadCastMessage(erply, fd);
+	channel->broadCastMessage(reply, fd);
+	channel->removeMember(fd);
+	if (channel->getMembers().size() == 0)
+		this->deleteChannel(channel->getName());
 }
 
 void   Server::part(int fd, std::vector<std::string> &cmd)
@@ -308,26 +284,30 @@ void   Server::part(int fd, std::vector<std::string> &cmd)
 	User						*member;
 	std::string					reply ;
 	std::vector<std::string>	chans;
-	size_t						i = 0;
+	size_t						i;
 
-    if (cmd.size() < 2)
+	if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
 	split(cmd[1], ',', chans);
-	while (i < chans.size())
+	for (i=0; i < chans.size(); i++)
 	{
 		channel = this->getChannel(chans[i]);
 		if (!channel)
-			throw myException(ERR_NOSUCHCHANNEL);
+		{
+			sendReply(fd,stringBuilder(9,this->getName().c_str()," ",
+			ft_tostring(ERR_NOSUCHCHANNEL).c_str(), " ", this->getUser(fd)->getNickname().c_str()," ",chans[i].c_str(),
+			" :",err_reply(ERR_NOSUCHCHANNEL).c_str()));
+			continue;
+		}
 		member = channel->getMember(fd);
 		if (!member)
 			throw myException(ERR_NOTONCHANNEL);
-		reply = stringBuilder(9, ":",member->getNickname().c_str(), "!~", member->getUsername().c_str(),
-				"@10.13.6.10 ", cmd[0].c_str(), " ", chans[i].c_str());
-		channel->broadCastMessage(reply);
+		reply = stringBuilder(10, ":",member->getNickname().c_str(), "!~", member->getUsername().c_str(),
+				"@", member->getIpAddress().c_str(), " ", cmd[0].c_str(), " ", chans[i].c_str());
+		channel->broadCastMessage(reply, fd);
 		channel->removeMember(fd);
 		if (channel->getMembers().size() == 0)
 			this->deleteChannel(channel->getName());
-		i++;
 	}
 }
 
@@ -338,8 +318,9 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 	size_t						i = 0;
 	Channel						*chans;
 
-	reply = stringBuilder(2, ":irc!~irc1337@10.13.6.10 321 ", " :Channel :Users  Name");
+	reply = stringBuilder(3, this->getName().c_str(), " 321 ", " :Channel :Users  Name");
 	sendReply(fd, reply);
+	reply.clear();
 	if (cmd.size() == 1)
 	{
 		std::map <std::string, Channel *>::iterator	it;
@@ -347,11 +328,15 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 		for (it = this->channels.begin(); it != this->channels.end(); ++it)
 		{
 			if (!it->second->isPrivate())
-				reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
+				reply = stringBuilder(9, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
 			else
-				reply = stringBuilder(7, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
+				reply = stringBuilder(8, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
 			sendReply(fd, reply);
+			reply.clear();
 		}
+	}
+	else
+	{
 		split(cmd[1], ',', channel);
 		while (i < channel.size())
 		{	
@@ -359,17 +344,18 @@ void	Server::list(int fd, std::vector<std::string> &cmd)
 			if (chans)
 			{
 				if (!chans->isPrivate())
-					reply = stringBuilder(8, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
+					reply = stringBuilder(9, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
 				else
-					reply = stringBuilder(7, ":irc!~irc1337@10.13.6.10 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
+					reply = stringBuilder(8, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
 				sendReply(fd, reply);
+				reply.clear();
 			}
 			i++;
 		}
 	}
-	reply = stringBuilder(3, ":irc!~irc1337@10.13.6.10 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
+	reply = stringBuilder(4, this->getName().c_str()," 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
 	sendReply(fd, reply);
-	sendReply(fd, reply);
+	reply.clear();
 }
 
 void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
@@ -544,17 +530,57 @@ void	Server::mode(int fd, std::vector<std::string> & cmd) {
 	}
 }
 
-// void	Server::names(int fd_u, std::vector<std::string> &cmd)
-// {
-// 	std::string					reply;
-// 	std::vector<std::string>	channel;
-// 	Channel						*chans;
-// 	int							i = 0;
 
-// 	if (cmd.size() > 1)
-// }
+void	Server::names(int fd_u, std::vector<std::string> &cmd)
+{
+	std::string						reply;
+	std::vector<std::string>		channel;
+	std::map <int, User *>			chanMembers;
+	User							*user;
+	Channel							*chan;
 
-void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
+	user = this->getUser(fd_u);
+	if (!user)
+		return ;
+	if (cmd.size() > 1)
+		split(cmd[1],',',channel);
+	if (channel.size() > 0)
+	{
+		for (size_t i = 0; i < channel.size(); i++)
+		{
+			chan = this->getChannel(channel[i]);
+			if (chan && !chan->isPrivate() && !chan->isSecret())
+			{
+				sendChannelUsers(fd_u, chan, user,channel[i]);
+
+				sendReply(fd_u, stringBuilder(6,this->getName().c_str(),"366 ",
+						user->getNickname().c_str(), " ", channel[i].c_str(),
+						" :End of /NAMES list."));
+			}
+			else
+				sendReply(fd_u, stringBuilder(6,this->getName().c_str(),"366 ",
+					user->getNickname().c_str(), " ", channel[i].c_str(),
+					" :End of /NAMES list."));
+		}
+	}
+	else
+	{
+		std::map <std::string, Channel *>::iterator	  it ;
+		std::map <std::string, Channel *> serverChannels =  this->getChannels();
+		
+		for (it = serverChannels.begin(); it != serverChannels.end(); it++)
+		{
+			if (!it->second->isPrivate() && !it->second->isSecret())
+				sendChannelUsers(fd_u, it->second, user,it->second->getName());
+		}
+		sendReply(fd_u, stringBuilder(5,this->getName().c_str(),"366 ",
+					user->getNickname().c_str(), " * ",
+					" :End of /NAMES list."));
+	}
+}
+
+
+void    Server::QUITcmd(int fd, std::vector<std::string> & cmd)
 {
 	std::string reply;
 	User *user;
@@ -568,4 +594,161 @@ void    Server::QUITcmd(int fd , std::vector<std::string> & cmd)
 		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", user->getNickname().c_str(), ")");
 	sendReply(fd,reply);
 	this->clientDisconnect(fd);
+}
+
+void	Server::OPERcmd(int fd, std::vector<std::string> &cmd)
+{
+	User *user;
+	user = this->getUser(fd);
+	if (!user)
+		return;
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	std::map <std::string, std::string>::iterator it;
+	it = this->getOperators().find(cmd[1]);
+	if (it == this->getOperators().end())
+		return ;
+	else
+	{
+		if (it->second == cmd[2])
+		{
+			user->setIsOperator();
+			sendReply(fd, stringBuilder(3,":irc!~irc1337 381 ",
+						user->getNickname().c_str()," :You are now an IRC operator"));
+		}
+		else
+			throw myException(ERR_PASSWDMISMATCH);
+	}
+	
+}
+
+void	Server::KILLcmd(int fd,    std::vector<std::string> &cmd)
+{
+	User * user;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	if (cmd.size() < 3)
+		throw myException(ERR_NEEDMOREPARAMS);
+	else if (!user->isOperator())
+		throw myException(ERR_NOPRIVILEGES);
+	else if (!this->getUser(cmd[1]))
+		throw myException(ERR_NOSUCHNICK);
+	sendReply(this->getUser(cmd[1])->getFd(),
+		stringBuilder(5,":irc!~irc1337 ERROR Closing Link: (Killed ( ",// to change with the command error
+				user->getNickname().c_str(), " ) ( " ,cmd[2].c_str()," ) )"));
+	close(this->getUser(cmd[1])->getFd());
+}
+
+void	Server::topic(int fd, std::vector<std::string> &cmd)
+{
+	User		*user;
+	Channel		*channel;
+	std::string	reply;
+
+	channel = this->getChannel(cmd[1]);
+	user = this->getUser(fd);
+	if (cmd.size() < 2)
+		throw myException(ERR_NEEDMOREPARAMS);
+	if (!channel)
+		throw myException(ERR_NOSUCHCHANNEL);
+	if (cmd.size() == 2)
+	{
+		if (channel->getTopic().empty())
+			throw myException(RPL_NOTOPIC);
+		else
+		{
+			std::cout << "TOPIC : " << channel->getTopic() <<std::endl;
+			reply = stringBuilder(7, this->getName().c_str(), "332 ", user->getNickname().c_str(),
+			" ", channel->getName().c_str(), " :",channel->getTopic().c_str());
+			sendReply(fd, reply);
+		}
+	}
+	else
+	{
+		if (!channel->getOperator(fd))
+			throw myException(ERR_NOPRIVILEGES);
+		if (!channel->getMember(fd))
+			throw myException(ERR_NOTONCHANNEL);
+		channel->setTopic(cmd[2], fd);
+		reply = stringBuilder(9, user->getNickname().c_str(), "!~", user->getUsername().c_str(),
+						"@",user->getIpAddress().c_str(), " NOTICE TOPIC ", cmd[1].c_str(), " :", cmd[2].c_str());
+		sendReply(fd, reply);
+	}
+}
+
+void	Server::VERSIONcmd(int fd)
+{
+	sendReply(fd, stringBuilder(8,this->getName().c_str(),
+				ft_tostring(RPL_VERSION).c_str()," ",
+				this->getUser(fd)->getNickname().c_str()," ",
+				this->getName().c_str(),
+				this->getVersion().c_str(),":Beta Version"));
+				
+}
+
+void	Server::TIMEcmd(int fd)
+{
+	time_t now = time(0);
+	char* dt = ctime(&now);
+
+	sendReply(fd, stringBuilder(8,this->getName().c_str(),
+					ft_tostring(RPL_TIME).c_str()," ",
+					this->getUser(fd)->getNickname().c_str()," ",
+					this->getName().c_str()," :",dt));
+}
+
+void	Server::ADMINcmd(int fd)
+{
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),
+				ft_tostring(RPL_ADMINME).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str()," ",
+				this->getName().c_str(),":Administrative info"));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINLOC1).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :The Server is in Morocco,Khouribga"));
+	
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINLOC2).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :The Server is being hosted in 1337 school and "
+				"running by mbabela,hel-makh and ybensell"));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),
+				ft_tostring(RPL_ADMINEMAIL).c_str(), " ",
+				this->getUser(fd)->getNickname().c_str(),
+				" :hh@dontemailme.com"));
+}
+
+void	Server::welcomeReplay(int fd)
+{
+	User *user;
+
+	user = this->getUser(fd);
+	time_t now = time(0);
+	user->setLog(ctime(&now));
+	this->DataToFile();
+	if (!user)
+		return ;
+	
+	sendReply(fd, stringBuilder(9,this->getName().c_str(),"001 ",
+				user->getNickname().c_str(),
+				" :Welcome to the Internet Relay Network ",
+				user->getNickname().c_str(),"!",
+				user->getUsername().c_str(),
+				"@",user->getIpAddress().c_str()));
+
+	sendReply(fd, stringBuilder(7,this->getName().c_str(),"002 ",
+				user->getNickname().c_str(),
+				" :Your host is ",
+				this->getName().c_str(), "running on version ",
+				this->getVersion().c_str()));
+
+	sendReply(fd, stringBuilder(5,this->getName().c_str(),"003 ",
+				user->getNickname().c_str(),
+				" :This server was created :",this->creationTime));
+
 }

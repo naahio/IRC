@@ -6,7 +6,7 @@
 #    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/23 11:47:53 by hel-makh         ###   ########.fr        #
+#    Updated: 2022/09/24 12:36:20 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,15 +31,15 @@ SRCS		=	srcs/main.cpp\
 
 OBJS		=	$(SRCS:.cpp=.o)
 
-# FLAGS		=	-Wall -Wextra -Werror -std=c++98
+FLAGS		=	-Wall -Wextra -Werror -std=c++98
 
 RM			=	rm -f
 
 %.o:%.cpp	$(HEADERS)
-			@c++ $(FLAGS) -c $< -o $@
+			c++ $(FLAGS) -c $< -o $@
 
 $(NAME):	$(OBJS) $(HEADERS)
-			@c++ $(FLAGS) $(OBJS) -o $(NAME)
+			c++ $(FLAGS) $(OBJS) -o $(NAME)
 
 all:		$(NAME)
 

@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/16 13:34:48 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/24 11:59:09 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,11 @@
 # include <map>
 # include <fcntl.h>
 # include <arpa/inet.h>
+# include <fstream>
 # include <sstream>
+# include <ctime>
+# include <netdb.h>
+
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
@@ -36,9 +40,8 @@
 # include "../pars/msg.hpp"
 # include "../tools/Commands.hpp"
 
-
 # define BUFF_SIZE		1024
-# define MAX_CONN		32
+# define MAX_CONN		50
 # define TIMEOUT		3 * 60 * 1000
 # define SERVNAME 		
 
@@ -47,6 +50,7 @@ class Server
 	private:
 		std::map <int, User *>				users;
 		std::map <std::string, Channel *>	channels;
+		std::map <std::string, std::string> operators;
 		
 		int				socket_fd;
 		struct pollfd	fds[MAX_CONN];
@@ -54,6 +58,9 @@ class Server
 		int				on;
 		int				port;
 		std::string		password;
+		std::string		name;
+		std::string		version;
+   		char 			*creationTime;
 
 		Server(void) {}
 
@@ -67,15 +74,18 @@ class Server
 		void				setNfds(int nfds);
 		int					getPort(void) const;
 		std::string const &	getPass(void) const;
+		std::string const &	getName(void) const;
+		std::string const & getVersion(void) const;
 
-		std::map <int, User *> &			getUsers(void);
-		std::map <std::string, Channel *> &	getChannels(void);
-
+		std::map <int, User *> &			        getUsers(void);
+		std::map <std::string, Channel *> &	        getChannels(void);
+		std::map <std::string, std::string> &  		getOperators(void);
+	
 		User	*	getUser(int fd);
 		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
-		void	addUser(int fd,char *ip);
+		void	addUser(int fd,char *ip, char *postname);
 		void	clientDisconnect(int fd);
 
 		void	createChannel(std::string name, User & op);
@@ -85,7 +95,7 @@ class Server
 		
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
-		void	splitCmd(std::string &cmd,
+		int		splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
 
 		int		Create_socket(void);
@@ -99,23 +109,33 @@ class Server
 
 		//**************** Commands : 
 
-		void	USERcmd(int fd,    std::vector<std::string> &cmd);
-		void	NICKcmd(int fd,    std::vector<std::string> &cmd);
-		void	PASScmd(int fd,    std::vector<std::string> &cmd);
-		void	JOINcmd(int fd,    std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(int fd, std::vector<std::string> &cmd);
-		void	INVITcmd(int fd,   std::vector<std::string> &cmd);
-		void	QUITcmd(int fd,    std::vector<std::string> &cmd);
+		void	USERcmd(int		fd,  std::vector<std::string> &cmd);
+		void	NICKcmd(int		fd,	std::vector<std::string> &cmd);
+		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
+		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd);
+		void	INVITcmd(int	fd,	std::vector<std::string> &cmd);
+		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
+		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);
+		void	KILLcmd(int		fd,	std::vector<std::string> &cmd);
+		void	VERSIONcmd(int	fd);
+		void	TIMEcmd(int		fd);
+		void	ADMINcmd(int	fd);
 
-		void    kick(int fd_u, std::vector<std::string> &cmd);
+		void    kick(int fd, std::vector<std::string> &cmd);
 		void    helps(int fd);
 		void    part(int fd, std::vector<std::string> &cmd);
-		void	list(int fd_u, std::vector<std::string> &cmd);
-		void    mode(int fd_u, std::vector<std::string> &cmd);
-		void    names(int fd_u, std::vector<std::string> &cmd);
+		void	list(int fd, std::vector<std::string> &cmd);
+		void    mode(int fd, std::vector<std::string> &cmd);
+		void    names(int fd, std::vector<std::string> &cmd);
+		void    topic(int fd, std::vector<std::string> &cmd);
 
+		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
+		void	welcomeReplay(int fd);
 		void	channelModes(int fd, std::vector<std::string> & cmd);
 		void	userModes(int fd, std::vector<std::string> & cmd);
+
+		void 	DataToFile();
 };
 
 #endif

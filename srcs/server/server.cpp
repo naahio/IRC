@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/24 10:44:05 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/24 12:39:46 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,14 @@ Server::Server(int _port, std::string _password)
 	this->port = _port;
 	this->password = _password;
 	this->nfds = 0;
+	this->operators.insert(std::pair<std::string,std::string>("penguin","messi123"));
+	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
+	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
+	this->name = ":irc!~irc1337 ";
+	this->version = "1.0 ";
+
+	time_t now = time(0);
+   	this->creationTime = ctime(&now);
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -75,6 +83,10 @@ std::map<std::string, Channel *> &	Server::getChannels(void) {
 	return (this->channels);
 }
 
+std::map <std::string, std::string> &  Server::getOperators(void){
+	return (this->operators);
+}
+
 User *	Server::getUser(int fd) {
 	std::map<int, User *>::iterator	user;
 
@@ -106,12 +118,22 @@ Channel *	Server::getChannel(std::string name) {
 	return (NULL);
 }
 
+std::string const &	Server::getName(void) const {
+	return (this->name);
+}
+
+
+std::string const & Server::getVersion(void) const
+{
+	return (this->version);
+}
+
 /*****************************[ Users Management ]*****************************/
 
-void	Server::addUser(int fd,char *ip) {
+void	Server::addUser(int fd,char *ip, char *postname) {
 	User *	user;
 
-	user = new User(fd,ip);
+	user = new User(fd, ip, postname);
 	this->users.insert(std::pair<int, User *>(fd, user));
 }
 
@@ -129,7 +151,7 @@ void	Server::clientDisconnect(int fd) {
 			delete user->second;
 			this->users.erase(user);
 		}
-	} catch (std::exception & e) {}
+	} catch (myException & e) {}
 }
 
 /****************************[ Channels Management ]***************************/
@@ -144,8 +166,8 @@ void	Server::createChannel(std::string name, User & op) {
 			return ;
 		}
 		delete channel;
-	} catch (std::exception & e) {
-		throw myException(std::string(e.what()));
+	} catch (myException & e) {
+		throw myException(e.getERROR_NO());
 	}
 }
 
@@ -346,26 +368,43 @@ bool	Server::accept_connections(void)
 		struct in_addr ipAddr = addr.sin_addr; 
 		char str[INET_ADDRSTRLEN];
 		inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
+        struct hostent *hp;
+
+
+  		hp = gethostbyaddr((const void *)&ipAddr, sizeof ipAddr, AF_INET);
+		
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
-		this->addUser(new_fd,str);
-		this->fds[this->nfds].fd = new_fd;
-		this->fds[this->nfds].events = POLLIN;
-		this->nfds++;
-		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
-		sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
+		if (this->nfds <MAX_CONN)
+		{
+			this->addUser(new_fd,str, hp->h_name);
+			this->fds[this->nfds].fd = new_fd;
+			this->fds[this->nfds].events = POLLIN;
+			this->nfds++;
+			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
+			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
+		}
+		else
+		{
+			sendReply(new_fd, ":irc!~irc1337 ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
+			std::cout << "Connection rejected : no space left ! " << new_fd << std::endl;
+			close(new_fd);
+		}
 	} while (new_fd != -1);
 	return (true);
 }	
 /********************************[ Parsing ]**********************************/
 
-void Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+int Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 {
 	std::vector<std::string> collonSplit;  
 
 	split(cmd,':',collonSplit);
+	if (!collonSplit.size())
+		return 0;
 	split(collonSplit[0],' ',oneCmdParsed);
-	for (size_t i = 1 ; i < collonSplit.size();i++)
+	for (size_t i = 1 ; i < collonSplit.size(); i++)
 		oneCmdParsed.push_back(collonSplit[i]);
+	return 1;
 }
 
 void	Server::parsExecCommands(Msg &msg)
@@ -376,7 +415,8 @@ void	Server::parsExecCommands(Msg &msg)
 	allCmds = msg.getCommands();
 	for (size_t i = 0 ; i < allCmds.size() ;i++)
 	{
-		splitCmd(allCmds[i],oneCmdParsed);	
+		if (!splitCmd(allCmds[i],oneCmdParsed))
+			return ;	
 		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
 		{
 			std::cout << oneCmdParsed[i] << std::endl;
@@ -404,6 +444,12 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			PASScmd(msg.getSender(), cmd);
 		else if (!cmd[0].compare("QUIT"))
 			QUITcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("VERSION"))
+			VERSIONcmd(msg.getSender());
+		else if (!cmd[0].compare("TIME"))
+			TIMEcmd(msg.getSender());
+		else if (!cmd[0].compare("ADMIN"))
+			ADMINcmd(msg.getSender());
 		else if (user && user->isAuth())
 		{
 			if (!cmd[0].compare("PRIVMSG"))
@@ -418,9 +464,23 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				mode(msg.getSender(), cmd);
 			else if (!cmd[0].compare("LIST"))
 				list(msg.getSender(), cmd);
+			else if (!cmd[0].compare("NAMES"))
+				names(msg.getSender(), cmd);
+			else if (!cmd[0].compare("INVIT"))
+				INVITcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("OPER"))
+				OPERcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("KILL"))
+				KILLcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("TOPIC"))
+				topic(msg.getSender(), cmd);
+			// else if (!cmd[0].compare("PONG"))
+			// 	sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
 		}
-	} catch(std::exception & e) {
-		send(msg.getSender(), e.what(), strlen(e.what()), 0);
+	} catch(myException & e) {
+		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),
+		ft_tostring(e.getERROR_NO()).c_str(), " ", this->getUser(msg.getSender())->getNickname().c_str()," "
+		,cmd[0].c_str()," ", e.what()));
 	}
 }
 
@@ -440,7 +500,7 @@ bool	Server::recv_send_msg(int fd)
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
 	memset(buffer,0,BUFF_SIZE);
-	do
+	do 
 	{
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{

@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/24 11:27:39 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/24 11:59:47 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <sys/types.h>
 # include <sys/socket.h>
 # include <string.h>
+# include <iostream>
 
 # include "../users/User.hpp"
 # include "../tools/tool.hpp"

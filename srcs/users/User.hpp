@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/21 14:27:48 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/24 11:59:28 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,17 +33,19 @@ class User
 		std::string	password;
 		std::string	msgRemainder;
 		std::string	ipAddress;
-
+		std::string	postnumber;
+		std::string	log;
 		bool	registered;
 		bool	connected;
 		bool	visible;
+		bool    isoperator;
 		
 		std::map <std::string, Channel *>	channels;
 
 		User(void) {}
 
 	public:
-		User(int fd,char *ip);
+		User(int fd,char *ip, std::string postname);
 		~User(void);
 
 		int					getFd(void) const;
@@ -56,7 +58,8 @@ class User
 		std::string const & getMsgRemainder(void) const;
 		std::string const & getIpAddress(void) const;
 		std::string const	getIdentifier(void) const;
-
+		std::string const & getPostNumber(void) const;
+		std::string const & getLog(void) const;
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
@@ -72,11 +75,13 @@ class User
 		void	setRegistered(void);
 		void	setConnected(void);
 		void	setVisibility(bool option);
-
+		void	setIsOperator(void);
+		void	setLog(std::string time);
 		bool	isAuth(void);
 		bool	isRegistered(void);
 		bool	isConnected(void);
 		bool	isVisible(void);
+		bool	isOperator(void);
 
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);

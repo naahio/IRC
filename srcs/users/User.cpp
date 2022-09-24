@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/21 14:27:41 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/24 12:00:40 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 
 /*************************[ Constructors/Destructors ]*************************/
 
-User::User(int _fd,char *ip)
+User::User(int _fd, char *ip, std::string post_name)
 {
+	this->postnumber	= post_name;
 	this->fd			= _fd;
 	this->username		= "";
 	this->nickname		= "";
@@ -26,7 +27,8 @@ User::User(int _fd,char *ip)
 	this->ipAddress		= ip;
 	this->registered	= false;
 	this->connected		= false;
-	this->visible		= false;
+	this->visible		= true;
+	this->isoperator	= false;
 }
 
 User::~User()
@@ -62,6 +64,10 @@ std::string const & User::getFullName(void) const
 {
 	return (this->fullName);
 }
+std::string const & User::getPostNumber(void) const
+{
+	return (this->postnumber);
+}
 
 std::string	const & User::getPassword(void) const
 {
@@ -89,6 +95,11 @@ std::string const	User::getIdentifier(void) const {
 	return (ident);
 }
 
+std::string const & User::getLog(void) const
+{
+	return (this->log);
+}
+
 Channel *	User::getChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator it;
 
@@ -97,6 +108,11 @@ Channel *	User::getChannel(std::string name) {
 		return (it->second);
 	}
 	return (NULL);
+}
+
+void	User::setLog(std::string time)
+{
+	this->log = time;
 }
 
 void	User::setFd(int _fd) {
@@ -150,6 +166,10 @@ void	User::setVisibility(bool option) {
 	this->visible = option;
 }
 
+void	User::setIsOperator(void){
+	this->isoperator = true;
+}
+
 /*****************************[ Member Functions ]*****************************/
 
 bool	User::isAuth(void) {
@@ -168,6 +188,10 @@ bool	User::isConnected(void)
 
 bool	User::isVisible(void) {
 	return	this->visible;
+}
+
+bool	User::isOperator(void){
+	return this->isoperator;
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {
