@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/24 12:53:07 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:38:52 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include  "../server/server.hpp"
+
 
 // function for NAMES command , It helps in join too
 
@@ -24,7 +25,11 @@ void	Server::sendChannelUsers(int fd, Channel *chan,User *user,const std::string
 	for (it = chanMembers.begin();it != chanMembers.end();it++)
 	{
 		if (it->second->isVisible())
+		{
+			if (chan->getOperator(it->second->getFd()))
+				members += '@';
 			members += (it->second->getNickname() + " ");
+		}
 	}
 	sendReply(fd, stringBuilder(7,this->getName().c_str(),"353 ",
 			user->getNickname().c_str()," = ",channel.c_str(),
@@ -103,6 +108,9 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 		}
 		else if (target)
 		{
+			std::vector<std::string> vec;
+			if (ctcpMessage(cmd[2],vec))
+				fileTransfer(fd,cmd[1],vec);
 			std::string	reply;
 			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 					"@",user->getIpAddress().c_str(), " PRIVMSG ", target->getNickname().c_str(), " :", cmd[2].c_str());
@@ -751,4 +759,108 @@ void	Server::welcomeReplay(int fd)
 				user->getNickname().c_str(),
 				" :This server was created :",this->creationTime));
 
+}
+
+void	Server::fileTransfer(int fd,std::string &nick,std::vector<std::string> &vec)
+{
+
+	std::string rply;
+ 	User *reciever;
+ 	reciever = this->getUser(nick);
+ 	if (!reciever)
+
+	rply = "NOTICE ";
+	rply += nick;
+	rply += " :";
+	rply += 0x01;
+	rply += "DCC GET ";
+	rply += this->getUser(fd)->getNickname();
+	rply += " ";
+	rply += vec[2];
+	rply += 0x01;
+	sendReply(fd,rply);
+}
+
+// SEND USER FILE SIZE
+void	Server::SENDcmd(int		fd, std::vector<std::string> &cmd)
+{
+	User *sender;
+	User *receiver;
+	std::stringstream ss;
+ 	__int64_t	fileSize;
+
+	sender = this->getUser(fd);
+	if (!sender)
+		return ;
+	receiver = this->getUser(cmd[1]);
+	if (!receiver)
+		throw myException(ERR_NOSUCHNICK);
+	if (cmd.size() < 4)
+		throw myException(ERR_NEEDMOREPARAMS);
+	
+	ss << cmd[4];
+	ss >> fileSize;
+	if (fileSize > 50000000)
+	{
+		sendReply (fd, stringBuilder(5,this->getName().c_str(),sender->getNickname().c_str(),
+							" ERROR SEND ",cmd[2].c_str()," :file is too big"));
+		return ;
+	}
+	sender->setFiles(cmd[2],fileSize);
+	sendReply(receiver->getFd(),stringBuilder(6,this->getName().c_str(),receiver->getNickname().c_str(),
+					" NOTICE SEND :**** ", sender->getNickname().c_str()," is sending the file : ",
+					cmd[2].c_str()));
+}
+
+// ACCEPT FILE USER
+
+void	Server::RESPONDcmd(int	fd, std::vector<std::string> &cmd)
+{
+	User *sender;
+
+	sender = this->getUser(cmd[2]);
+	if (!sender)
+		throw myException(ERR_NOSUCHNICK);
+	if (cmd.size() < 2)
+		throw myException(ERR_NEEDMOREPARAMS);
+
+	 // :irc!~irc1337 NOTICE SEND ToDo ACCEPT : peng ACCEPTED the file
+	 
+	std::map<std::string,size_t> files;
+	std::map<std::string,size_t>::iterator it;
+
+	files = sender->getFiles();
+	it = files.find(cmd[1]);
+
+	if (it == files.end())
+	{
+		sendReply (fd, stringBuilder(7,this->getName().c_str(),
+					this->getUser(fd)->getNickname().c_str(),
+					" ERROR SEND ",cmd[1].c_str()," :",sender->getNickname().c_str(),
+					"Is not sending that file"));
+		return ;
+	}
+	if (!cmd[0].compare("ACCEPT"))
+	{
+		std::stringstream ss;
+		std::string fsize;
+
+		ss << it->second;
+		ss >> fsize;
+		sendReply(sender->getFd(),stringBuilder(5,this->getName().c_str(),
+						"NOTICE SEND ",cmd[1].c_str()," ACCEPT : ",
+						this->getUser(fd)->getNickname().c_str(),
+						" ACCEPTED the file. The sending Proccess will begin"));
+		
+		sendReply(fd,stringBuilder(8,this->getName().c_str(),"NOTICE SEND ",
+						cmd[1].c_str()," " ,sender->getIpAddress().c_str(),
+						" 5555 ",fsize.c_str()," ACCEPTED : file will start sending... "));
+		sender->removeFile(cmd[1]);
+	}
+	else if (!cmd[0].compare("DECLINE"))
+	{
+		sendReply(sender->getFd(),stringBuilder(6,this->getName().c_str(),"NOTICE SEND " ,cmd[1].c_str(), " DECLINED : ",
+					this->getUser(fd)->getNickname().c_str()," DECLINED the file"));
+		sender->removeFile(cmd[1]);
+	}
 }

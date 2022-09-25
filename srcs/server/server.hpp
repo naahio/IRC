@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/24 11:59:09 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:38:43 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@
 # include <fstream>
 # include <sstream>
 # include <ctime>
+#include <sys/types.h>
+#include <sys/stat.h>
 # include <netdb.h>
 
 
@@ -98,6 +100,9 @@ class Server
 		int		splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
 
+		bool	ctcpMessage(std::string &cmd,std::vector<std::string> &vec);
+		void	fileTransfer(int fd,std::string & nick,std::vector<std::string> &vec);
+
 		int		Create_socket(void);
 		int		reusable_socket(void);
 		int		nonblocking_socket(void);
@@ -121,7 +126,10 @@ class Server
 		void	VERSIONcmd(int	fd);
 		void	TIMEcmd(int		fd);
 		void	ADMINcmd(int	fd);
-
+		void	SENDcmd(int		fd, std::vector<std::string> &cmd);
+		void	RESPONDcmd(int	fd, std::vector<std::string> &cmd);
+		void	sendingFile(User *sender,User *reciever,size_t fileSize);
+		
 		void    kick(int fd, std::vector<std::string> &cmd);
 		void    helps(int fd);
 		void    part(int fd, std::vector<std::string> &cmd);

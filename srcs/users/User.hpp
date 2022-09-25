@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/24 11:59:28 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:39:50 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class User
 		bool    isoperator;
 		
 		std::map <std::string, Channel *>	channels;
-
+		std::map<std::string,size_t>  files;
 		User(void) {}
 
 	public:
@@ -63,6 +63,8 @@ class User
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
+		std::map<std::string,size_t> &
+							getFiles(void) ;
 
 		void	setFd(int _fd);
 		void	setUsername(std::string user_name);
@@ -76,6 +78,7 @@ class User
 		void	setConnected(void);
 		void	setVisibility(bool option);
 		void	setIsOperator(void);
+		void	setFiles(std::string filename,size_t filesize);
 		void	setLog(std::string time);
 		bool	isAuth(void);
 		bool	isRegistered(void);
@@ -83,6 +86,7 @@ class User
 		bool	isVisible(void);
 		bool	isOperator(void);
 
+		void	removeFile(std::string file);
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);
 };
