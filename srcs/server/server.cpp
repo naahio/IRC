@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 09:38:33 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 11:47:09 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -495,7 +495,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 					!cmd[0].compare("DECLINE"))
 				RESPONDcmd(msg.getSender(),cmd);
 			// else if (!cmd[0].compare("PONG"))
-			// 	sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
+			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),
@@ -524,7 +524,7 @@ bool	Server::recv_send_msg(int fd)
 	{
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
-			rc = recv(fd,buffer, sizeof(buffer), 0);
+			rc = recv(fd,buffer,510, 0);
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -541,6 +541,7 @@ bool	Server::recv_send_msg(int fd)
 			}
 			buffer[rc] = '\0';
 			buff += buffer;
+			std::cout << "rc : " <<  rc  << std::endl;
 		}
 		std::cout << " >>>>> "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");
