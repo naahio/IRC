@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 16:44:11 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 19:07:34 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,11 @@ void	Server::sendChannelUsers(int fd, Channel *chan,User *user,const std::string
 			members += (it->second->getNickname() + " ");
 		}
 	}
-	sendReply(fd, stringBuilder(7,this->getName().c_str(),"353 ",
-			user->getNickname().c_str()," = ",channel.c_str(),
-			" : ", members.c_str()));
+	sendReply(fd, this->getName()
+		+ ft_tostring(RPL_NAMREPLY) + " "
+		+ user->getNickname() + " = "
+		+ channel + " :"
+		+ members + "\n");
 }
 
 void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
@@ -41,7 +43,7 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	User						*user;
 	std::vector<std::string>	channels;
 	std::vector<std::string>	keys;
-	std::string					reply;
+	std::string					rply;
 
 	user = this->getUser(fd);
 	if (!user)
@@ -58,28 +60,29 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	{
 		try {
 			Channel *chan = this->getChannel(channels[i]);
-			if (chan && !chan->getMember(fd))
-				chan->addMember(user, keys[i]);
-			else if (!chan)
+			if (chan && chan->getMember(fd))
+				continue;
+			if (!chan)
 				this->createChannel(channels[i], *user);
 			else
-				continue;
-			reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
-				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " :", channels[i].c_str());
-			this->getChannel(channels[i])->broadCastMessage(reply);
-			sendChannelUsers(fd, this->getChannel(channels[i]), user, 
-					this->getChannel(channels[i])->getName());
-			sendReply(fd, stringBuilder(6,this->getName().c_str()," 366 ",
-						user->getNickname().c_str(), " ", 
-						this->getChannel(channels[i])->getName().c_str(),
-						" :End of /NAMES list."));
-			reply.clear();
+				chan->addMember(user, keys[i]);
+			rply = ":" + user->getIdentifier() + " "
+				+ cmd[0] + " :"
+				+ chan->getName() + "\n";
+			chan->broadCastMessage(rply);
+			sendChannelUsers(fd, chan, user, chan->getName());
+			sendReply(fd, this->getName()
+				+ ft_tostring(RPL_ENDOFNAMES) + " "
+				+ user->getNickname() + " "
+				+ chan->getName() + " "
+				+ reply(RPL_ENDOFNAMES) + "\n");
 		}
 		catch (myException &e) {
-				sendReply(fd,stringBuilder(9, this->getName().c_str()," ",
-				ft_tostring(e.getERROR_NO()).c_str(), " ",
-				user->getNickname().c_str()," "
-				,channels[i].c_str()," ", e.what()));
+			sendReply(fd, this->getName()
+				+ ft_tostring(e.getERROR_NO()) + " "
+				+ user->getNickname() + " "
+				+ channels[i] + " "
+				+ e.what() + "\n");
 		}
 	}
 }
@@ -563,26 +566,24 @@ void	Server::mode(int fd, std::vector<std::string> & cmd) {
 	} catch (myException & e) {
 		if (e.getERROR_NO() == ERR_USERSDONTMATCH) {
 			sendReply(fd, this->getName()
-					+ ft_tostring(e.getERROR_NO()) + " "
-					+ this->getUser(fd)->getNickname() + " "
-					+ e.what() + "\n");
+				+ ft_tostring(e.getERROR_NO()) + " "
+				+ this->getUser(fd)->getNickname() + " "
+				+ e.what() + "\n");
 		} else {
 			sendReply(fd, this->getName()
-					+ ft_tostring(e.getERROR_NO()) + " "
-					+ this->getUser(fd)->getNickname() + " "
-					+ cmd[1] + " "
-					+ e.what() + "\n");
+				+ ft_tostring(e.getERROR_NO()) + " "
+				+ this->getUser(fd)->getNickname() + " "
+				+ cmd[1] + " "
+				+ e.what() + "\n");
 		}
 	}
 }
 
 void	Server::names(int fd_u, std::vector<std::string> &cmd)
 {
-	std::string						reply;
-	std::vector<std::string>		channel;
-	std::map <int, User *>			chanMembers;
-	User							*user;
-	Channel							*chan;
+	std::vector<std::string>	channel;
+	User						*user;
+	Channel						*chan;
 
 	user = this->getUser(fd_u);
 	if (!user)
@@ -597,15 +598,20 @@ void	Server::names(int fd_u, std::vector<std::string> &cmd)
 			if (chan && !chan->isPrivate() && !chan->isSecret())
 			{
 				sendChannelUsers(fd_u, chan, user,channel[i]);
-
-				sendReply(fd_u, stringBuilder(6,this->getName().c_str(),"366 ",
-						user->getNickname().c_str(), " ", channel[i].c_str(),
-						" :End of /NAMES list."));
+				sendReply(fd_u, this->getName()
+					+ ft_tostring(RPL_ENDOFNAMES) + " "
+					+ user->getNickname() + " "
+					+ chan->getName() + " "
+					+ reply(RPL_ENDOFNAMES) + "\n");
 			}
 			else
-				sendReply(fd_u, stringBuilder(6,this->getName().c_str(),"366 ",
-					user->getNickname().c_str(), " ", channel[i].c_str(),
-					" :End of /NAMES list."));
+			{
+				sendReply(fd_u, this->getName()
+					+ ft_tostring(RPL_ENDOFNAMES) + " "
+					+ user->getNickname() + " "
+					+ channel[i] + " "
+					+ reply(RPL_ENDOFNAMES) + "\n");
+			}
 		}
 	}
 	else
@@ -618,9 +624,10 @@ void	Server::names(int fd_u, std::vector<std::string> &cmd)
 			if (!it->second->isPrivate() && !it->second->isSecret())
 				sendChannelUsers(fd_u, it->second, user,it->second->getName());
 		}
-		sendReply(fd_u, stringBuilder(5,this->getName().c_str(),"366 ",
-					user->getNickname().c_str(), " * ",
-					" :End of /NAMES list."));
+		sendReply(fd_u, this->getName()
+			+ ft_tostring(RPL_ENDOFNAMES) + " "
+			+ user->getNickname() + " * "
+			+ reply(RPL_ENDOFNAMES) + "\n");
 	}
 }
 
