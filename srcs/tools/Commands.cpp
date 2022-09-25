@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 14:13:27 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 16:31:16 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -210,7 +210,7 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	}
 }
 
-void    Server::helps(int fd)
+void	Server::helps(int fd)
 {
 	sendReply(fd, this->name + "NOTICE HELP :use te following commands to register or log in : \n");
 	sendReply(fd, this->name + "NOTICE HELP :|-> PASS password \n");
@@ -234,34 +234,47 @@ void    Server::helps(int fd)
 	sendReply(fd, this->name + "NOTICE HELP :|=> KILL nickname reason \n");
 }
 
-void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
+void	Server::INVITEcmd(int fd,std::vector<std::string> &cmd)
 {
-	User *user,*invit;
-	Channel *channel;
+	User	*inviter, *invitee;
+	Channel	*channel;
 
-	user = this->getUser(fd);
-	if (!user)
-		return;
 	if (cmd.size() < 3)
 		throw myException(ERR_NEEDMOREPARAMS);
+	inviter = this->getUser(fd);
+	if (!inviter)
+		return;
+	invitee = this->getUser(cmd[1]);
+	if (!invitee)
+		throw myException(ERR_NOSUCHNICK);
 	channel = this->getChannel(cmd[2]);
 	if (!channel)
 		throw myException(ERR_NOSUCHCHANNEL);
 	if (!channel->getMember(fd))
 		throw myException(ERR_NOTONCHANNEL);
-	if (channel->isInviteOnly() && !channel->getOperator(user->getFd()))
-		throw myException(ERR_CHANOPRIVSNEEDED);
-	invit = this->getUser(cmd[1]);
-	if (!invit)
-		throw myException(ERR_NOSUCHNICK);
-	if (channel->getMember(invit->getFd()))
+	if (channel->getMember(invitee->getFd()))
 		throw myException(ERR_USERONCHANNEL);
-	channel->addInvitee(invit);
-	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
-	// here we send RPL_INVITING reply
+	if (!channel->getOperator(fd))
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	channel->addInvitee(invitee);
+	sendReply(fd, this->name
+		+ ft_tostring(RPL_INVITING) + " "
+		+ inviter->getNickname() + " "
+		+ invitee->getNickname() + " "
+		+ channel->getName() + "\n");
+	sendReply(fd, this->name
+		+ "NOTICE @"
+		+ channel->getName() + " :"
+		+ inviter->getNickname() + " invited "
+		+ invitee->getNickname() + " into channel "
+		+ channel->getName() + "\n");
+	sendReply(invitee->getFd(), ":" + inviter->getIdentifier() + " "
+		+ "INVITE "
+		+ invitee->getNickname() + " :"
+		+ channel->getName() + "\n");
 }
 
-void    Server::kick(int fd, std::vector<std::string> &cmd)
+void	Server::kick(int fd, std::vector<std::string> &cmd)
 {
 	User		*op;
 	User		*user;
@@ -289,7 +302,7 @@ void    Server::kick(int fd, std::vector<std::string> &cmd)
 		this->deleteChannel(channel->getName());
 }
 
-void   Server::part(int fd, std::vector<std::string> &cmd)
+void	Server::part(int fd, std::vector<std::string> &cmd)
 {
 	Channel						*channel;
 	User						*member;

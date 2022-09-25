@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 12:24:24 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 15:58:05 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ class Server
 		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
 		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
 		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd);
-		void	INVITcmd(int	fd,	std::vector<std::string> &cmd);
+		void	INVITEcmd(int	fd,	std::vector<std::string> &cmd);
 		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
 		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);
 		void	KILLcmd(int		fd,	std::vector<std::string> &cmd);

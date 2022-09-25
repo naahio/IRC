@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 13:31:06 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 16:17:24 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -482,8 +482,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				list(msg.getSender(), cmd);
 			else if (!cmd[0].compare("NAMES"))
 				names(msg.getSender(), cmd);
-			else if (!cmd[0].compare("INVIT"))
-				INVITcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("INVITE"))
+				INVITEcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("OPER"))
 				OPERcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("KILL"))
