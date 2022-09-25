@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/24 12:37:45 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 12:08:20 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -521,15 +521,15 @@ bool	Channel::isBanned(std::string banMask) {
 	return (false);
 }
 
-void	Channel::broadCastMessage(std::string & message, int fd) {
+void	Channel::broadCastMessage(std::string & message, int fd, bool everyone) {
 	std::map<int, User *>::iterator	it;
 
-	if ((this->memberChatOnly && !this->getMember(fd))
-		|| (fd != -1 && this->moderated && !this->getModerator(fd))) {
+	if (fd != -1 && ((this->memberChatOnly && !this->getMember(fd))
+		|| (this->moderated && !this->getModerator(fd)))) {
 		throw myException(ERR_CANNOTSENDTOCHAN);
 	}
 	for (it = this->members.begin(); it != this->members.end(); ++it) {
-		// if (fd != it->second->getFd())
+		if (everyone || (!everyone && it->second->getFd() != fd))
 			sendReply(it->second->getFd(), message);
 	}
 }

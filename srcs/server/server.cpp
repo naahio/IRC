@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 11:47:09 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 12:24:14 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,7 +199,7 @@ void	Server::listChannelModes(Channel * channel, int fd) {
 	user = this->getUser(fd);
 	if (!user)
 		return ;
-	reply = ":irc!~irc1337 " + ft_tostring(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
+	reply = this->name + ft_tostring(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
 	if (channel->isPrivate())
 		reply += "p";
 	if (channel->isSecret())
@@ -222,7 +222,7 @@ void	Server::listChannelModes(Channel * channel, int fd) {
 	}
 	reply2 += "\n";
 	sendReply(fd, reply + reply2);
-	sendReply(fd, ":irc!~irc1337 "
+	sendReply(fd, this->name
 		+ ft_tostring(RPL_CREATIONTIME) + " "
 		+ user->getNickname() + " "
 		+ channel->getName() + " "
@@ -240,7 +240,7 @@ void	Server::listChannelBans(Channel * channel, int fd) {
 		return ;
 	bans = channel->getBans();
 	for (it = bans.begin(); it != bans.end(); ++it) {
-		replyMessage += ":irc!~irc1337 "
+		replyMessage += this->name
 			+ ft_tostring(RPL_BANLIST) + " "
 			+ user->getNickname() + " "
 			+ channel->getName() + " "
@@ -248,7 +248,7 @@ void	Server::listChannelBans(Channel * channel, int fd) {
 			+ it->banMod + " "
 			+ ft_tostring(it->banTimestamp) + "\n";
 	}
-	replyMessage += ":irc!~irc1337 "
+	replyMessage += this->name
 		+ ft_tostring(RPL_ENDOFBANLIST) + " "
 		+ user->getNickname() + " "
 		+ channel->getName() + " "
@@ -380,12 +380,12 @@ bool	Server::accept_connections(void)
 			this->fds[this->nfds].fd = new_fd;
 			this->fds[this->nfds].events = POLLIN;
 			this->nfds++;
-			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
-			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
+			sendReply(new_fd, this->name + "NOTICE AUTH :*** Looking up your hostname...\n");
+			sendReply(new_fd, this->name + "NOTICE AUTH :*** Found your hostname\n");
 		}
 		else
 		{
-			sendReply(new_fd, ":irc!~irc1337 ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
+			sendReply(new_fd, this->name + "ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
 			std::cout << "Connection rejected : no space left ! " << new_fd << std::endl;
 			close(new_fd);
 		}
@@ -498,9 +498,11 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
 		}
 	} catch(myException & e) {
-		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),
-		ft_tostring(e.getERROR_NO()).c_str(), " ", this->getUser(msg.getSender())->getNickname().c_str()," "
-		,cmd[0].c_str()," ", e.what()));
+		sendReply(msg.getSender(), this->getName()
+				+ ft_tostring(e.getERROR_NO()) + " "
+				+ this->getUser(msg.getSender())->getNickname() + " "
+				+ cmd[0].c_str() + " "
+				+ e.what() + "\n");
 	}
 }
 

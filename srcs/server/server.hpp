@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 11:47:02 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 12:24:24 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,21 +31,18 @@
 # include <fstream>
 # include <sstream>
 # include <ctime>
-#include <sys/types.h>
-#include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/stat.h>
 # include <netdb.h>
-
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
 # include "../tools/tool.hpp"
 # include "../pars/msg.hpp"
-# include "../tools/Commands.hpp"
 
 # define BUFF_SIZE		512
 # define MAX_CONN		50
 # define TIMEOUT		3 * 60 * 1000
-# define SERVNAME 		
 
 class Server
 {
