@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/24 16:34:50 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:35:42 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ void reciveFile(std::vector<std::string> &vec)
             write(fd,buffer,1);
         }
         std::cout << "total byte recieved :  " << nb << std::endl;
-        std::cout << "The file recieved succefully  " << nb << std::endl;
+        std::cout << "The file has been recieved succefully :D" << std::endl;
         close(fd);
         close (client);
         exit (0);

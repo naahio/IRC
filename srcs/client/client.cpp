@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/24 12:51:23 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:25:36 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void reciveFile(std::vector<std::string> &vec)
         ss << vec[5];
         ss >> port;
         ss.clear();
-
+        
         std::cout << "Getting the file ...." << std::endl;
         std::cout << "ip address : " << vec[4].c_str() << std::endl;
         std::cout << "port       : " << port << std::endl;
