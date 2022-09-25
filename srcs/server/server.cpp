@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 12:24:14 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 13:31:06 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -449,6 +449,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
 			cmd[0][i] = toupper(cmd[0][i]);
+			//+ c,]mdpoint
 		if (!cmd[0].compare("HELP"))
 			helps(msg.getSender());
 		else if (!cmd[0].compare("USER"))
@@ -496,6 +497,15 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				RESPONDcmd(msg.getSender(),cmd);
 			// else if (!cmd[0].compare("PONG"))
 			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
+			else
+			{
+				sendReply(msg.getSender(),stringBuilder(8,this->getName().c_str(),
+							ft_tostring(ERR_UNKNOWNCOMMAND).c_str()," ",
+							user->getNickname().c_str()," ",cmd[0].c_str(),
+							" ",err_reply(ERR_UNKNOWNCOMMAND).c_str()));
+				return ;
+			}
+
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
