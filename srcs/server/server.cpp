@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/21 11:17:44 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:38:33 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,10 +130,10 @@ std::string const & Server::getVersion(void) const
 
 /*****************************[ Users Management ]*****************************/
 
-void	Server::addUser(int fd,char *ip) {
+void	Server::addUser(int fd,char *ip, char *postname) {
 	User *	user;
 
-	user = new User(fd,ip);
+	user = new User(fd, ip, postname);
 	this->users.insert(std::pair<int, User *>(fd, user));
 }
 
@@ -189,6 +189,71 @@ void	Server::deleteChannel(std::string name) {
 	}
 	delete channel->second;
 	this->channels.erase(channel);
+}
+
+void	Server::listChannelModes(Channel * channel, int fd) {
+	User *				user;
+	std::string			reply;
+	std::string			reply2;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	reply = ":irc!~irc1337 " + ft_tostring(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
+	if (channel->isPrivate())
+		reply += "p";
+	if (channel->isSecret())
+		reply += "s";
+	if (channel->isInviteOnly())
+		reply += "i";
+	if (!channel->isTopicSettable())
+		reply += "t";
+	if (channel->isMemberChatOnly())
+		reply += "n";
+	if (channel->isModerated())
+		reply += "m";
+	if (channel->getMembersLimit() != 0) {
+		reply += "l";
+		reply2 += " " + ft_tostring(channel->getMembersLimit());
+	}
+	if (channel->getKey() != "") {
+		reply += "k";
+		reply2 += " " + channel->getKey();
+	}
+	reply2 += "\n";
+	sendReply(fd, reply + reply2);
+	sendReply(fd, ":irc!~irc1337 "
+		+ ft_tostring(RPL_CREATIONTIME) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ ft_tostring(channel->getCreationTimestamp()) + "\n");
+}
+
+void	Server::listChannelBans(Channel * channel, int fd) {
+	User *							user;
+	std::string						replyMessage;
+	std::vector<t_bans>				bans;
+	std::vector<t_bans>::iterator	it;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	bans = channel->getBans();
+	for (it = bans.begin(); it != bans.end(); ++it) {
+		replyMessage += ":irc!~irc1337 "
+			+ ft_tostring(RPL_BANLIST) + " "
+			+ user->getNickname() + " "
+			+ channel->getName() + " "
+			+ it->banMask + " "
+			+ it->banMod + " "
+			+ ft_tostring(it->banTimestamp) + "\n";
+	}
+	replyMessage += ":irc!~irc1337 "
+		+ ft_tostring(RPL_ENDOFBANLIST) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ reply(RPL_ENDOFBANLIST) + "\n";
+	sendReply(fd, replyMessage);
 }
 
 /*****************************[ Server Management ]****************************/
@@ -303,10 +368,15 @@ bool	Server::accept_connections(void)
 		struct in_addr ipAddr = addr.sin_addr; 
 		char str[INET_ADDRSTRLEN];
 		inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
+        struct hostent *hp;
+
+
+  		hp = gethostbyaddr((const void *)&ipAddr, sizeof ipAddr, AF_INET);
+		
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
 		if (this->nfds <MAX_CONN)
 		{
-			this->addUser(new_fd,str);
+			this->addUser(new_fd,str, hp->h_name);
 			this->fds[this->nfds].fd = new_fd;
 			this->fds[this->nfds].events = POLLIN;
 			this->nfds++;
@@ -424,6 +494,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			else if (!cmd[0].compare("ACCEPT")||
 					!cmd[0].compare("DECLINE"))
 				RESPONDcmd(msg.getSender(),cmd);
+			// else if (!cmd[0].compare("PONG"))
+			// 	sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),

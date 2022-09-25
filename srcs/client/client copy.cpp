@@ -6,16 +6,63 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/25 09:35:42 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:54:45 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../server/server.hpp"
+# include <stdio.h>
+# include <vector>
+# include <stdlib.h>
+# include <sys/ioctl.h>
+# include <sys/poll.h>
+# include <sys/socket.h>
+# include <sys/time.h>
+# include <netinet/in.h>
+# include <errno.h>
+# include <iostream>
+# include <unistd.h>
+# include <cstring>
+# include <iterator>
+# include <map>
+# include <fcntl.h>
+# include <arpa/inet.h>
+# include <fstream>
+# include <sstream>
+# include <ctime>
+#include <sys/types.h>
+#include <sys/stat.h>
+# include <netdb.h>
+
 
 int flag = 1;
 
 // to do : handle errors 
 //:irc!~irc1337 NOTICE SEND tmp ip port size ACCEPTED :  fill will start sending 
+
+void	split(std::string const &s1,char delim,
+				std::vector<std::string> &out)
+{
+	std::stringstream X(s1);
+	std::string T;
+
+	while (std::getline(X,T,delim))
+	{
+		if (!T.empty())
+			out.push_back(T);
+	}
+}
+
+void	sendReply(int fd,const std::string &reply)
+{
+	size_t total = 0;
+	while (total != reply.length())
+	{
+		ssize_t nb = send(fd,reply.c_str() + total,reply.length() - total, 0);
+		if (nb == -1)
+			std::cout << "sending error" << std::endl; // to check later 
+		total += nb;
+	}
+}
 
 void reciveFile(std::vector<std::string> &vec)
 {
@@ -242,7 +289,7 @@ void    *reciving(void *arg)
     std::string reply;
     while (flag)
     {
-        memset(buff,0,BUFF_SIZE);
+        memset(buff,0,1024);
         rc = recv(*sock,buff,sizeof(buff),0);
         if (rc == 0)
         {

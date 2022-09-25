@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/24 11:20:47 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:39:28 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,9 @@
 
 /*************************[ Constructors/Destructors ]*************************/
 
-User::User(int _fd,char *ip)
+User::User(int _fd, char *ip, std::string post_name)
 {
+	this->postnumber	= post_name;
 	this->fd			= _fd;
 	this->username		= "";
 	this->nickname		= "";
@@ -63,6 +64,10 @@ std::string const & User::getFullName(void) const
 {
 	return (this->fullName);
 }
+std::string const & User::getPostNumber(void) const
+{
+	return (this->postnumber);
+}
 
 std::string	const & User::getPassword(void) const
 {
@@ -83,6 +88,18 @@ std::string const & User::getIpAddress(void) const
 	return (this->ipAddress);
 }
 
+std::string const	User::getIdentifier(void) const {
+	std::string	ident;
+
+	ident = this->nickname + "!" + this->username + "@" + this->ipAddress;
+	return (ident);
+}
+
+std::string const & User::getLog(void) const
+{
+	return (this->log);
+}
+
 Channel *	User::getChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator it;
 
@@ -96,6 +113,11 @@ Channel *	User::getChannel(std::string name) {
 std::map<std::string,size_t> & User::getFiles(void)
 {
 	return (this->files);
+}
+
+void	User::setLog(std::string time)
+{
+	this->log = time;
 }
 
 void	User::setFd(int _fd) {

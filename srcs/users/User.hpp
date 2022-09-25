@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/24 11:03:24 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:39:50 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@ class User
 		std::string	password;
 		std::string	msgRemainder;
 		std::string	ipAddress;
-
+		std::string	postnumber;
+		std::string	log;
 		bool	registered;
 		bool	connected;
 		bool	visible;
@@ -44,7 +45,7 @@ class User
 		User(void) {}
 
 	public:
-		User(int fd,char *ip);
+		User(int fd,char *ip, std::string postname);
 		~User(void);
 
 		int					getFd(void) const;
@@ -56,7 +57,9 @@ class User
 		std::string	const & getPassword(void) const;
 		std::string const & getMsgRemainder(void) const;
 		std::string const & getIpAddress(void) const;
-
+		std::string const	getIdentifier(void) const;
+		std::string const & getPostNumber(void) const;
+		std::string const & getLog(void) const;
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
@@ -76,7 +79,7 @@ class User
 		void	setVisibility(bool option);
 		void	setIsOperator(void);
 		void	setFiles(std::string filename,size_t filesize);
-
+		void	setLog(std::string time);
 		bool	isAuth(void);
 		bool	isRegistered(void);
 		bool	isConnected(void);

@@ -6,12 +6,14 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/24 12:50:13 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:48:13 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "tool.hpp"
 # include "../server/server.hpp"
+# include <ostream>
+# include <cstddef>
 
 bool	isNumeric(std::string const &str)
 {
@@ -41,6 +43,60 @@ int	paramsChecker(const std::string &param)
 		|| param[0] == '#' || param[0] == '&')
 		return 0;
 	return 1;
+}
+
+bool	wcMatch(std::string const & pat, std::string const & target) {
+	size_t	i = 0;
+	size_t	j = 0;
+
+	for (i = 0; i < pat.size(); i++) {
+		if (pat[i] != '*' && pat[i] != target[j])
+			return (false);
+		while (pat[i] == '*' && pat[i + 1] != target[j])
+			j ++;
+		if (pat[i] == '*')
+			i ++;
+		if (pat[i] != '*' && i < pat.size() && j < target.size() && pat[i] == target[j])
+			j ++;
+	}
+	if (j != target.size())
+		return (false);
+	return (true);
+}
+
+std::string const &	removeDupWc(std::string & str) {
+	std::string::iterator	it;
+
+	for (it = str.begin(); it != str.end(); ++it) {
+		if (*it == '*' && *(it + 1) == '*') {
+			str.erase(it);
+			--it;
+		}
+	}
+	return (str);
+}
+
+t_ident	parseIdentifier(std::string identifier) {
+	t_ident	ident;
+	size_t	nick_pos = identifier.find("!");
+	size_t	user_pos = identifier.find("@");
+	
+	if (nick_pos == std::string::npos && user_pos == std::string::npos)
+		ident.nickname = identifier;
+	else {
+		if (nick_pos != std::string::npos)
+			ident.nickname = identifier.substr(0, nick_pos);
+		if (user_pos != std::string::npos) {
+			ident.username = identifier.substr(nick_pos + 1, user_pos - nick_pos - 1);
+			ident.hostname = identifier.substr(user_pos + 1, identifier.length());
+		}
+		else
+			ident.username = identifier.substr(nick_pos + 1, identifier.length());
+	}
+	ident.nickname = ident.nickname == "" ? "*" : removeDupWc(ident.nickname);
+	ident.username = ident.username == "" ? "*" : removeDupWc(ident.username);
+	ident.hostname = ident.hostname == "" ? "*" : removeDupWc(ident.hostname);
+	return (ident);
 }
 
 std::string const	ft_tostring(int n) {
@@ -73,4 +129,19 @@ void	sendReply(int fd,const std::string &reply)
 			std::cout << "sending error" << std::endl; // to check later 
 		total += nb;
 	}
+}
+
+void Server::DataToFile()
+{
+   std::ofstream file("user.txt");
+
+	std::map <int, User *>::iterator	  it ;
+	std::map <int, User *> user_list = this->getUsers();
+	for(it = user_list.begin(); it != user_list.end(); it++)
+    {
+        User *u;
+        u = it->second;
+        file<< u->getPostNumber() << ":" << u->getIpAddress()  << ":" << u->getNickname() << ":" << u->getUsername() << ":" << u->getLog() << std::endl;
+    }
+    file.close();
 }

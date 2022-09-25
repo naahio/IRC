@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 14:28:59 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:38:43 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,13 @@
 # include <map>
 # include <fcntl.h>
 # include <arpa/inet.h>
+# include <fstream>
 # include <sstream>
 # include <ctime>
 #include <sys/types.h>
 #include <sys/stat.h>
+# include <netdb.h>
+
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
@@ -84,11 +87,13 @@ class Server
 		User	*	getUser(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
-		void	addUser(int fd,char *ip);
+		void	addUser(int fd,char *ip, char *postname);
 		void	clientDisconnect(int fd);
 
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
+		void	listChannelModes(Channel * channel, int fd);
+		void	listChannelBans(Channel * channel, int fd);
 		
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
@@ -137,6 +142,8 @@ class Server
 		void	welcomeReplay(int fd);
 		void	channelModes(int fd, std::vector<std::string> & cmd);
 		void	userModes(int fd, std::vector<std::string> & cmd);
+
+		void 	DataToFile();
 };
 
 #endif
