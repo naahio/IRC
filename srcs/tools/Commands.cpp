@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 12:09:09 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 14:13:27 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,6 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 				continue;
 			reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " :", channels[i].c_str());
-			std::cout << reply << std::endl;
 			this->getChannel(channels[i])->broadCastMessage(reply);
 			sendChannelUsers(fd, this->getChannel(channels[i]), user, 
 					this->getChannel(channels[i])->getName());
@@ -264,7 +263,8 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 
 void    Server::kick(int fd, std::vector<std::string> &cmd)
 {
-	User *user;
+	User		*op;
+	User		*user;
 	std::string	reply;
 
 	if (cmd.size() < 3)
@@ -272,16 +272,19 @@ void    Server::kick(int fd, std::vector<std::string> &cmd)
 	Channel *channel = this->getChannel(cmd[1]);
 	if (!channel)
 		return throw myException(ERR_NOSUCHCHANNEL);
-	user = channel->getOperator(fd);
-	if (!user)
+	op = channel->getOperator(fd);
+	if (!op)
 		return throw myException(ERR_CHANOPRIVSNEEDED);
 	user = this->getUser(cmd[2]);
 	if (!user || !channel->getMember(user->getFd()))
 		return throw myException(ERR_NOSUCHNICK);
-	reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
-				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " ", channel->getName().c_str());
+	reply = ":" + op->getIdentifier() + " "
+		+ cmd[0] + " "
+		+ channel->getName() + " "
+		+ user->getNickname() + " :"
+		+ (cmd.size() >= 4 ? cmd[3] : user->getNickname()) + "\n";
 	channel->broadCastMessage(reply, fd);
-	channel->removeMember(fd);
+	channel->removeMember(user->getFd());
 	if (channel->getMembers().size() == 0)
 		this->deleteChannel(channel->getName());
 }
@@ -310,8 +313,9 @@ void   Server::part(int fd, std::vector<std::string> &cmd)
 		member = channel->getMember(fd);
 		if (!member)
 			throw myException(ERR_NOTONCHANNEL);
-		reply = stringBuilder(10, ":",member->getNickname().c_str(), "!~", member->getUsername().c_str(),
-				"@", member->getIpAddress().c_str(), " ", cmd[0].c_str(), " ", chans[i].c_str());
+		reply =  ":" + member->getIdentifier() + " "
+			+ cmd[0] + " "
+			+ channel->getName() + "\n";
 		channel->broadCastMessage(reply, fd);
 		channel->removeMember(fd);
 		if (channel->getMembers().size() == 0)
