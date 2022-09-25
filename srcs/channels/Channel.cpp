@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/25 11:15:05 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 12:08:20 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -529,7 +529,7 @@ void	Channel::broadCastMessage(std::string & message, int fd, bool everyone) {
 		throw myException(ERR_CANNOTSENDTOCHAN);
 	}
 	for (it = this->members.begin(); it != this->members.end(); ++it) {
-		if (!everyone && it->second->getFd() != fd)
+		if (everyone || (!everyone && it->second->getFd() != fd))
 			sendReply(it->second->getFd(), message);
 	}
 }
