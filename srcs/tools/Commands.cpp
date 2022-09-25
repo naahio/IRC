@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 16:31:16 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 16:44:11 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -394,13 +394,13 @@ void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
 	channel = this->getChannel(cmd[1]);
 	if (!channel)
 		throw myException(ERR_NOSUCHCHANNEL);
-	op = channel->getOperator(fd);
-	if (!op)
-		throw myException(ERR_CHANOPRIVSNEEDED);
 	if (cmd.size() < 3 || cmd[2].empty()) {
 		this->listChannelModes(channel, fd);
 		return ;
 	}
+	op = channel->getOperator(fd);
+	if (!op)
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	for (size_t i = 0; i < cmd[2].length(); i++) {
 		try {
 			switch (cmd[2][i]) {
@@ -519,6 +519,10 @@ void	Server::userModes(int fd, std::vector<std::string> & cmd) {
 		throw myException(ERR_NOSUCHCHANNEL);
 	if (user->getFd() != fd)
 		throw myException(ERR_USERSDONTMATCH);
+	if (cmd.size() < 3 || cmd[2].empty()) {
+		this->listUserModes(user, fd);
+		return ;
+	}
 	for (size_t i = 0; i < cmd[2].length(); i++) {
 		try {
 			switch (cmd[2][i]) {

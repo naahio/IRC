@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 16:17:24 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 16:44:27 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,17 @@ void	Server::clientDisconnect(int fd) {
 	} catch (myException & e) {}
 }
 
+void	Server::listUserModes(User * user, int fd) {
+	std::string	reply;
+	std::string	reply2;
+
+	reply = this->name + ft_tostring(RPL_UMODEIS) + " " + user->getNickname() + " +";
+	if (user->isVisible())
+		reply += "i";
+	reply2 += "\n";
+	sendReply(fd, reply + reply2);
+}
+
 /****************************[ Channels Management ]***************************/
 
 void	Server::createChannel(std::string name, User & op) {
@@ -192,9 +203,9 @@ void	Server::deleteChannel(std::string name) {
 }
 
 void	Server::listChannelModes(Channel * channel, int fd) {
-	User *				user;
-	std::string			reply;
-	std::string			reply2;
+	User *		user;
+	std::string	reply;
+	std::string	reply2;
 
 	user = this->getUser(fd);
 	if (!user)
