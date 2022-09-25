@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 09:58:56 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 14:48:15 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ class User
 		bool    isoperator;
 		
 		std::map <std::string, Channel *>	channels;
-
+		std::map<std::string,size_t>  files;
 		User(void) {}
 
 	public:
@@ -57,11 +57,14 @@ class User
 		std::string	const & getPassword(void) const;
 		std::string const & getMsgRemainder(void) const;
 		std::string const & getIpAddress(void) const;
+		std::string const	getIdentifier(void) const;
 		std::string const & getPostNumber(void) const;
 		std::string const & getLog(void) const;
 		std::map <std::string, Channel *> &
 							getChannels(void);
 		Channel *			getChannel(std::string name);
+		std::map<std::string,size_t> &
+							getFiles(void) ;
 
 		void	setFd(int _fd);
 		void	setUsername(std::string user_name);
@@ -75,6 +78,7 @@ class User
 		void	setConnected(void);
 		void	setVisibility(bool option);
 		void	setIsOperator(void);
+		void	setFiles(std::string filename,size_t filesize);
 		void	setLog(std::string time);
 		bool	isAuth(void);
 		bool	isRegistered(void);
@@ -82,6 +86,7 @@ class User
 		bool	isVisible(void);
 		bool	isOperator(void);
 
+		void	removeFile(std::string file);
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);
 

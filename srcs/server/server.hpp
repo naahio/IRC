@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 10:05:54 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 14:46:19 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@
 # include <fstream>
 # include <sstream>
 # include <ctime>
+# include <sys/types.h>
+# include <sys/stat.h>
 # include <netdb.h>
 
 // # include "../users/User.hpp"
@@ -40,10 +42,9 @@
 # include "../bot/player/Player.hpp"
 
 
-# define BUFF_SIZE		1024
+# define BUFF_SIZE		512
 # define MAX_CONN		50
 # define TIMEOUT		3 * 60 * 1000
-# define SERVNAME 		
 
 class Server
 {
@@ -98,11 +99,16 @@ class Server
 
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
+		void	listChannelModes(Channel * channel, int fd);
+		void	listChannelBans(Channel * channel, int fd);
 		
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		int		splitCmd(std::string &cmd,
 						std::vector<std::string> &oneCmdParsed);
+
+		bool	ctcpMessage(std::string &cmd,std::vector<std::string> &vec);
+		void	fileTransfer(int fd,std::string & nick,std::vector<std::string> &vec);
 
 		int		Create_socket(void);
 		int		reusable_socket(void);
@@ -127,7 +133,10 @@ class Server
 		void	VERSIONcmd(int	fd);
 		void	TIMEcmd(int		fd);
 		void	ADMINcmd(int	fd);
-
+		void	SENDcmd(int		fd, std::vector<std::string> &cmd);
+		void	RESPONDcmd(int	fd, std::vector<std::string> &cmd);
+		void	sendingFile(User *sender,User *reciever,size_t fileSize);
+		
 		void    kick(int fd, std::vector<std::string> &cmd);
 		void    helps(int fd);
 		void    part(int fd, std::vector<std::string> &cmd);

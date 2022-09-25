@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 08:35:51 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 14:48:08 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,13 @@ std::string const & User::getIpAddress(void) const
 	return (this->ipAddress);
 }
 
+std::string const	User::getIdentifier(void) const {
+	std::string	ident;
+
+	ident = this->nickname + "!" + this->username + "@" + this->ipAddress;
+	return (ident);
+}
+
 std::string const & User::getLog(void) const
 {
 	return (this->log);
@@ -101,6 +108,11 @@ Channel *	User::getChannel(std::string name) {
 		return (it->second);
 	}
 	return (NULL);
+}
+
+std::map<std::string,size_t> & User::getFiles(void)
+{
+	return (this->files);
 }
 
 void	User::setLog(std::string time)
@@ -163,6 +175,10 @@ void	User::setIsOperator(void){
 	this->isoperator = true;
 }
 
+void	User::setFiles(std::string filename,size_t fileSize)
+{
+	this->files.insert(std::pair<std::string,size_t>(filename,fileSize));
+}
 /*****************************[ Member Functions ]*****************************/
 
 bool	User::isAuth(void) {
@@ -185,6 +201,14 @@ bool	User::isVisible(void) {
 
 bool	User::isOperator(void){
 	return this->isoperator;
+}
+
+void	User::removeFile(std::string file)
+{
+	std::map<std::string,size_t>::iterator it;
+
+	it = this->files.find(file);
+	this->files.erase(it);
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {

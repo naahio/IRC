@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/02 11:05:18 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/12 12:26:55 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/16 13:45:37 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ std::string	reply(int repl_no) {
 			return(":End of /WHO list");
 		case RPL_ENDOFNAMES:
 			return(":End of /NAMES list");
+		case RPL_ENDOFBANLIST:
+			return(":End of channel ban list");
 		case RPL_ENDOFINFO:
 			return(":End of /INFO list");
 		case RPL_YOUREOPER:

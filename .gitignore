@@ -31,9 +31,11 @@
 *.out
 *.app
 ircserv
+client
 
 #others
 .history
 .vscode
 *.dSYM/
 .DS_Store
+user.txt

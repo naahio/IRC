@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 13:38:46 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 14:45:41 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,6 +203,71 @@ void	Server::deleteChannel(std::string name) {
 	this->channels.erase(channel);
 }
 
+void	Server::listChannelModes(Channel * channel, int fd) {
+	User *				user;
+	std::string			reply;
+	std::string			reply2;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	reply = this->name + ft_tostring(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
+	if (channel->isPrivate())
+		reply += "p";
+	if (channel->isSecret())
+		reply += "s";
+	if (channel->isInviteOnly())
+		reply += "i";
+	if (!channel->isTopicSettable())
+		reply += "t";
+	if (channel->isMemberChatOnly())
+		reply += "n";
+	if (channel->isModerated())
+		reply += "m";
+	if (channel->getMembersLimit() != 0) {
+		reply += "l";
+		reply2 += " " + ft_tostring(channel->getMembersLimit());
+	}
+	if (channel->getKey() != "") {
+		reply += "k";
+		reply2 += " " + channel->getKey();
+	}
+	reply2 += "\n";
+	sendReply(fd, reply + reply2);
+	sendReply(fd, this->name
+		+ ft_tostring(RPL_CREATIONTIME) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ ft_tostring(channel->getCreationTimestamp()) + "\n");
+}
+
+void	Server::listChannelBans(Channel * channel, int fd) {
+	User *							user;
+	std::string						replyMessage;
+	std::vector<t_bans>				bans;
+	std::vector<t_bans>::iterator	it;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	bans = channel->getBans();
+	for (it = bans.begin(); it != bans.end(); ++it) {
+		replyMessage += this->name
+			+ ft_tostring(RPL_BANLIST) + " "
+			+ user->getNickname() + " "
+			+ channel->getName() + " "
+			+ it->banMask + " "
+			+ it->banMod + " "
+			+ ft_tostring(it->banTimestamp) + "\n";
+	}
+	replyMessage += this->name
+		+ ft_tostring(RPL_ENDOFBANLIST) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ reply(RPL_ENDOFBANLIST) + "\n";
+	sendReply(fd, replyMessage);
+}
+
 /*****************************[ Server Management ]****************************/
 
 int		Server::Create_socket(void)
@@ -327,12 +392,12 @@ bool	Server::accept_connections(void)
 			this->fds[this->nfds].fd = new_fd;
 			this->fds[this->nfds].events = POLLIN;
 			this->nfds++;
-			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Looking up your hostname...\n");
-			sendReply(new_fd, ":irc!~irc1337 NOTICE AUTH :*** Found your hostname\n");
+			sendReply(new_fd, this->name + "NOTICE AUTH :*** Looking up your hostname...\n");
+			sendReply(new_fd, this->name + "NOTICE AUTH :*** Found your hostname\n");
 		}
 		else
 		{
-			sendReply(new_fd, ":irc!~irc1337 ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
+			sendReply(new_fd, this->name + "ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
 			std::cout << "Connection rejected : no space left ! " << new_fd << std::endl;
 			close(new_fd);
 		}
@@ -341,7 +406,22 @@ bool	Server::accept_connections(void)
 }	
 /********************************[ Parsing ]**********************************/
 
-int Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+bool	Server::ctcpMessage(std::string &cmd,
+					std::vector<std::string> &vec)
+{
+	split(cmd,' ',vec);
+	if (vec.size() >= 5 && vec[0][0] == 0x01 && 
+		vec[0].find("DCC") != std::string::npos 
+		&& !vec[1].compare("SEND"))
+	{
+		std::cout << "Im here" << std::endl;
+		return true;
+	}
+	std::cout << "Im here 1" << std::endl;
+	return false;
+}
+
+int		Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
 {
 	std::vector<std::string> collonSplit;  
 
@@ -423,14 +503,29 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				KILLcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("TOPIC"))
 				topic(msg.getSender(), cmd);
+			else if (!cmd[0].compare("SEND"))
+				SENDcmd(msg.getSender(),cmd);
+			else if (!cmd[0].compare("ACCEPT")||
+					!cmd[0].compare("DECLINE"))
+				RESPONDcmd(msg.getSender(),cmd);
+			// else if (!cmd[0].compare("PONG"))
+			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
 			else
+			{
+				sendReply(msg.getSender(),stringBuilder(8,this->getName().c_str(),
+							ft_tostring(ERR_UNKNOWNCOMMAND).c_str()," ",
+							user->getNickname().c_str()," ",cmd[0].c_str(),
+							" ",err_reply(ERR_UNKNOWNCOMMAND).c_str()));
 				return ;
+			}
 			pl->add_Points(COMMANDS_POINT);
 		}
 	} catch(myException & e) {
-		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),
-		ft_tostring(e.getERROR_NO()).c_str(), " ", this->getUser(msg.getSender())->getNickname().c_str()," "
-		,cmd[0].c_str()," ", e.what()));
+		sendReply(msg.getSender(), this->getName()
+				+ ft_tostring(e.getERROR_NO()) + " "
+				+ this->getUser(msg.getSender())->getNickname() + " "
+				+ cmd[0].c_str() + " "
+				+ e.what() + "\n");
 	}
 }
 
@@ -454,7 +549,7 @@ bool	Server::recv_send_msg(int fd)
 	{
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
-			rc = recv(fd,buffer, sizeof(buffer), 0);
+			rc = recv(fd,buffer,510, 0);
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -471,6 +566,7 @@ bool	Server::recv_send_msg(int fd)
 			}
 			buffer[rc] = '\0';
 			buff += buffer;
+			std::cout << "rc : " <<  rc  << std::endl;
 		}
 		std::cout << " >>>>> "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");

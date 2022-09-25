@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/17 11:13:55 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 12:08:20 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ Channel::Channel(std::string _name) {
 	this->name = _name;
 	this->topic = "";
 	this->key = "";
+	this->creationTimestamp = std::time(0);
 	this->membersLimit = 0;
 	this->_private = false;
 	this->secret = false;
@@ -47,6 +48,10 @@ std::string const &	Channel::getTopic(void) const {
 
 std::string const &	Channel::getKey(void) const {
 	return (this->key);
+}
+
+std::time_t	Channel::getCreationTimestamp(void) const {
+	return (this->creationTimestamp);
 }
 
 size_t	Channel::getMembersLimit(void) const {
@@ -81,6 +86,10 @@ std::map <int, User *> &	Channel::getMembers(void) {
 	return (this->members);
 }
 
+std::map <int, User *> &	Channel::getInvitees(void) {
+	return (this->invitees);
+}
+
 std::vector <int> &	Channel::getOperators(void) {
 	return (this->operators);
 }
@@ -89,70 +98,163 @@ std::vector <int> &	Channel::getModerators(void) {
 	return (this->moderators);
 }
 
-std::vector <int> &	Channel::getInvitees(void) {
-	return (this->invitees);
+std::vector <t_bans> &	Channel::getBans(void) {
+	return (this->bans);
 }
 
 void	Channel::setTopic(std::string _topic, int fd) {
-	if (!this->topicSettable && !this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!this->topicSettable && !op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->topic = _topic;
+	reply = ":" + op->getIdentifier() + " "
+		+ "TOPIC" + " "
+		+ this->getName() + " "
+		+ ":" + _topic + "\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setKey(std::string _key, int fd) {
-	if (!this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	if (!this->key.empty())
 		throw myException(ERR_KEYSET);
 	this->key = _key;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ "+k " + _key + "\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setLimit(size_t limit, int fd) {
-	if (!this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
-	if (limit)
-		this->membersLimit = limit;
+	if (!limit)
+		return ;
+	this->membersLimit = limit;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ "+l " + ft_tostring(limit) + "\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setPrivate(bool option, int fd) {
-	if (!this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->_private = option;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ (option ? "+" : "-") + "p\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setSecret(bool option, int fd) {
-	if (!this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->secret = option;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ (option ? "+" : "-") + "s\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setMemberChatOnly(bool option, int fd) {
-	if (!this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->memberChatOnly = option;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ (option ? "+" : "-") + "n\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setInviteOnly(bool option, int fd) {
-	if (!this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->inviteOnly = option;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ (option ? "+" : "-") + "i\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setModerated(bool option, int fd) {
-	if (!this->getOperator(fd))
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->moderated = option;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ (option ? "+" : "-") + "m\n";
+	this->broadCastMessage(reply);
 }
 
 void	Channel::setTopicSettable(bool option, int fd) {
+	User *		op;
+	std::string	reply;
+
+	op = this->getOperator(fd);
+	if (!op)
+		throw myException(ERR_CHANOPRIVSNEEDED);
 	if (!this->getOperator(fd))
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->topicSettable = option;
+	reply = ":" + op->getIdentifier() + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ (option ? "+" : "-") + "t\n";
+	this->broadCastMessage(reply);
 }
 
 /*****************************[ Member Functions ]*****************************/
 
 User *	Channel::getMember(int fd) {
+	std::map<int, User *>::iterator	it;
+
+	it = this->members.find(fd);
+	if (it != this->members.end())
+		return (it->second);
+	return (NULL);
+}
+
+User *	Channel::getInvitee(int fd) {
 	std::map<int, User *>::iterator	it;
 
 	it = this->members.find(fd);
@@ -179,17 +281,10 @@ User *	Channel::getModerator(int fd) {
 	return (NULL);
 }
 
-User *	Channel::getInvitee(int fd) {
-	std::vector<int>::iterator	it;
-
-	it = std::find(this->invitees.begin(), this->invitees.end(), fd);
-	std::cout << *it << std::endl;
-	if (it != this->invitees.end())
-		return (this->getMember(fd));
-	return (NULL);
-}
-
 void	Channel::addMember(User * member, std::string _key) {
+	if (this->isBanned(member)) {
+		throw myException(ERR_BANNEDFROMCHAN);
+	}
 	if (this->inviteOnly && !this->getInvitee(member->getFd())) {
 		throw myException(ERR_INVITEONLYCHAN);
 	}
@@ -227,19 +322,47 @@ void	Channel::removeMember(int fd) {
 	}
 }
 
-void	Channel::addOperator(int fd) {
-	User *	member;
+void	Channel::addInvitee(User * invitee) {
+	this->invitees.insert(std::pair<int, User *>(invitee->getFd(), invitee));
+}
+
+void	Channel::removeInvitee(int fd) {
+	std::map<int, User *>::iterator	it;
+
+	it = this->invitees.find(fd);
+	if (it != this->invitees.end()) {
+		this->invitees.erase(it);
+	}
+}
+
+void	Channel::addOperator(int fd, int opFd) {
+	User *		member;
+	User *		op;
+	std::string	reply;
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
 		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	this->operators.push_back(fd);
+	if (opFd != -1) {
+		op = this->getOperator(opFd);
+		if (!op)
+			return ;
+		reply = ":" + op->getIdentifier() + " "
+			+ "MODE" + " "
+			+ this->getName() + " "
+			+ "+o" + " "
+			+ member->getNickname() + "\n";
+		this->broadCastMessage(reply);
+	}
 }
 
-void	Channel::removeOperator(int fd) {
+void	Channel::removeOperator(int fd, int opFd) {
 	User *						member;
+	User *						op;
 	std::vector<int>::iterator	it;
+	std::string					reply;
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
@@ -247,23 +370,49 @@ void	Channel::removeOperator(int fd) {
 	}
 	it = std::find(this->operators.begin(), this->operators.end(), fd);
 	if (it != this->operators.end()) {
+		if (opFd != -1) {
+			op = this->getOperator(opFd);
+			if (!op)
+				return ;
+			reply = ":" + op->getIdentifier() + " "
+				+ "MODE" + " "
+				+ this->getName() + " "
+				+ "-o" + " "
+				+ member->getNickname() + "\n";
+			this->broadCastMessage(reply);
+		}
 		this->operators.erase(it);
 	}
 }
 
-void	Channel::addModerator(int fd) {
-	User *	member;
+void	Channel::addModerator(int fd, int opFd) {
+	User *		member;
+	User *		op;
+	std::string	reply;
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
 		throw myException(ERR_USERNOTINCHANNEL);
 	}
 	this->moderators.push_back(fd);
+	if (opFd != -1) {
+		op = this->getOperator(opFd);
+		if (!op)
+			return ;
+		reply = ":" + op->getIdentifier() + " "
+			+ "MODE" + " "
+			+ this->getName() + " "
+			+ "+v" + " "
+			+ member->getNickname() + "\n";
+		this->broadCastMessage(reply);
+	}
 }
 
-void	Channel::removeModerator(int fd) {
+void	Channel::removeModerator(int fd, int opFd) {
 	User *						member;
+	User *						op;
 	std::vector<int>::iterator	it;
+	std::string					reply;
 	
 	member = this->getMember(fd);
 	if (member == NULL) {
@@ -271,37 +420,116 @@ void	Channel::removeModerator(int fd) {
 	}
 	it = std::find(this->moderators.begin(), this->moderators.end(), fd);
 	if (it != this->moderators.end()) {
+		if (opFd != -1) {
+			op = this->getOperator(opFd);
+			if (!op)
+				return ;
+			reply = ":" + op->getIdentifier() + " "
+				+ "MODE" + " "
+				+ this->getName() + " "
+				+ "-v" + " "
+				+ member->getNickname() + "\n";
+			this->broadCastMessage(reply);
+		}
 		this->moderators.erase(it);
 	}
 }
 
-void	Channel::addInvitee(int fd) {
-	this->invitees.push_back(fd);
+#include <iostream>
+void	Channel::addBan(std::string banMask, int fd) {
+	User *		mod;
+	t_bans		ban;
+	t_ident		ident;
+	std::string reply;
+
+	mod = this->getOperator(fd);
+	if (!mod)
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	ident = parseIdentifier(banMask);
+	ban.banMask = ident.nickname + "!" + ident.username + "@" + ident.hostname;
+	ban.banMod = mod->getNickname() + "!" + mod->getUsername() + "@" + mod->getIpAddress();
+	ban.banTimestamp = std::time(0);
+	std::cout << "nickname: " << ident.nickname << std::endl;
+	std::cout << "username: " << ident.username << std::endl;
+	std::cout << "hostname: " << ident.hostname << std::endl;
+	if (!this->isBanned(ban.banMask)) {
+		this->bans.push_back(ban);
+	}
+	reply = ":" + ban.banMod + " "
+		+ "MODE" + " "
+		+ this->getName() + " "
+		+ "+b" + " "
+		+ ban.banMask + "\n";
+	this->broadCastMessage(reply);
 }
 
-void	Channel::removeInvitee(int fd) {
-	User *						member;
-	std::vector<int>::iterator	it;
+void	Channel::removeBan(std::string banMask, int fd) {
+	User *							op;
+	std::vector<t_bans>::iterator	it;
+	t_ident							ident, ident2;
+	std::string 					reply;
 	
-	member = this->getMember(fd);
-	if (member == NULL) {
-		throw myException(ERR_USERNOTINCHANNEL);
-	}
-	it = std::find(this->invitees.begin(), this->invitees.end(), fd);
-	if (it != this->invitees.end()) {
-		this->invitees.erase(it);
+	op = this->getOperator(fd);
+	if (!op)
+		throw myException(ERR_CHANOPRIVSNEEDED);
+	ident = parseIdentifier(banMask);
+	for (it = this->bans.begin(); it != this->bans.end(); ++it) {
+		ident2 = parseIdentifier(it->banMask);
+		if (ident.nickname == ident2.nickname
+			&& ident.username == ident2.username
+			&& ident.hostname == ident2.hostname) {
+			this->bans.erase(it);
+			reply = ":" + op->getIdentifier() + " "
+				+ "MODE" + " "
+				+ this->getName() + " "
+				+ "+b" + " "
+				+ banMask + "\n";
+			this->broadCastMessage(reply);
+			break ;
+		}
 	}
 }
 
-void	Channel::broadCastMessage(std::string & message, int fd) {
+bool	Channel::isBanned(User * user) {
+	std::vector<t_bans>::iterator	it;
+	t_ident							ident;
+
+	for (it = this->bans.begin(); it != this->bans.end(); ++it) {
+		ident = parseIdentifier(it->banMask);
+		if (wcMatch(ident.nickname, user->getNickname())
+			&& wcMatch(ident.username, user->getUsername())
+			&& wcMatch(ident.hostname, user->getHostName())) {
+			return (true);
+		}
+	}
+	return (false);
+}
+
+bool	Channel::isBanned(std::string banMask) {
+	std::vector<t_bans>::iterator	it;
+	t_ident							ident, ident2;
+
+	ident = parseIdentifier(banMask);
+	for (it = this->bans.begin(); it != this->bans.end(); ++it) {
+		ident2 = parseIdentifier(it->banMask);
+		if (wcMatch(ident2.nickname, ident.nickname)
+			&& wcMatch(ident2.username, ident.username)
+			&& wcMatch(ident2.hostname, ident.hostname)) {
+			return (true);
+		}
+	}
+	return (false);
+}
+
+void	Channel::broadCastMessage(std::string & message, int fd, bool everyone) {
 	std::map<int, User *>::iterator	it;
 
-	if ((this->memberChatOnly && !this->getMember(fd))
-		|| (fd != -1 && this->moderated && !this->getModerator(fd))) {
+	if (fd != -1 && ((this->memberChatOnly && !this->getMember(fd))
+		|| (this->moderated && !this->getModerator(fd)))) {
 		throw myException(ERR_CANNOTSENDTOCHAN);
 	}
 	for (it = this->members.begin(); it != this->members.end(); ++it) {
-		// if (fd != it->second->getFd())
+		if (everyone || (!everyone && it->second->getFd() != fd))
 			sendReply(it->second->getFd(), message);
 	}
 }
