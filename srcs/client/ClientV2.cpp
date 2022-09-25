@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client copy.cpp                                    :+:      :+:    :+:   */
+/*   ClientV2.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/25 09:54:45 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 09:56:11 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@
 # include <fstream>
 # include <sstream>
 # include <ctime>
-#include <sys/types.h>
-#include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/stat.h>
 # include <netdb.h>
 
 
