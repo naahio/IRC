@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 11:54:42 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 12:09:09 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 		{	
 			std::string reply;
 			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(), "@",user->getIpAddress().c_str(), " PRIVMSG ", chan->getName().c_str(), " :", cmd[2].c_str()), 
-			chan->broadCastMessage(reply, user->getFd());
+			chan->broadCastMessage(reply, user->getFd(), false);
 		}
 		else if (target)
 		{
