@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 11:54:20 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 13:31:06 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -449,6 +449,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
 			cmd[0][i] = toupper(cmd[0][i]);
+			//+ c,]mdpoint
 		if (!cmd[0].compare("HELP"))
 			helps(msg.getSender());
 		else if (!cmd[0].compare("USER"))
@@ -495,7 +496,16 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 					!cmd[0].compare("DECLINE"))
 				RESPONDcmd(msg.getSender(),cmd);
 			// else if (!cmd[0].compare("PONG"))
-			// 	sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
+			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
+			else
+			{
+				sendReply(msg.getSender(),stringBuilder(8,this->getName().c_str(),
+							ft_tostring(ERR_UNKNOWNCOMMAND).c_str()," ",
+							user->getNickname().c_str()," ",cmd[0].c_str(),
+							" ",err_reply(ERR_UNKNOWNCOMMAND).c_str()));
+				return ;
+			}
+
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
@@ -526,7 +536,7 @@ bool	Server::recv_send_msg(int fd)
 	{
 		while (buff.find_first_of("\r\n") == std::string::npos)
 		{
-			rc = recv(fd,buffer, sizeof(buffer), 0);
+			rc = recv(fd,buffer,510, 0);
 			if (rc == -1)
 			{
 				if (errno != EWOULDBLOCK)
@@ -543,6 +553,7 @@ bool	Server::recv_send_msg(int fd)
 			}
 			buffer[rc] = '\0';
 			buff += buffer;
+			std::cout << "rc : " <<  rc  << std::endl;
 		}
 		std::cout << " >>>>> "<< buffer << std::endl;
 		size_t pos = buff.find_last_of("\r\n");

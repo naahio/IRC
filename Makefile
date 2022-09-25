@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
+#    By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/24 16:15:59 by hel-makh         ###   ########.fr        #
+#    Updated: 2022/09/25 13:36:10 by ybensell         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,6 +34,8 @@ FLAGS		=	-Wall -Wextra -Werror -std=c++98
 
 RM			=	rm -f
 
+CLIENT		= ./srcs/client/ClientV2.cpp
+
 %.o:%.cpp	$(HEADERS)
 			c++ $(FLAGS) -c $< -o $@
 
@@ -48,6 +50,8 @@ clean:
 fclean:		clean
 			@$(RM) $(NAME)
 
+client:
+			c++ $(FLAGS) $(CLIENT) -o client
 re:			fclean all
 
 .PHONY:		all clean fclean re

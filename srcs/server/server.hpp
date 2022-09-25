@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 11:54:00 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 12:24:24 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@
 # include "../tools/tool.hpp"
 # include "../pars/msg.hpp"
 
-# define BUFF_SIZE		1024
+# define BUFF_SIZE		512
 # define MAX_CONN		50
 # define TIMEOUT		3 * 60 * 1000
 

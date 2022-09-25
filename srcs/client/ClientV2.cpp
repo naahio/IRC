@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/21 14:14:58 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/25 09:56:11 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 13:37:13 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,7 +231,6 @@ void  checkFileSending(std::string &reply)
 {
     std::vector<std::string> vec;
     std::stringstream ss;
-    size_t fileSize;
 
     split(reply,' ',vec);
     if (!vec[1].compare("NOTICE") && !vec[2].compare("SEND"))
@@ -266,7 +265,6 @@ bool checkPayload(std::string &payload)
             return false;
         }
 
-        __int64_t	fileSize;
         struct stat buf;
         fstat(fd,&buf);
         ss << buf.st_size;
@@ -311,11 +309,9 @@ int main(int argc,char **argv)
         return 1;
     std::stringstream ss;
     struct sockaddr_in addr;
-    int sock,client,rc;
+    int sock,client;
     uint16_t port;
     std::string payload;
-    char buff[1024];
-    pid_t pid;
     std::string reply;
 
     ss << argv[2];
