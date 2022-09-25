@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/21 15:51:58 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 10:05:54 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,12 @@
 # include <ctime>
 # include <netdb.h>
 
-
-# include "../users/User.hpp"
+// # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
 # include "../tools/tool.hpp"
 # include "../pars/msg.hpp"
-# include "../tools/Commands.hpp"
+# include "../bot/player/Player.hpp"
+
 
 # define BUFF_SIZE		1024
 # define MAX_CONN		50
@@ -51,6 +51,10 @@ class Server
 		std::map <int, User *>				users;
 		std::map <std::string, Channel *>	channels;
 		std::map <std::string, std::string> operators;
+		
+		std::map <std::string, Player *> players_list;
+		std::map <std::string, Player *> players;
+
 		
 		int				socket_fd;
 		struct pollfd	fds[MAX_CONN];
@@ -65,6 +69,7 @@ class Server
 		Server(void) {}
 
 	public:
+
 		Server(int port, std::string password);
 		~Server(void);
 
@@ -80,6 +85,9 @@ class Server
 		std::map <int, User *> &			        getUsers(void);
 		std::map <std::string, Channel *> &	        getChannels(void);
 		std::map <std::string, std::string> &  		getOperators(void);
+
+		std::map <std::string, Player *> &	        getPlayers_List(void);
+		std::map <std::string, Player *> &  		getPlayers(void);
 	
 		User	*	getUser(int fd);
 		User	*	getUser(std::string nickname);

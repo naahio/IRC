@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 15:13:45 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 14:14:28 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,8 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	std::vector<std::string>	channels;
 	std::vector<std::string>	keys;
 	std::string					reply;
-
+	Player	*player = new Player();
+	Player	*pl = player->getPlayer(this->players_list, fd);
 	user = this->getUser(fd);
 	if (!user)
 		return ;
@@ -56,9 +57,13 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			if (chan && !chan->getMember(fd))
 				chan->addMember(user, keys[i]);
 			else if (!chan)
+			{
+				pl->add_Points(CREATED_CHANNEL_POINT);
 				this->createChannel(channels[i], *user);
+			}
 			else
 				continue;
+			pl->add_Points(CHANNEL_POINT);
            	reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " :", channels[i].c_str());
 			std::cout << reply << std::endl;
@@ -704,7 +709,7 @@ void	Server::ADMINcmd(int fd)
 				ft_tostring(RPL_ADMINLOC1).c_str(), " ",
 				this->getUser(fd)->getNickname().c_str(),
 				" :The Server is in Morocco,Khouribga"));
-	
+
 	sendReply(fd, stringBuilder(5,this->getName().c_str(),
 				ft_tostring(RPL_ADMINLOC2).c_str(), " ",
 				this->getUser(fd)->getNickname().c_str(),
@@ -717,21 +722,34 @@ void	Server::ADMINcmd(int fd)
 				" :hh@dontemailme.com"));
 }
 
+void Server::DataToFile()
+{
+   std::ofstream file("user.txt");
+
+	std::map <int, User *>::iterator	  it ;
+	std::map <int, User *> user_list = this->getUsers();
+	for(it = user_list.begin(); it != user_list.end(); it++)
+    {
+        User *u;
+        u = it->second;
+        file << u->getFd()<< " " << u->getPostNumber() << " " << u->getIpAddress()  << " " << u->getNickname() << " " << u->getUsername() << std::endl;
+    }
+    file.close();
+}
+
 void	Server::welcomeReplay(int fd)
 {
-	User *user;
-	User *bot;
+	User	*user;
+	User	*bot;
+	Player	*player;
+
 	user = this->getUser(fd);
-	
 	time_t now = time(0);
+	std::cout << "now : " << now <<  std::endl;
    	user->setLog(ctime(&now));
-	this->DataToFile();
-	bot = this->getUser("/lily");
-	if (bot)
-		sendReply(bot->getFd(), " : L_DAPET");
 	if (!user)
 		return ;
-	
+	player = new Player();
 	sendReply(fd, stringBuilder(9,this->getName().c_str(),"001 ",
 				user->getNickname().c_str(),
 				" :Welcome to the Internet Relay Network ",
@@ -748,5 +766,19 @@ void	Server::welcomeReplay(int fd)
 	sendReply(fd, stringBuilder(5,this->getName().c_str(),"003 ",
 				user->getNickname().c_str(),
 				" :This server was created :",this->creationTime));
-
+				
+	if (user->isAuth())
+	{
+		bot = this->getUser("/lily");
+		if (bot)
+			sendReply(bot->getFd(), " : L_DAPET");
+		std::cout << "looking for user " << std::endl;
+		// if (this->players.empty())
+		// 	player->load_data(this->players);
+		if (this->players.empty() || player->check_exist(this->players, user) == false)
+			player->add_player(this->players_list, user);
+		else
+			player->link_data(this->players_list, this->players, user);
+		std::cout << "number of Player : " << this->getPlayers_List().size() << std::endl;
+	}
 }

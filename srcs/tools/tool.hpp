@@ -6,13 +6,16 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/18 11:28:05 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 12:20:36 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef TOOL_HPP
 # define TOOL_HPP
 
+# include <iostream>
+# include <ostream>
+# include <cstddef>
 # include <string>
 # include <sstream>
 # include <vector>
@@ -44,6 +47,7 @@ void				split(std::string const &s1, char delim, std::vector<std::string> &out);
 int					paramsChecker(const std::string &param);
 
 std::string const	ft_tostring(int n);
+int					ft_toInt(std::string const & str);
 std::string const	stringBuilder(int n, ...);
 void				sendReply(int fd, const std::string &reply);
 

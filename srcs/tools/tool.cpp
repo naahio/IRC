@@ -6,14 +6,11 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/22 11:44:02 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 12:22:01 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "tool.hpp"
-# include "../server/server.hpp"
-# include <ostream>
-# include <cstddef>
 
 bool	isNumeric(std::string const &str)
 {
@@ -52,6 +49,16 @@ std::string const	ft_tostring(int n) {
 	return (ss.str());
 }
 
+int	ft_toInt(std::string const & str)
+{
+	std::stringstream	ss;
+	int	i;
+
+	ss << str;
+	ss >> i;
+	return (i);
+}
+
 std::string const	stringBuilder(int n, ...) {
 	va_list		ptr;
 	std::string	str;
@@ -75,19 +82,4 @@ void	sendReply(int fd,const std::string &reply)
 			std::cout << "sending error" << std::endl; // to check later 
 		total += nb;
 	}
-}
-
-void Server::DataToFile()
-{
-   std::ofstream file("user.txt");
-
-	std::map <int, User *>::iterator	  it ;
-	std::map <int, User *> user_list = this->getUsers();
-	for(it = user_list.begin(); it != user_list.end(); it++)
-    {
-        User *u;
-        u = it->second;
-        file << u->getFd()<< " " << u->getPostNumber() << " " << u->getIpAddress()  << " " << u->getNickname() << " " << u->getUsername() << std::endl;
-    }
-    file.close();
 }

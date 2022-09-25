@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 08:47:18 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 08:35:51 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,4 +199,17 @@ void	User::leaveChannel(std::string name) {
 		throw myException(ERR_NOTONCHANNEL);
 	}
 	this->channels.erase(it);
+}
+
+User*	User::operator = (const User& user) 
+{ 
+    this->fd			= user.fd;
+    this->username		= user.username;
+	this->nickname		= user.nickname;
+	this->hostName		= user.hostName;
+	this->ipAddress		= user.ipAddress;
+	this->postnumber	= user.postnumber;
+	this->connected		= user.connected;
+
+	return (this);
 }

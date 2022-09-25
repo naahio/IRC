@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/20 10:58:29 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 14:39:54 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,9 +43,12 @@ int main(int argc, char **argv)
 		|| !serv.listen_from_socket())
 		close_server(serv, EXIT_FAILURE);
 
-	// std::system("php -f /bot/bot.php");
 	serv.poll_trait();
 
+	Player *player = new Player();
+	if (serv.getPlayers().empty())
+		player->load_data(serv.getPlayers());
+	std::cout << "number of existing Player : " << serv.getPlayers().size() << std::endl;
 	do
 	{
 		std::cout << "Waiting for a poll . . . " << std::endl;
@@ -77,6 +80,8 @@ int main(int argc, char **argv)
 			{
 				if (!serv.recv_send_msg(serv.getFds()[i].fd))
 				{
+					player->save_data(serv.getPlayers_List());
+					player->load_data(serv.getPlayers());
 					serv.clientDisconnect(serv.getFds()[i].fd);
 					for (int j = i; j < serv.getNfds(); j++)
 					{

@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:27 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 08:46:46 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 09:58:56 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,8 @@ class User
 
 		void	joinChannel(Channel & channel, std::string name);
 		void	leaveChannel(std::string name);
+
+		User*	operator = (const User& user);
 };
 
 #endif

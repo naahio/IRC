@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/22 09:13:34 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/25 13:38:46 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,18 @@ std::map<std::string, Channel *> &	Server::getChannels(void) {
 std::map <std::string, std::string> &  Server::getOperators(void){
 	return (this->operators);
 }
+
+//----------------------------- PLAYER :
+
+std::map<std::string, Player *> &	Server::getPlayers_List(void) {
+	return (this->players_list);
+}
+
+std::map<std::string, Player *> &	Server::getPlayers(void) {
+	return (this->players);
+}
+
+//----------------------------- 
 
 User *	Server::getUser(int fd) {
 	std::map<int, User *>::iterator	user;
@@ -363,7 +375,9 @@ void	Server::parsExecCommands(Msg &msg)
 
 void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
-	User *user;
+	User	*user;
+	Player	*player = new Player();
+	Player	*pl = player->getPlayer(this->players_list, msg.getSender());
 
 	user = this->getUser(msg.getSender());
 	try {
@@ -409,8 +423,9 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				KILLcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("TOPIC"))
 				topic(msg.getSender(), cmd);
-			// else if (!cmd[0].compare("PONG"))
-			// 	sendReply(msg.getSender(), stringBuilder(2, this->getName().c_str(), ))
+			else
+				return ;
+			pl->add_Points(COMMANDS_POINT);
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(),stringBuilder(8, this->getName().c_str(),
