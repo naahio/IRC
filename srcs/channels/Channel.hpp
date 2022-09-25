@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/24 11:59:47 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/25 11:14:43 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ class Channel {
 		bool	isBanned(User * user);
 		bool	isBanned(std::string banMask);
 		
-		void	broadCastMessage(std::string & message, int fd = -1);
+		void	broadCastMessage(std::string & message, int fd = -1, bool everyone = true);
 };
 
 #endif

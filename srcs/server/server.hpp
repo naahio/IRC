@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 09:38:43 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/25 11:54:00 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,21 +31,18 @@
 # include <fstream>
 # include <sstream>
 # include <ctime>
-#include <sys/types.h>
-#include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/stat.h>
 # include <netdb.h>
-
 
 # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
 # include "../tools/tool.hpp"
 # include "../pars/msg.hpp"
-# include "../tools/Commands.hpp"
 
 # define BUFF_SIZE		1024
 # define MAX_CONN		50
 # define TIMEOUT		3 * 60 * 1000
-# define SERVNAME 		
 
 class Server
 {
