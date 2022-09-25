@@ -6,7 +6,7 @@
 #    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/24 12:36:20 by hel-makh         ###   ########.fr        #
+#    Updated: 2022/09/24 16:15:59 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,8 +17,7 @@ HEADERS		=	./srcs/server/server.hpp\
 				./srcs/pars/msg.hpp\
 				./srcs/channels/Channel.hpp\
 				./srcs/tools/tool.hpp\
-				./srcs/tools/replies.hpp\
-				./srcs/tools/Commands.hpp
+				./srcs/tools/replies.hpp
 
 SRCS		=	srcs/main.cpp\
 				./srcs/server/server.cpp\
