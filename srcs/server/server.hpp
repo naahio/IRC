@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 10:15:50 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/26 11:58:19 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,12 +91,13 @@ class Server
 		void	addUser(int fd,User *user);
 		void	addGuest(int fd,char *ip, char *postname);  
 		void	clientDisconnect(int fd);
+		void	listUserModes(User * user, int fd);
 
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		void	listChannelModes(Channel * channel, int fd);
 		void	listChannelBans(Channel * channel, int fd);
-		
+
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		int		splitCmd(std::string &cmd,
@@ -121,7 +122,7 @@ class Server
 		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
 		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
 		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd);
-		void	INVITcmd(int	fd,	std::vector<std::string> &cmd);
+		void	INVITEcmd(int	fd,	std::vector<std::string> &cmd);
 		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
 		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);
 		void	KILLcmd(int		fd,	std::vector<std::string> &cmd);
