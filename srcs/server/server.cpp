@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 11:05:39 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/26 11:54:08 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -486,6 +486,12 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	User *user;
 
 	user = this->getUser(msg.getSender());
+	if (!user)
+	{
+		user = this->getGuest(msg.getSender());
+		if (!user)
+			return;
+	}
 	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
 			cmd[0][i] = toupper(cmd[0][i]);
@@ -550,7 +556,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
 				+ ft_tostring(e.getERROR_NO()) + " "
-				+ this->getUser(msg.getSender())->getNickname() + " "
+				+ user->getNickname() + " "
 				+ cmd[0].c_str() + " "
 				+ e.what() + "\n");
 	}
