@@ -6,11 +6,13 @@
 #    By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/25 14:44:58 by mbabela          ###   ########.fr        #
+#    Updated: 2022/09/26 13:00:34 by mbabela          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		=	ircserv
+
+CLIENT_NAME	=	client
 
 HEADERS		=	./srcs/server/server.hpp\
 				./srcs/users/User.hpp\
@@ -21,7 +23,7 @@ HEADERS		=	./srcs/server/server.hpp\
 				./srcs/tools/tool.hpp\
 				./srcs/tools/replies.hpp
 
-SRCS		=	srcs/main.cpp\
+SRCS		=	./srcs/main.cpp\
 				./srcs/server/server.cpp\
 				./srcs/users/User.cpp\
 				./srcs/pars/msg.cpp\
@@ -30,14 +32,14 @@ SRCS		=	srcs/main.cpp\
 				./srcs/tools/replies.cpp\
 				./srcs/tools/Commands.cpp\
 				./srcs/tools/tool.cpp
-				
+
+CLIENT_SRCS	=	./srcs/client/ClientV2.cpp
+
 OBJS		=	$(SRCS:.cpp=.o)
 
 FLAGS		=	-Wall -Wextra -Werror -std=c++98
 
 RM			=	rm -f
-
-CLIENT		= ./srcs/client/ClientV2.cpp
 
 %.o:%.cpp	$(HEADERS)
 			c++ $(FLAGS) -c $< -o $@
@@ -45,16 +47,16 @@ CLIENT		= ./srcs/client/ClientV2.cpp
 $(NAME):	$(OBJS) $(HEADERS)
 			c++ $(FLAGS) $(OBJS) -o $(NAME)
 
-all:		$(NAME)
+client:
+			c++ $(FLAGS) $(CLIENT_SRCS) -o $(CLIENT_NAME)
+
+all:		$(NAME) client
 
 clean:
 			@$(RM) $(OBJS)
 
 fclean:		clean
-			@$(RM) $(NAME)
-
-client:
-			c++ $(FLAGS) $(CLIENT) -o client
+			@$(RM) $(NAME) $(CLIENT_NAME)
 re:			fclean all
 
 .PHONY:		all clean fclean re

@@ -1,18 +1,1 @@
-
-
-
-
-
-
-
-
-
-
-
-message = :lime!~limeChat@10.12.8.5 PRIVMSG naahio :where is nickname
-
-sender_nickname : sender = split('!') + sender[0].split(':') => sender_nickname[1]
-command.split() => command[3]
-	|
-	|
-	------> where : looking for command[5]
+4 naahio e2r8p5.1337.ma LEVEL_2 Fighter 9 user 80

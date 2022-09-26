@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/25 09:11:58 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 11:07:56 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 13:28:38 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 
 # define LVL0					0
 # define LVL1					50
-# define LVL2					150
+# define LVL2					62
 # define LVL3					200
 # define LVL4					250
 # define LVL5					260

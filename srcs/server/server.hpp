@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 09:02:02 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 12:59:58 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ class Server
 {
 	private:
 		std::map <int, User *>				users;
+		std::map <int, User *>				guests; 
 		std::map <std::string, Channel *>	channels;
 		std::map <std::string, std::string> operators;
 		
@@ -83,6 +84,7 @@ class Server
 		std::string const & getVersion(void) const;
 
 		std::map <int, User *> &			        getUsers(void);
+		std::map <int, User *> &			        getGuests(void); 
 		std::map <std::string, Channel *> &	        getChannels(void);
 		std::map <std::string, std::string> &  		getOperators(void);
 
@@ -90,16 +92,20 @@ class Server
 	
 		User	*	getUser(int fd);
 		User	*	getUser(std::string nickname);
+		User	*	getGuest(int fd);
+		User	*	getGuest(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
-		void	addUser(int fd,char *ip, char *postname);
+		void	addUser(int fd,User *user);
+		void	addGuest(int fd,char *ip, char *postname);  
 		void	clientDisconnect(int fd);
+		void	listUserModes(User * user, int fd);
 
 		void	createChannel(std::string name, User & op);
 		void	deleteChannel(std::string name);
 		void	listChannelModes(Channel * channel, int fd);
 		void	listChannelBans(Channel * channel, int fd);
-		
+
 		void	parsExecCommands(Msg &msg);
 		void	cmdExec(Msg &msg,std::vector<std::string> &cmd);
 		int		splitCmd(std::string &cmd,
@@ -124,7 +130,7 @@ class Server
 		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
 		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
 		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd);
-		void	INVITcmd(int	fd,	std::vector<std::string> &cmd);
+		void	INVITEcmd(int	fd,	std::vector<std::string> &cmd);
 		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
 		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);
 		void	KILLcmd(int		fd,	std::vector<std::string> &cmd);

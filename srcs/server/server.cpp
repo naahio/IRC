@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 11:47:33 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 13:39:12 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,11 @@ std::map<int, User *> &	Server::getUsers(void) {
 	return (this->users);
 }
 
+std::map <int, User *> & Server::getGuests(void)
+{
+	return (this->guests);
+}
+
 std::map<std::string, Channel *> &	Server::getChannels(void) {
 	return (this->channels);
 }
@@ -116,6 +121,29 @@ User *	Server::getUser(std::string nickname) {
 	return (NULL);
 }
 
+User	*	Server::getGuest(int fd)
+{
+	std::map<int, User *>::iterator	user;
+
+	user = this->guests.find(fd);
+	if (user != this->guests.end()) {
+		return (user->second);
+	}
+	return (NULL);
+}
+
+User	*	Server::getGuest(std::string nickname)
+{
+	std::map<int, User *>::iterator	user;
+
+	for (user = this->guests.begin(); user != this->guests.end(); ++user) {
+		if (user->second->getNickname() == nickname) {
+			return (user->second);
+		}
+	}
+	return (NULL);
+}
+
 Channel *	Server::getChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator	channel;
 	
@@ -138,35 +166,64 @@ std::string const & Server::getVersion(void) const
 
 /*****************************[ Users Management ]*****************************/
 
-void	Server::addUser(int fd,char *ip, char *postname) {
+void	Server::addUser(int fd,User *user) {
+	
+	this->users.insert(std::pair<int, User *>(fd, user));
+}
+
+void	Server::addGuest(int fd,char *ip, char *postname)
+{
 	User *	user;
 
 	user = new User(fd, ip, postname);
-	this->users.insert(std::pair<int, User *>(fd, user));
+	this->guests.insert(std::pair<int, User *>(fd, user));
 }
 
 void	Server::clientDisconnect(int fd) {
 	try {
 		std::map<int, User *>::iterator		user;
 		std::map<std::string, Channel *>	channels;
-		this->save_data();
 		time_t now = time(0);
+		std::cout << "logout : " << now << std::endl;
 		Player *player = this->getPlayer(this->getUser(fd)->getNickname());
-		player->set_logtime(now - player->getLogtime());
+		player->set_logtime(now - player->getLoged_In());
+		std::cout << "LogTime : " << player->getLogtime() << std::endl;
 		player->add_Points(player->getLogtime() * 0.05);
 		std::cout << "deleting : " << this->getUser(fd)->getNickname() << std::endl;
+		this->save_data();
 		this->getPlayers_List().erase(this->getUser(fd)->getNickname());
 		std::cout << "deleted : " << std::endl;
+
 		user = this->users.find(fd);
 		if (user != this->users.end()) {
 			channels = user->second->getChannels();
 			while (!channels.empty()) {
 				channels.begin()->second->removeMember(fd);
+				channels = user->second->getChannels();
 			}
 			delete user->second;
 			this->users.erase(user);
 		}
+		else
+		{
+			user = this->guests.find(fd);
+			if (user != this->guests.end()) {
+				delete user->second;
+				this->guests.erase(user);
+			}
+		}
 	} catch (myException & e) {}
+}
+
+void	Server::listUserModes(User * user, int fd) {
+	std::string	reply;
+	std::string	reply2;
+
+	reply = this->name + ft_tostring(RPL_UMODEIS) + " " + user->getNickname() + " +";
+	if (user->isVisible())
+		reply += "i";
+	reply2 += "\n";
+	sendReply(fd, reply + reply2);
 }
 
 /****************************[ Channels Management ]***************************/
@@ -207,9 +264,9 @@ void	Server::deleteChannel(std::string name) {
 }
 
 void	Server::listChannelModes(Channel * channel, int fd) {
-	User *				user;
-	std::string			reply;
-	std::string			reply2;
+	User *		user;
+	std::string	reply;
+	std::string	reply2;
 
 	user = this->getUser(fd);
 	if (!user)
@@ -391,7 +448,7 @@ bool	Server::accept_connections(void)
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
 		if (this->nfds <MAX_CONN)
 		{
-			this->addUser(new_fd,str, hp->h_name);
+			this->addGuest(new_fd,str, hp->h_name);
 			this->fds[this->nfds].fd = new_fd;
 			this->fds[this->nfds].events = POLLIN;
 			this->nfds++;
@@ -417,10 +474,8 @@ bool	Server::ctcpMessage(std::string &cmd,
 		vec[0].find("DCC") != std::string::npos 
 		&& !vec[1].compare("SEND"))
 	{
-		std::cout << "Im here" << std::endl;
 		return true;
 	}
-	std::cout << "Im here 1" << std::endl;
 	return false;
 }
 
@@ -462,6 +517,12 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	Player	*pl = this->getPlayer(msg.getSender());
 
 	user = this->getUser(msg.getSender());
+	if (!user)
+	{
+		user = this->getGuest(msg.getSender());
+		if (!user)
+			return;
+	}
 	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
 			cmd[0][i] = toupper(cmd[0][i]);
@@ -483,6 +544,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			ADMINcmd(msg.getSender());
 		else if (user && user->isAuth())
 		{
+			// if (!cmd[0].compare("NOTICE"))
+			// 	NOTICEcmd(msg.getSender(), cmd);
 			if (!cmd[0].compare("PRIVMSG"))
 				PRIVMSGcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("JOIN"))
@@ -497,8 +560,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				list(msg.getSender(), cmd);
 			else if (!cmd[0].compare("NAMES"))
 				names(msg.getSender(), cmd);
-			else if (!cmd[0].compare("INVIT"))
-				INVITcmd(msg.getSender(), cmd);
+			else if (!cmd[0].compare("INVITE"))
+				INVITEcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("OPER"))
 				OPERcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("KILL"))
@@ -514,22 +577,19 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
 			else
 			{
-				sendReply(msg.getSender(),stringBuilder(8,this->getName().c_str(),
-							ft_tostring(ERR_UNKNOWNCOMMAND).c_str()," ",
-							user->getNickname().c_str()," ",cmd[0].c_str(),
-							" ",err_reply(ERR_UNKNOWNCOMMAND).c_str()));
-				return ;
+				throw myException(ERR_UNKNOWNCOMMAND);
 			}
 			pl->add_Points(COMMANDS_POINT);
 			pl->Level_Up();
 			this->save_data();
+
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
-				+ ft_tostring(e.getERROR_NO()) + " "
-				+ this->getUser(msg.getSender())->getNickname() + " "
-				+ cmd[0].c_str() + " "
-				+ e.what() + "\n");
+			+ ft_tostring(e.getERROR_NO()) + " "
+			+ user->getNickname() + " "
+			+ cmd[0].c_str() + " "
+			+ e.what() + "\n");
 	}
 }
 
@@ -545,7 +605,10 @@ bool	Server::recv_send_msg(int fd)
 
 	user = this->getUser(fd);
 	if (!user)
-		return (false);
+	{
+		if (!(user = this->getGuest(fd)))
+			return false;
+	}
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
 	memset(buffer,0,BUFF_SIZE);
@@ -590,6 +653,7 @@ void	Server::add_player(User *user) // first time connected
 	time_t now = time(0);
 	Player *player = new Player(user);
 	player->set_Loged_In(now);
+	std::cout << "login : " << player->getLoged_In() << std::endl;
 	std::cout << "NEW PLAYER ADDED  : " << player->getnickname() << std::endl;
 	this->players_list.insert(std::pair<std::string, Player *>(user->getNickname(), player));
 	// this->save_data(players_list);
@@ -597,11 +661,12 @@ void	Server::add_player(User *user) // first time connected
 
 void	Server::link_data(User *user)
 {
-	time_t now = time(0);
 	std::cout << " geting player  " << std::endl;
 	Player *player = this->getPlayer(user->getNickname());
 	player->set_user(user);
+	time_t now = time(0);
 	player->set_Loged_In(now);
+	std::cout << "re login : " << player->getLoged_In() << std::endl;
 	std::cout << " PLAYER LINKED  : " << player->getnickname() << std::endl;
 	this->players_list.insert(std::pair<std::string, Player *>(user->getNickname(), player));
 	std::cout << " SAVED " << std::endl;
@@ -644,7 +709,7 @@ void	Server::save_data()
     {
         Player *player;
         player = it->second;
-        file << player->getUser()->getNickname() << " " << player->getUser()->getNickname() << " " << player->getUser()->getPostNumber() << " " << player->getLevel() << " " << player->getStatus()  << " " << player->getLogtime() << " " << player->getRank() <<  " " << player->getPoint() << std::endl;
+        file << player->getUser()->getFd() << " " << player->getUser()->getNickname() << " " << player->getUser()->getPostNumber() << " " << player->getLevel() << " " << player->getStatus()  << " " << player->getLogtime() << " " << player->getRank() <<  " " << player->getPoint() << std::endl;
     }
     file.close();
 }
