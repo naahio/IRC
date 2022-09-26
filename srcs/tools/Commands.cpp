@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 13:19:07 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 16:10:53 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -805,7 +805,6 @@ void Server::DataToFile()
 void	Server::welcomeReplay(int fd)
 {
 	User	*user;
-	User	*bot;
 	Player	*player;
 
 	user = this->getUser(fd);
@@ -835,9 +834,6 @@ void	Server::welcomeReplay(int fd)
 				
 	if (user->isAuth())
 	{
-		bot = this->getUser("/lily");
-		if (bot)
-			sendReply(bot->getFd(), " : L_DAPET");
 		std::cout << "looking for user " << std::endl;
 		this->load_data();
 		if (this->players_list.empty() || this->check_exist(user) == false)

@@ -21,13 +21,7 @@ class player:
 		self.logtime	= logtime
 		self.rank 		= rank
 		self.points 	= points
-
-class sender:
-    
-    def __init__(self):
-        self.nickname = ""
-
-  
+ 
 class lily:
     
     socket = socket.socket()
@@ -40,8 +34,9 @@ class lily:
     
     def serv_connect(self, server, port, username, password, nickname, channel):
         print("Connecting to " + server)
-        if self.socket.connect((server, port)):
-            self.socket.send(bytes("PASS " + password + "\n"))
+        self.socket.connect((server, port))
+        
+        self.socket.send(bytes("PASS " + password + "\n"))
         self.socket.send(bytes("USER " + username + " *" + " *" + " *" + "\n"))
         self.socket.send(bytes("NICK " + nickname + "\n"))
         
@@ -60,27 +55,55 @@ class lily:
             for line in csv_file:
                 words = line.split()
                 results.append((words[0:]))
-            for fd, post, ip, nickname, username in results:
-                player = player()
-                player.creat_player(fd, ip, post, nickname, username)
-                user_list[fd] = player
+            for fd, nickname, post, level, status, logtime, rank, points in results:
+                playr = player()
+                playr.creat_player(fd, nickname, post, level, status, logtime, rank, points)
+                user_list[fd] = playr
         return user_list
     
+    def get_player(self, sender):
+        i = 1
+        for u in user_list:
+            player = user_list[u]
+            if player.nickname == sender:
+                i = 0
+                return player
+        if i == 1:
+            self.send_msg(sender, "USER NOT FOUND !")
+
+    def pars_message(self, message):
+        splt = message.split('!')
+        splt = splt[0].split(':')
+        return splt[1]
+
     def fin_user(self, looking_for, user_list, sender):
         i = 1
         for u in user_list:
             player = user_list[u]
             if player.nickname == looking_for:
                 i = 0
-                self.send_msg(sender, player.post) 
+                pst = player.post.split('.')
+                self.send_msg(sender, pst[0]) 
                 break
         if i == 1:
-            self.send_msg(sender, "USER NOT FOUND !") 
-    
-    def pars_message(message):
-        splt = message.split()   
-                
+            self.send_msg(sender, "USER NOT FOUND !")
 
+    def palyer_profile(self, sender):
+        player = self.get_player(sender)
+        print("Nickname	: " + player.nickname)
+        print("Level    : " + player.level)
+        print("Status   : " + player.status)
+        print("LogTime  : " + player.logtime)
+        print("Rank     : " + player.rank)
+        print("Points   : " + player.points)
+        if player:
+            self.send_msg(sender, ("Nickname	= " + player.nickname))
+            self.send_msg(sender, ("Level    = " + player.level))
+            self.send_msg(sender, ("Status   = " + player.status))
+            self.send_msg(sender, ("LogTime  = " + player.logtime))
+            self.send_msg(sender, ("Rank     = " + player.rank))
+            self.send_msg(sender, ("Points   = " + player.points))
+        
 IRC_SERV 	=	"10.12.8.5"
 IRC_PORT 	=	9999
 CHANNEL  	=	"#General"
@@ -91,24 +114,28 @@ PASSWORD 	=	"1337"
 irc = lily()
 irc.serv_connect(IRC_SERV, IRC_PORT, BOT_USER, PASSWORD, BOT_NICK, CHANNEL)
 user_list = {}
-player = player()
+playr = player()
 
 while True:
     message = irc.serv_response()
-    if "WHERE" in message:
-        cmd = message.split("!")
-        cmd = cmd[0].split(":")
-        irc.send_msg(cmd[1],"Looking for the USER . . .")
+    if message:
+    	print("message : " +message)
+    if message:
+        sender = irc.pars_message(message)
+    if "whereis" in message:
+        irc.send_msg(sender,"Looking for the USER . . .")
         w = message.split()
-        irc.fin_user(w[2], user_list, cmd[1])
+        irc.fin_user(w[4], user_list, sender)
+    elif "profile" in message:
+        irc.palyer_profile(sender)
     elif "L_DAPET" in message:
         user_list = irc.read_file()
         print("-*----------*-")
         for u in user_list:
             print(user_list[u].nickname)
-    elif "PRIVMSG" in message:
+    elif "help" in message:
         cmd = message.split("!")
         cmd = cmd[0].split(":")
-        irc.send_msg(cmd[1], "cmd available [find nickname] ! waiting for the commands from the dev . . .")
+        irc.send_msg(cmd[1], "this is lily, please User < profile > to see your profile or < whereis + nickname >  to find a player")
     if not message:
     	break

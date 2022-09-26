@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 13:39:12 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 16:10:58 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,15 +184,17 @@ void	Server::clientDisconnect(int fd) {
 		std::map<int, User *>::iterator		user;
 		std::map<std::string, Channel *>	channels;
 		time_t now = time(0);
-		std::cout << "logout : " << now << std::endl;
-		Player *player = this->getPlayer(this->getUser(fd)->getNickname());
-		player->set_logtime(now - player->getLoged_In());
-		std::cout << "LogTime : " << player->getLogtime() << std::endl;
-		player->add_Points(player->getLogtime() * 0.05);
-		std::cout << "deleting : " << this->getUser(fd)->getNickname() << std::endl;
-		this->save_data();
-		this->getPlayers_List().erase(this->getUser(fd)->getNickname());
-		std::cout << "deleted : " << std::endl;
+		User *u = this->getUser(fd);
+		if (u)
+		{
+			Player *player = this->getPlayer(u->getNickname());
+			player->set_logtime(now - player->getLoged_In());
+			player->add_Points(player->getLogtime() * 0.5);
+			std::cout << "deleting : " << u->getNickname() << std::endl;
+			this->save_data();
+			this->getPlayers_List().erase(u->getNickname());
+			std::cout << "deleted : " << std::endl;
+		}
 
 		user = this->users.find(fd);
 		if (user != this->users.end()) {
@@ -703,8 +705,12 @@ bool	Server::load_data()
 
 void	Server::save_data()
 {
+	User	*bot;
 	std::ofstream file("/Users/mbabela/Desktop/IRC/user.txt");
-	std::map <std::string, Player *>::iterator	  it ;
+	std::map <std::string, Player *>::iterator	  it;
+	bot = this->getUser("/lily");
+	if (bot)
+		sendReply(bot->getFd(), " : L_DAPET");
 	for(it = this->players_list.begin(); it != this->players_list.end(); it++)
     {
         Player *player;

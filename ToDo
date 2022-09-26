@@ -38,7 +38,7 @@
 
 
 
-		message = :lime!~limeChat@10.12.8.5 PRIVMSG naahio :where is nickname
+		message = :lime!~limeChat@10.12.8.5 PRIVMSG naahio :whereis nickname
 
 		sender_nickname : sender = split('!') + sender[0].split(':') => sender_nickname[1]
 		command.split() => command[3]
