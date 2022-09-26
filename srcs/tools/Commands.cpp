@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 19:07:34 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/26 11:16:45 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,13 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			Channel *chan = this->getChannel(channels[i]);
 			if (chan && chan->getMember(fd))
 				continue;
-			if (!chan)
-				this->createChannel(channels[i], *user);
-			else
+			if (chan) {
 				chan->addMember(user, keys[i]);
+			}
+			else {
+				this->createChannel(channels[i], *user);
+				chan = this->getChannel(channels[i]);
+			}
 			rply = ":" + user->getIdentifier() + " "
 				+ cmd[0] + " :"
 				+ chan->getName() + "\n";
@@ -121,7 +124,6 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 		else if (!target && !chan)
 			throw myException(ERR_NOSUCHNICK);
 	}
-
 }
 
 void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
