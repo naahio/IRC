@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 16:44:27 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/26 11:35:00 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,12 +141,14 @@ void	Server::clientDisconnect(int fd) {
 	try {
 		std::map<int, User *>::iterator		user;
 		std::map<std::string, Channel *>	channels;
+		std::map<std::string, Channel *>::iterator	it;
 
 		user = this->users.find(fd);
 		if (user != this->users.end()) {
 			channels = user->second->getChannels();
 			while (!channels.empty()) {
 				channels.begin()->second->removeMember(fd);
+				channels = user->second->getChannels();
 			}
 			delete user->second;
 			this->users.erase(user);
@@ -454,7 +456,7 @@ void	Server::parsExecCommands(Msg &msg)
 
 void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
-	User *user;
+	User	*user;
 
 	user = this->getUser(msg.getSender());
 	try {
@@ -479,6 +481,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			ADMINcmd(msg.getSender());
 		else if (user && user->isAuth())
 		{
+			// if (!cmd[0].compare("NOTICE"))
+			// 	NOTICEcmd(msg.getSender(), cmd);
 			if (!cmd[0].compare("PRIVMSG"))
 				PRIVMSGcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("JOIN"))
@@ -509,21 +513,15 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			// else if (!cmd[0].compare("PONG"))
 			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
 			else
-			{
-				sendReply(msg.getSender(),stringBuilder(8,this->getName().c_str(),
-							ft_tostring(ERR_UNKNOWNCOMMAND).c_str()," ",
-							user->getNickname().c_str()," ",cmd[0].c_str(),
-							" ",err_reply(ERR_UNKNOWNCOMMAND).c_str()));
-				return ;
-			}
+				throw myException(ERR_UNKNOWNCOMMAND);
 
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
-				+ ft_tostring(e.getERROR_NO()) + " "
-				+ this->getUser(msg.getSender())->getNickname() + " "
-				+ cmd[0].c_str() + " "
-				+ e.what() + "\n");
+			+ ft_tostring(e.getERROR_NO()) + " "
+			+ user->getNickname() + " "
+			+ cmd[0].c_str() + " "
+			+ e.what() + "\n");
 	}
 }
 
