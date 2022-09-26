@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 11:58:38 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/26 12:11:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,10 +62,13 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			Channel *chan = this->getChannel(channels[i]);
 			if (chan && chan->getMember(fd))
 				continue;
-			if (!chan)
-				this->createChannel(channels[i], *user);
-			else
+			if (chan) {
 				chan->addMember(user, keys[i]);
+			}
+			else {
+				this->createChannel(channels[i], *user);
+				chan = this->getChannel(channels[i]);
+			}
 			rply = ":" + user->getIdentifier() + " "
 				+ cmd[0] + " :"
 				+ chan->getName() + "\n";
@@ -121,7 +124,6 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 		else if (!target && !chan)
 			throw myException(ERR_NOSUCHNICK);
 	}
-
 }
 
 void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
@@ -320,7 +322,7 @@ void	Server::part(int fd, std::vector<std::string> &cmd)
 	if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
 	split(cmd[1], ',', chans);
-	for (i=0; i < chans.size(); i++)
+	for (i = 0; i < chans.size(); i++)
 	{
 		channel = this->getChannel(chans[i]);
 		if (!channel)

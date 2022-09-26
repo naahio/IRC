@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 11:58:13 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/26 12:13:41 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -564,10 +564,10 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
-				+ ft_tostring(e.getERROR_NO()) + " "
-				+ user->getNickname() + " "
-				+ cmd[0].c_str() + " "
-				+ e.what() + "\n");
+			+ ft_tostring(e.getERROR_NO()) + " "
+			+ user->getNickname() + " "
+			+ cmd[0].c_str() + " "
+			+ e.what() + "\n");
 	}
 }
 
