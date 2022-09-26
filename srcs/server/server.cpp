@@ -6,7 +6,7 @@
 /*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 13:31:06 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/26 11:05:39 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,11 @@ std::map<int, User *> &	Server::getUsers(void) {
 	return (this->users);
 }
 
+std::map <int, User *> & Server::getGuests(void)
+{
+	return (this->guests);
+}
+
 std::map<std::string, Channel *> &	Server::getChannels(void) {
 	return (this->channels);
 }
@@ -108,6 +113,29 @@ User *	Server::getUser(std::string nickname) {
 	return (NULL);
 }
 
+User	*	Server::getGuest(int fd)
+{
+	std::map<int, User *>::iterator	user;
+
+	user = this->guests.find(fd);
+	if (user != this->guests.end()) {
+		return (user->second);
+	}
+	return (NULL);
+}
+
+User	*	Server::getGuest(std::string nickname)
+{
+	std::map<int, User *>::iterator	user;
+
+	for (user = this->guests.begin(); user != this->guests.end(); ++user) {
+		if (user->second->getNickname() == nickname) {
+			return (user->second);
+		}
+	}
+	return (NULL);
+}
+
 Channel *	Server::getChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator	channel;
 	
@@ -130,11 +158,17 @@ std::string const & Server::getVersion(void) const
 
 /*****************************[ Users Management ]*****************************/
 
-void	Server::addUser(int fd,char *ip, char *postname) {
+void	Server::addUser(int fd,User *user) {
+	
+	this->users.insert(std::pair<int, User *>(fd, user));
+}
+
+void	Server::addGuest(int fd,char *ip, char *postname)
+{
 	User *	user;
 
 	user = new User(fd, ip, postname);
-	this->users.insert(std::pair<int, User *>(fd, user));
+	this->guests.insert(std::pair<int, User *>(fd, user));
 }
 
 void	Server::clientDisconnect(int fd) {
@@ -150,6 +184,14 @@ void	Server::clientDisconnect(int fd) {
 			}
 			delete user->second;
 			this->users.erase(user);
+		}
+		else
+		{
+			user = this->guests.find(fd);
+			if (user != this->guests.end()) {
+				delete user->second;
+				this->guests.erase(user);
+			}
 		}
 	} catch (myException & e) {}
 }
@@ -376,7 +418,7 @@ bool	Server::accept_connections(void)
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
 		if (this->nfds <MAX_CONN)
 		{
-			this->addUser(new_fd,str, hp->h_name);
+			this->addGuest(new_fd,str, hp->h_name);
 			this->fds[this->nfds].fd = new_fd;
 			this->fds[this->nfds].events = POLLIN;
 			this->nfds++;
@@ -402,10 +444,8 @@ bool	Server::ctcpMessage(std::string &cmd,
 		vec[0].find("DCC") != std::string::npos 
 		&& !vec[1].compare("SEND"))
 	{
-		std::cout << "Im here" << std::endl;
 		return true;
 	}
-	std::cout << "Im here 1" << std::endl;
 	return false;
 }
 
@@ -482,7 +522,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				list(msg.getSender(), cmd);
 			else if (!cmd[0].compare("NAMES"))
 				names(msg.getSender(), cmd);
-			else if (!cmd[0].compare("INVIT"))
+			else if (!cmd[0].compare("INVITE"))
 				INVITcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("OPER"))
 				OPERcmd(msg.getSender(), cmd);
@@ -528,7 +568,10 @@ bool	Server::recv_send_msg(int fd)
 
 	user = this->getUser(fd);
 	if (!user)
-		return (false);
+	{
+		if (!(user = this->getGuest(fd)))
+			return false;
+	}
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
 	memset(buffer,0,BUFF_SIZE);

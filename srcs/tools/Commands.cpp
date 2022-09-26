@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 12:09:09 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/26 10:54:29 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(fd);
+	user = this->getGuest(fd);
 	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
@@ -142,7 +142,7 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 	std::string reply;
-	user = this->getUser(fd);
+	user = this->getGuest(fd);
 	if (!user)
 		return ;
 	if (user->isAuth())
@@ -160,8 +160,10 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			welcomeReplay(fd);
 			user->setRegistered();
+			this->addUser(fd,user);
+			this->guests.erase(this->guests.find(fd));
+			welcomeReplay(fd);
 		}
 		else
 		{
@@ -177,7 +179,7 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(fd);
+	user = this->getGuest(fd);
 	if (!user)
 		return;
 	if (cmd.size() < 2)
@@ -186,7 +188,7 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (!paramsChecker(cmd[1]))
 			throw myException(ERR_ERRONEUSNICKNAME);
-		else if (this->getUser(cmd[1]))
+		else if (this->getUser(cmd[1]) || this->getGuest(cmd[1]))
 			throw myException(ERR_NICKNAMEINUSE);
 		if (user->isAuth())
 			sendReply(fd,stringBuilder(7,":",user->getNickname().c_str(),"!~",this->getName().c_str(),
@@ -197,8 +199,10 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			welcomeReplay(fd);
 			user->setRegistered();
+			this->addUser(fd,user);
+			this->guests.erase(this->guests.find(fd));
+			welcomeReplay(fd);
 		}
 		else
 		{
@@ -258,6 +262,7 @@ void	Server::INVITcmd(int fd,std::vector<std::string> &cmd)
 	if (channel->getMember(invit->getFd()))
 		throw myException(ERR_USERONCHANNEL);
 	channel->addInvitee(invit);
+	//sendReply(invit->getFd(),stringBuilder(6,":",user->getNickname().c_str(),));
 	send(fd,"hh sardtlo invite\n",sizeof("hh sardtlo invite\n"),0);
 	// here we send RPL_INVITING reply
 }
@@ -611,7 +616,10 @@ void    Server::QUITcmd(int fd, std::vector<std::string> & cmd)
 
 	user = this->getUser(fd);
 	if (!user)
-		return ;
+	{
+		if (!(user = this->getGuest(fd)))
+			return ;
+	}
 	if (!cmd[1].empty())
 		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", cmd[1].c_str(), ")");
 	else
