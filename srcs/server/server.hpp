@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 14:46:19 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 09:02:02 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,8 @@ class Server
 		std::map <std::string, std::string> operators;
 		
 		std::map <std::string, Player *> players_list;
-		std::map <std::string, Player *> players;
 
-		
+
 		int				socket_fd;
 		struct pollfd	fds[MAX_CONN];
 		int				nfds;
@@ -88,7 +87,6 @@ class Server
 		std::map <std::string, std::string> &  		getOperators(void);
 
 		std::map <std::string, Player *> &	        getPlayers_List(void);
-		std::map <std::string, Player *> &  		getPlayers(void);
 	
 		User	*	getUser(int fd);
 		User	*	getUser(std::string nickname);
@@ -151,6 +149,15 @@ class Server
 		void	userModes(int fd, std::vector<std::string> & cmd);
 
 		void 	DataToFile();
+		void	add_player(User *user);
+		void	link_data(User *user);
+		bool	load_data();
+		void	save_data();
+		bool	check_exist(User *user);
+
+		Player *	getPlayer(std::string nickname);
+		Player *	getPlayer(int fd);
+		
 };
 
 #endif

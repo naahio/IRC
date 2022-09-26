@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 14:39:54 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 09:04:59 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,9 @@ int main(int argc, char **argv)
 
 	serv.poll_trait();
 
-	Player *player = new Player();
-	if (serv.getPlayers().empty())
-		player->load_data(serv.getPlayers());
-	std::cout << "number of existing Player : " << serv.getPlayers().size() << std::endl;
+	if (serv.getPlayers_List().empty())
+		serv.load_data();
+	std::cout << "number of existing Player : " << serv.getPlayers_List().size() << std::endl;
 	do
 	{
 		std::cout << "Waiting for a poll . . . " << std::endl;
@@ -80,8 +79,6 @@ int main(int argc, char **argv)
 			{
 				if (!serv.recv_send_msg(serv.getFds()[i].fd))
 				{
-					player->save_data(serv.getPlayers_List());
-					player->load_data(serv.getPlayers());
 					serv.clientDisconnect(serv.getFds()[i].fd);
 					for (int j = i; j < serv.getNfds(); j++)
 					{

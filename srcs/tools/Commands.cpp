@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 14:54:42 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 11:36:17 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,8 +41,9 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	std::vector<std::string>	channels;
 	std::vector<std::string>	keys;
 	std::string					reply;
-	Player	*player = new Player();
-	Player	*pl = player->getPlayer(this->players_list, fd);
+
+	Player	*pl = this->getPlayer(fd);
+
 	user = this->getUser(fd);
 	if (!user)
 		return ;
@@ -62,12 +63,14 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 				chan->addMember(user, keys[i]);
 			else if (!chan)
 			{
-				pl->add_Points(CREATED_CHANNEL_POINT);
+				if (pl)
+					pl->add_Points(CREATED_CHANNEL_POINT);
 				this->createChannel(channels[i], *user);
 			}
 			else
 				continue;
-			pl->add_Points(CHANNEL_POINT);
+			if (pl)
+				pl->add_Points(CHANNEL_POINT);
 			reply = stringBuilder(10, ":",user->getNickname().c_str(), "!~", user->getUsername().c_str(),
 				"@",user->getIpAddress().c_str()," ", cmd[0].c_str(), " :", channels[i].c_str());
 			std::cout << reply << std::endl;
@@ -803,20 +806,18 @@ void	Server::welcomeReplay(int fd)
 		if (bot)
 			sendReply(bot->getFd(), " : L_DAPET");
 		std::cout << "looking for user " << std::endl;
-		// if (this->players.empty())
-		// 	player->load_data(this->players);
-		if (this->players.empty() || player->check_exist(this->players, user) == false)
-			player->add_player(this->players_list, user);
+		this->load_data();
+		if (this->players_list.empty() || this->check_exist(user) == false)
+			this->add_player(user);
 		else
-			player->link_data(this->players_list, this->players, user);
-		std::cout << "number of Player : " << this->getPlayers_List().size() << std::endl;
+			this->link_data(user);
+		std::cout << "number of Player : " << this->players_list.size() << std::endl;
 
 	}
 }
 
 void	Server::fileTransfer(int fd,std::string &nick,std::vector<std::string> &vec)
 {
-
 	std::string rply;
  	User *reciever;
  	reciever = this->getUser(nick);
@@ -877,8 +878,7 @@ void	Server::RESPONDcmd(int	fd, std::vector<std::string> &cmd)
 	if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
 
-	 // :irc!~irc1337 NOTICE SEND ToDo ACCEPT : peng ACCEPTED the file
-	 
+ 
 	std::map<std::string,size_t> files;
 	std::map<std::string,size_t>::iterator it;
 

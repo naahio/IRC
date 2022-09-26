@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 14:45:41 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/26 11:47:33 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,10 +93,6 @@ std::map<std::string, Player *> &	Server::getPlayers_List(void) {
 	return (this->players_list);
 }
 
-std::map<std::string, Player *> &	Server::getPlayers(void) {
-	return (this->players);
-}
-
 //----------------------------- 
 
 User *	Server::getUser(int fd) {
@@ -153,7 +149,14 @@ void	Server::clientDisconnect(int fd) {
 	try {
 		std::map<int, User *>::iterator		user;
 		std::map<std::string, Channel *>	channels;
-
+		this->save_data();
+		time_t now = time(0);
+		Player *player = this->getPlayer(this->getUser(fd)->getNickname());
+		player->set_logtime(now - player->getLogtime());
+		player->add_Points(player->getLogtime() * 0.05);
+		std::cout << "deleting : " << this->getUser(fd)->getNickname() << std::endl;
+		this->getPlayers_List().erase(this->getUser(fd)->getNickname());
+		std::cout << "deleted : " << std::endl;
 		user = this->users.find(fd);
 		if (user != this->users.end()) {
 			channels = user->second->getChannels();
@@ -456,8 +459,7 @@ void	Server::parsExecCommands(Msg &msg)
 void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 {
 	User	*user;
-	Player	*player = new Player();
-	Player	*pl = player->getPlayer(this->players_list, msg.getSender());
+	Player	*pl = this->getPlayer(msg.getSender());
 
 	user = this->getUser(msg.getSender());
 	try {
@@ -519,6 +521,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 				return ;
 			}
 			pl->add_Points(COMMANDS_POINT);
+			pl->Level_Up();
+			this->save_data();
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
@@ -577,4 +581,118 @@ bool	Server::recv_send_msg(int fd)
 		return (true);
 	} while (true);
 	return (true);
+}
+
+//********************* PLAYER'S FUNCTION : ********************
+
+void	Server::add_player(User *user) // first time connected
+{
+	time_t now = time(0);
+	Player *player = new Player(user);
+	player->set_Loged_In(now);
+	std::cout << "NEW PLAYER ADDED  : " << player->getnickname() << std::endl;
+	this->players_list.insert(std::pair<std::string, Player *>(user->getNickname(), player));
+	// this->save_data(players_list);
+}
+
+void	Server::link_data(User *user)
+{
+	time_t now = time(0);
+	std::cout << " geting player  " << std::endl;
+	Player *player = this->getPlayer(user->getNickname());
+	player->set_user(user);
+	player->set_Loged_In(now);
+	std::cout << " PLAYER LINKED  : " << player->getnickname() << std::endl;
+	this->players_list.insert(std::pair<std::string, Player *>(user->getNickname(), player));
+	std::cout << " SAVED " << std::endl;
+}
+
+bool	Server::load_data()
+{
+	std::ifstream	file;
+	std::string		data;
+	std::vector<std::string> p_data;					
+
+	std::cout << " Loading data  " << std::endl;
+	file.open("/Users/mbabela/Desktop/IRC/user.txt");
+	if (!file)
+	{
+		std::cout << "Error ! could not open the file " <<std::endl;
+		return (false);
+	}
+	for (int i = 0; std::getline (file, data); i++)
+	{
+		if (data.empty())
+			continue;
+		std::cout << "files lanes : " << data << std::endl;
+		split(data, ' ', p_data);
+		std::cout << "found  : " << p_data[1] << std::endl;
+		Player *player = new Player(p_data[1], p_data[3], p_data[4], ft_toInt(p_data[5]), p_data[6], ft_toInt(p_data[7]));
+		this->players_list.insert(std::pair<std::string, Player *>(p_data[1], player));
+		data.clear();
+		p_data.clear();
+	}
+	file.close();
+	return (true);
+}
+
+void	Server::save_data()
+{
+	std::ofstream file("/Users/mbabela/Desktop/IRC/user.txt");
+	std::map <std::string, Player *>::iterator	  it ;
+	for(it = this->players_list.begin(); it != this->players_list.end(); it++)
+    {
+        Player *player;
+        player = it->second;
+        file << player->getUser()->getNickname() << " " << player->getUser()->getNickname() << " " << player->getUser()->getPostNumber() << " " << player->getLevel() << " " << player->getStatus()  << " " << player->getLogtime() << " " << player->getRank() <<  " " << player->getPoint() << std::endl;
+    }
+    file.close();
+}
+
+bool	Server::check_exist(User *user)
+{
+	std::map<std::string, Player *>::iterator iter;
+
+	std::cout << "checking if the user exist " << std::endl;
+	for (iter = this->players_list.begin(); iter != players_list.end(); iter++)
+	{
+		Player *player;
+		player = iter->second;
+		if (player->getnickname() == user->getNickname())
+		{
+			std::cout << "User Already Exist ! " << std::endl;
+			return (true);
+		}
+	}
+	std::cout << "User not found " << std::endl;
+	return (false);
+}
+
+Player *     Server::getPlayer(std::string nickname)
+{
+	std::map<std::string, Player *>::iterator	it;
+
+	for (it = this->players_list.begin(); it != this->players_list.end(); ++it) 
+	{
+		Player *player = it->second;
+		if (player->getnickname() == nickname)
+			return (player);
+	}
+	std::cout << "Player not found nick " << std::endl;
+	return (NULL);
+}
+
+Player *     Server::getPlayer(int fd)
+{
+	std::map<std::string, Player *>::iterator	it;
+
+	for (it = this->players_list.begin(); it != this->players_list.end(); ++it) 
+	{
+		Player *player = it->second;
+		if (player->getUser())
+			if (player->getUser()->getFd() == fd)
+				return (it->second);
+	}
+	std::cout << "Player not found fd " << std::endl;
+	return (NULL);
 }

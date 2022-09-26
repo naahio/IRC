@@ -1,25 +1,32 @@
 import socket
-import sre_compile
-import sys
 
-class user:
-	# FD - POST - IP - nick - user - log
+class player:
+
 	def __init__(self):
 		self.fd			= 0
-		self.post		= ""
-		self.ip			= ""
 		self.nickname	= ""
-		self.username	= ""
-		self.lvl		= ""
-		self
+		self.post		= ""
+		self.level		= ""
+		self.status 	= ""
+		self.logtime	= ""
+		self.rank 		= ""
+		self.points 	= 0
 
-	def creat_user(self, fd, ip, post, nickname, username):
+	def creat_player(self, fd, nickname, post, level, status, logtime, rank, points):
 		self.fd			= fd
-		self.ip			= ip
-		self.post		= post;
 		self.nickname	= nickname
-		self.username	= username
-		
+		self.post		= post;
+		self.level		= level
+		self.status 	= status
+		self.logtime	= logtime
+		self.rank 		= rank
+		self.points 	= points
+
+class sender:
+    
+    def __init__(self):
+        self.nickname = ""
+
   
 class lily:
     
@@ -33,9 +40,8 @@ class lily:
     
     def serv_connect(self, server, port, username, password, nickname, channel):
         print("Connecting to " + server)
-        self.socket.connect((server, port))
-        
-        self.socket.send(bytes("PASS " + password + "\n"))
+        if self.socket.connect((server, port)):
+            self.socket.send(bytes("PASS " + password + "\n"))
         self.socket.send(bytes("USER " + username + " *" + " *" + " *" + "\n"))
         self.socket.send(bytes("NICK " + nickname + "\n"))
         
@@ -55,35 +61,37 @@ class lily:
                 words = line.split()
                 results.append((words[0:]))
             for fd, post, ip, nickname, username in results:
-                usr = user()
-                usr.creat_user(fd, ip, post, nickname, username)
-                user_list[fd] = usr
+                player = player()
+                player.creat_player(fd, ip, post, nickname, username)
+                user_list[fd] = player
         return user_list
     
     def fin_user(self, looking_for, user_list, sender):
         i = 1
         for u in user_list:
-            usr = user_list[u]
-            if usr.nickname == looking_for:
+            player = user_list[u]
+            if player.nickname == looking_for:
                 i = 0
-                self.send_msg(sender, usr.post) 
+                self.send_msg(sender, player.post) 
                 break
         if i == 1:
             self.send_msg(sender, "USER NOT FOUND !") 
-            
+    
+    def pars_message(message):
+        splt = message.split()   
                 
 
-IRC_SERV = "10.11.7.6"
-IRC_PORT = 9999
-CHANNEL  = "#General"
-BOT_USER = "bot"
-BOT_NICK = "/lily"
-PASSWORD = "1337"
+IRC_SERV 	=	"10.12.8.5"
+IRC_PORT 	=	9999
+CHANNEL  	=	"#General"
+BOT_USER 	=	"bot"
+BOT_NICK	=	"/lily"
+PASSWORD 	=	"1337"
 
 irc = lily()
 irc.serv_connect(IRC_SERV, IRC_PORT, BOT_USER, PASSWORD, BOT_NICK, CHANNEL)
 user_list = {}
-usr = user()
+player = player()
 
 while True:
     message = irc.serv_response()

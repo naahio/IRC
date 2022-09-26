@@ -1,3 +1,18 @@
-lime 0 newbie 0 newbie 12
-naahio 0 newbie 0 newbie 12
-peng 0 newbie 0 newbie 0
+
+
+
+
+
+
+
+
+
+
+
+message = :lime!~limeChat@10.12.8.5 PRIVMSG naahio :where is nickname
+
+sender_nickname : sender = split('!') + sender[0].split(':') => sender_nickname[1]
+command.split() => command[3]
+	|
+	|
+	------> where : looking for command[5]
