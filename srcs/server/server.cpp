@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 14:06:41 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 14:30:35 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -552,8 +552,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			SENDcmd(msg.getSender(),cmd);
 		else if (!cmd[0].compare("ACCEPT") || !cmd[0].compare("DECLINE"))
 			RESPONDcmd(msg.getSender(),cmd);
-		// else if (!cmd[0].compare("PONG"))
-		//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
+		else if (!cmd[0].compare("PONG"))
+			sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PONG ", this->getName().c_str()));
 		else
 			throw myException(ERR_UNKNOWNCOMMAND);
 	} catch(myException & e) {
@@ -586,8 +586,6 @@ bool	Server::recv_send_msg(int fd)
 	memset(buffer,0,BUFF_SIZE);
 	do 
 	{
-		while (buff.find_first_of("\r\n") == std::string::npos)
-		{
 			rc = recv(fd,buffer,510, 0);
 			if (rc == -1)
 			{
@@ -605,15 +603,21 @@ bool	Server::recv_send_msg(int fd)
 			}
 			buffer[rc] = '\0';
 			buff += buffer;
-			std::cout << "rc : " <<  rc  << std::endl;
+		if (buff.find_first_of("\r\n") != std::string::npos)
+		{
+			std::cout << " >>>>> "<< buff << std::endl;
+			size_t pos = buff.find_last_of("\r\n");
+			buff = buff.substr(0, pos);
+			user->setMsgRemainder(remain);
+			Msg msg = Msg(buff, fd);
+			parsExecCommands(msg);
+			return (true);
 		}
-		std::cout << " >>>>> "<< buffer << std::endl;
-		size_t pos = buff.find_last_of("\r\n");
-		buff = buff.substr(0, pos);
-		user->setMsgRemainder(remain);
-		Msg msg = Msg(buff, fd);
-		parsExecCommands(msg);
-		return (true);
+		else
+		{
+			user->setMsgRemainder(buff);
+			return (true);
+		}
 	} while (true);
 	return (true);
 }

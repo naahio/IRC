@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 14:24:21 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 14:29:24 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,6 +142,8 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 	User *user;
 
 	user = this->getGuest(fd);
+	if (!user)
+		return;
 	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
@@ -196,7 +198,11 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getGuest(fd);
 	if (!user)
-		return;
+	{
+		user = this->getUser(fd);
+		if (!user)
+			return;
+	}
 	if (cmd.size() < 2)
 		throw myException(ERR_NONICKNAMEGIVEN);
 	else
