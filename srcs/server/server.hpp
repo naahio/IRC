@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 12:59:58 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 14:42:03 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@
 
 
 # define BUFF_SIZE		512
-# define MAX_CONN		50
+# define MAX_CONN		64
 # define TIMEOUT		3 * 60 * 1000
 
 class Server
@@ -58,7 +58,7 @@ class Server
 
 
 		int				socket_fd;
-		struct pollfd	fds[MAX_CONN];
+		struct pollfd	fds[MAX_CONN + 1];
 		int				nfds;
 		int				on;
 		int				port;
@@ -129,7 +129,7 @@ class Server
 		void	NICKcmd(int		fd,	std::vector<std::string> &cmd);
 		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
 		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd, bool notice = false);
 		void	INVITEcmd(int	fd,	std::vector<std::string> &cmd);
 		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
 		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);
@@ -150,7 +150,7 @@ class Server
 		void    topic(int fd, std::vector<std::string> &cmd);
 
 		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
-		void	welcomeReplay(int fd);
+		void	welcomeReply(int fd);
 		void	channelModes(int fd, std::vector<std::string> & cmd);
 		void	userModes(int fd, std::vector<std::string> & cmd);
 
