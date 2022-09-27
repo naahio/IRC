@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/02 11:05:18 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/26 17:00:09 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 13:14:39 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ std::string	reply(int repl_no) {
 			return(":End of /INFO list");
 		case RPL_YOUREOPER:
 			return(":You are now an IRC operator");
+		case RPL_ADMINME:
+			return(":Administrative info");
 		default:
 			return(":Undefined reply");
 	}

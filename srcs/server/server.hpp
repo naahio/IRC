@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 10:20:20 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 13:34:28 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,7 @@ class Server
 		void    topic(int fd, std::vector<std::string> &cmd);
 
 		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
-		void	welcomeReplay(int fd);
+		void	welcomeReply(int fd);
 		void	channelModes(int fd, std::vector<std::string> & cmd);
 		void	userModes(int fd, std::vector<std::string> & cmd);
 

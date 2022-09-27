@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/26 17:18:08 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 13:05:25 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,8 @@ void	Channel::setTopic(std::string _topic, int fd) {
 	User *		op;
 	std::string	reply;
 
+	if (!this->getMember(fd))
+		throw myException(ERR_NOTONCHANNEL);
 	op = this->getOperator(fd);
 	if (!this->topicSettable && !op)
 		throw myException(ERR_CHANOPRIVSNEEDED);

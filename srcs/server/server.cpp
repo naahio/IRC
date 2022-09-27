@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 10:20:05 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 14:06:41 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ Server::Server(int _port, std::string _password)
 	this->version = "1.0 ";
 
 	time_t now = time(0);
-   	this->creationTime = ctime(&now);
+	this->creationTime = ctime(&now);
 	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
@@ -508,7 +508,6 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 	try {
 		for (int i = 0 ; cmd[0][i] ; i++)
 			cmd[0][i] = toupper(cmd[0][i]);
-			//+ c,]mdpoint
 		if (!cmd[0].compare("HELP"))
 			helps(msg.getSender());
 		else if (!cmd[0].compare("USER"))
@@ -525,43 +524,38 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			TIMEcmd(msg.getSender());
 		else if (!cmd[0].compare("ADMIN"))
 			ADMINcmd(msg.getSender());
-		else if (user && user->isAuth())
-		{
-			if (!cmd[0].compare("NOTICE"))
-				PRIVMSGcmd(msg.getSender(), cmd, true);
-			else if (!cmd[0].compare("PRIVMSG"))
-				PRIVMSGcmd(msg.getSender(), cmd);
-			else if (!cmd[0].compare("JOIN"))
-				JOINcmd(msg.getSender(), cmd);
-			else if (!cmd[0].compare("KICK"))
-				kick(msg.getSender(), cmd);
-			else if (!cmd[0].compare("PART"))
-				part(msg.getSender(), cmd);
-			else if (!cmd[0].compare("MODE"))
-				mode(msg.getSender(), cmd);
-			else if (!cmd[0].compare("LIST"))
-				list(msg.getSender(), cmd);
-			else if (!cmd[0].compare("NAMES"))
-				names(msg.getSender(), cmd);
-			else if (!cmd[0].compare("INVITE"))
-				INVITEcmd(msg.getSender(), cmd);
-			else if (!cmd[0].compare("OPER"))
-				OPERcmd(msg.getSender(), cmd);
-			else if (!cmd[0].compare("KILL"))
-				KILLcmd(msg.getSender(), cmd);
-			else if (!cmd[0].compare("TOPIC"))
-				topic(msg.getSender(), cmd);
-			else if (!cmd[0].compare("SEND"))
-				SENDcmd(msg.getSender(),cmd);
-			else if (!cmd[0].compare("ACCEPT")||
-					!cmd[0].compare("DECLINE"))
-				RESPONDcmd(msg.getSender(),cmd);
-			// else if (!cmd[0].compare("PONG"))
-			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
-			else
-				throw myException(ERR_UNKNOWNCOMMAND);
-
-		}
+		else if (!cmd[0].compare("NOTICE"))
+			PRIVMSGcmd(msg.getSender(), cmd, true);
+		else if (!cmd[0].compare("PRIVMSG"))
+			PRIVMSGcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("JOIN"))
+			JOINcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("KICK"))
+			kick(msg.getSender(), cmd);
+		else if (!cmd[0].compare("PART"))
+			part(msg.getSender(), cmd);
+		else if (!cmd[0].compare("MODE"))
+			mode(msg.getSender(), cmd);
+		else if (!cmd[0].compare("LIST"))
+			list(msg.getSender(), cmd);
+		else if (!cmd[0].compare("NAMES"))
+			names(msg.getSender(), cmd);
+		else if (!cmd[0].compare("INVITE"))
+			INVITEcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("OPER"))
+			OPERcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("KILL"))
+			KILLcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("TOPIC"))
+			topic(msg.getSender(), cmd);
+		else if (!cmd[0].compare("SEND"))
+			SENDcmd(msg.getSender(),cmd);
+		else if (!cmd[0].compare("ACCEPT") || !cmd[0].compare("DECLINE"))
+			RESPONDcmd(msg.getSender(),cmd);
+		// else if (!cmd[0].compare("PONG"))
+		//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
+		else
+			throw myException(ERR_UNKNOWNCOMMAND);
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
 			+ ft_tostring(e.getERROR_NO()) + " "
