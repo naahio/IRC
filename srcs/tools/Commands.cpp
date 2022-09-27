@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 12:11:29 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/27 10:19:43 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,26 +89,31 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 		}
 	}
 }
-void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
-{
-	User *user,*target;
-	Channel *chan;
 
-	chan = this->getChannel(cmd[1]);
-	target = this->getUser(cmd[1]);
-	user = this->getUser(fd);
-	if (!user)
-		return ;
-	if (cmd.size() == 1)
-		throw myException(ERR_NORECIPIENT);
-	else if (cmd.size() == 2)
-		throw myException(ERR_NOTEXTTOSEND);
-	else
-	{
+void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd, bool notice)
+{
+	User	*user, *target;
+	Channel	*chan;
+
+	try {
+		user = this->getUser(fd);
+		if (!user)
+			return ;
+		if (cmd.size() == 1)
+			throw myException(ERR_NORECIPIENT);
+		else if (cmd.size() == 2)
+			throw myException(ERR_NOTEXTTOSEND);
+		chan = this->getChannel(cmd[1]);
+		target = this->getUser(cmd[1]);
+		if (!target && !chan)
+			throw myException(ERR_NOSUCHNICK);
 		if (chan)
-		{	
+		{
 			std::string reply;
-			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(), "@",user->getIpAddress().c_str(), " PRIVMSG ", chan->getName().c_str(), " :", cmd[2].c_str()), 
+			reply = ":" + user->getIdentifier() + " "
+				+ cmd[0] + " "
+				+ chan->getName() + " :"
+				+ cmd[2] + "\n";
 			chan->broadCastMessage(reply, user->getFd(), false);
 		}
 		else if (target)
@@ -116,13 +121,19 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd)
 			std::vector<std::string> vec;
 			if (ctcpMessage(cmd[2],vec))
 				fileTransfer(fd,cmd[1],vec);
-			std::string	reply;
-			reply = stringBuilder(10, ":", user->getNickname().c_str(), "!~", user->getUsername().c_str(),
-					"@",user->getIpAddress().c_str(), " PRIVMSG ", target->getNickname().c_str(), " :", cmd[2].c_str());
-			sendReply(target->getFd(),reply);
+			sendReply(target->getFd(), ":" + user->getIdentifier() + " "
+				+ cmd[0] + " "
+				+ target->getNickname() + " :"
+				+ cmd[2] + "\n");
 		}
-		else if (!target && !chan)
-			throw myException(ERR_NOSUCHNICK);
+	} catch(myException & e) {
+		if (!notice || e.getERROR_NO() == ERR_NORECIPIENT || e.getERROR_NO() == ERR_NOTEXTTOSEND) {
+			sendReply(fd, this->getName()
+				+ ft_tostring(e.getERROR_NO()) + " "
+				+ user->getNickname() + " "
+				+ (cmd.size() > 2 ? (cmd[1] + " ") : "")
+				+ e.what() + "\n");
+		}
 	}
 }
 
@@ -287,109 +298,131 @@ void	Server::kick(int fd, std::vector<std::string> &cmd)
 {
 	User		*op;
 	User		*user;
+	Channel		*channel;
 	std::string	reply;
 
 	if (cmd.size() < 3)
 		throw myException(ERR_NEEDMOREPARAMS);
-	Channel *channel = this->getChannel(cmd[1]);
-	if (!channel)
-		return throw myException(ERR_NOSUCHCHANNEL);
-	op = channel->getOperator(fd);
-	if (!op)
-		return throw myException(ERR_CHANOPRIVSNEEDED);
-	user = this->getUser(cmd[2]);
-	if (!user || !channel->getMember(user->getFd()))
-		return throw myException(ERR_NOSUCHNICK);
-	reply = ":" + op->getIdentifier() + " "
-		+ cmd[0] + " "
-		+ channel->getName() + " "
-		+ user->getNickname() + " :"
-		+ (cmd.size() >= 4 ? cmd[3] : user->getNickname()) + "\n";
-	channel->broadCastMessage(reply, fd);
-	channel->removeMember(user->getFd());
-	if (channel->getMembers().size() == 0)
-		this->deleteChannel(channel->getName());
+	try {
+		op = this->getUser(fd);
+		if (!op)
+			return;
+		channel = this->getChannel(cmd[1]);
+		if (!channel)
+			return throw myException(this->getName()
+				+ ft_tostring(ERR_NOSUCHCHANNEL) + " "
+				+ op->getNickname() + " "
+				+ cmd[1] + " "
+				+ err_reply(ERR_NOSUCHCHANNEL) + "\n");
+		op = channel->getOperator(fd);
+		if (!op)
+			return throw myException(this->getName()
+				+ ft_tostring(ERR_CHANOPRIVSNEEDED) + " "
+				+ op->getNickname() + " "
+				+ cmd[1] + " "
+				+ err_reply(ERR_CHANOPRIVSNEEDED) + "\n");
+		user = this->getUser(cmd[2]);
+		if (!user || !channel->getMember(user->getFd()))
+			return throw myException(this->getName()
+				+ ft_tostring(ERR_NOSUCHNICK) + " "
+				+ op->getNickname() + " "
+				+ cmd[2] + " "
+				+ err_reply(ERR_NOSUCHNICK) + "\n");
+		reply = ":" + op->getIdentifier() + " "
+			+ cmd[0] + " "
+			+ channel->getName() + " "
+			+ user->getNickname() + " :"
+			+ (cmd.size() >= 4 ? cmd[3] : op->getNickname()) + "\n";
+		channel->broadCastMessage(reply, fd);
+		channel->removeMember(user->getFd());
+		if (channel->getMembers().size() == 0)
+			this->deleteChannel(channel->getName());
+	} catch(std::exception & e) {
+		sendReply(fd, e.what());
+	}
 }
 
 void	Server::part(int fd, std::vector<std::string> &cmd)
 {
+	User						*user;
 	Channel						*channel;
-	User						*member;
-	std::string					reply ;
-	std::vector<std::string>	chans;
-	size_t						i;
+	std::vector<std::string>	channels;
 
 	if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
-	split(cmd[1], ',', chans);
-	for (i = 0; i < chans.size(); i++)
+	user = this->getUser(fd);
+	if (!user)
+		return;
+	split(cmd[1], ',', channels);
+	for (size_t i = 0; i < channels.size(); i++)
 	{
-		channel = this->getChannel(chans[i]);
-		if (!channel)
-		{
-			sendReply(fd,stringBuilder(9,this->getName().c_str()," ",
-			ft_tostring(ERR_NOSUCHCHANNEL).c_str(), " ", this->getUser(fd)->getNickname().c_str()," ",chans[i].c_str(),
-			" :",err_reply(ERR_NOSUCHCHANNEL).c_str()));
-			continue;
+		try {
+			channel = this->getChannel(channels[i]);
+			if (!channel)
+				throw myException(ERR_NOSUCHCHANNEL);
+			if (!channel->getMember(fd))
+				throw myException(ERR_NOTONCHANNEL);
+			std::string reply =  ":" + user->getIdentifier() + " "
+				+ cmd[0] + " "
+				+ channel->getName() + "\n";
+			channel->broadCastMessage(reply, fd);
+			channel->removeMember(fd);
+			if (channel->getMembers().size() == 0)
+				this->deleteChannel(channel->getName());
+		} catch(myException & e) {
+			sendReply(fd, ":" + user->getIdentifier() + " "
+				+ ft_tostring(e.getERROR_NO()) + " "
+				+ user->getNickname() + " "
+				+ (channel ? channel->getName() : channels[i]) + " "
+				+ e.what() + "\n");
 		}
-		member = channel->getMember(fd);
-		if (!member)
-			throw myException(ERR_NOTONCHANNEL);
-		reply =  ":" + member->getIdentifier() + " "
-			+ cmd[0] + " "
-			+ channel->getName() + "\n";
-		channel->broadCastMessage(reply, fd);
-		channel->removeMember(fd);
-		if (channel->getMembers().size() == 0)
-			this->deleteChannel(channel->getName());
 	}
 }
 
 void	Server::list(int fd, std::vector<std::string> &cmd)
 {
-	std::string					reply;
-	std::vector<std::string>	channel;
-	size_t						i = 0;
-	Channel						*chans;
+	User						*user;
+	std::vector<std::string>	channels;
 
-	reply = stringBuilder(3, this->getName().c_str(), " 321 ", " :Channel :Users  Name");
-	sendReply(fd, reply);
-	reply.clear();
+	user = this->getUser(fd);
+	if (!user)
+		return;
+	sendReply(fd, this->getName()
+		+ ft_tostring(RPL_LISTSTART) + " "
+		+ reply(RPL_LISTSTART) + "\n");
 	if (cmd.size() == 1)
 	{
 		std::map <std::string, Channel *>::iterator	it;
-
 		for (it = this->channels.begin(); it != this->channels.end(); ++it)
 		{
-			if (!it->second->isPrivate())
-				reply = stringBuilder(9, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :", it->second->getTopic().c_str());
-			else
-				reply = stringBuilder(8, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", it->first.c_str(), " ",ft_tostring(it->second->getMembers().size()).c_str(), " :");
-			sendReply(fd, reply);
-			reply.clear();
+			sendReply(fd, this->getName()
+				+ ft_tostring(RPL_LIST) + " "
+				+ user->getNickname() + " "
+				+ it->first + " "
+				+ ft_tostring(it->second->getMembers().size()) + " :"
+				+ (it->second->isPrivate() ? "" : it->second->getTopic()) + "\n");
 		}
 	}
 	else
 	{
-		split(cmd[1], ',', channel);
-		while (i < channel.size())
+		split(cmd[1], ',', channels);
+		for (size_t i = 0; i < channels.size(); i++)
 		{	
-			chans = this->getChannel(channel[i]);
-			if (chans)
-			{
-				if (!chans->isPrivate())
-					reply = stringBuilder(9, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :", chans->getTopic().c_str());
-				else
-					reply = stringBuilder(8, this->getName().c_str()," 322 ", this->getUser(fd)->getNickname().c_str(), " ", chans->getName().c_str(), " ",ft_tostring(chans->getMembers().size()).c_str(), " :");
-				sendReply(fd, reply);
-				reply.clear();
-			}
-			i++;
+			Channel *channel = this->getChannel(channels[i]);
+			if (!channel)
+				continue;
+			sendReply(fd, this->getName()
+				+ ft_tostring(RPL_LIST) + " "
+				+ user->getNickname() + " "
+				+ channel->getName() + " "
+				+ ft_tostring(channel->getMembers().size()) + " :"
+				+ (channel->isPrivate() ? "" : channel->getTopic()) + "\n");
 		}
 	}
-	reply = stringBuilder(4, this->getName().c_str()," 323 ", this->getUser(fd)->getNickname().c_str(), " :End of /LIST");
-	sendReply(fd, reply);
-	reply.clear();
+	sendReply(fd, this->getName()
+		+ ft_tostring(RPL_LISTEND) + " "
+		+ user->getNickname() + " "
+		+ reply(RPL_LISTEND) + "\n");
 }
 
 void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
@@ -542,7 +575,7 @@ void	Server::userModes(int fd, std::vector<std::string> & cmd) {
 					sign = false;
 					break;
 				case 'i':
-					user->setVisibility(sign);
+					user->setVisibility(!sign);
 					sendReply(fd, ":" + user->getNickname() + " "
 						+ "MODE" + " "
 						+ user->getNickname() + " "

@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/02 11:05:18 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/16 13:45:37 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/26 17:00:09 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ std::string	reply(int repl_no) {
 			return(":is an IRC operator");
 		case RPL_ENDOFWHOIS:
 			return(":End of /WHOIS list");
+		case RPL_LISTSTART:
+			return("Channel :Users  Name");
 		case RPL_ENDOFWHOWAS:
 			return(":End of WHOWAS");
 		case RPL_LISTEND:

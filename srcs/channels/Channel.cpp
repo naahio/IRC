@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/25 12:08:20 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/26 17:18:08 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,8 +257,8 @@ User *	Channel::getMember(int fd) {
 User *	Channel::getInvitee(int fd) {
 	std::map<int, User *>::iterator	it;
 
-	it = this->members.find(fd);
-	if (it != this->members.end())
+	it = this->invitees.find(fd);
+	if (it != this->invitees.end())
 		return (it->second);
 	return (NULL);
 }
@@ -435,8 +435,7 @@ void	Channel::removeModerator(int fd, int opFd) {
 	}
 }
 
-#include <iostream>
-void	Channel::addBan(std::string banMask, int fd) {
+void	Channel::addBan(std::string const & banMask, int fd) {
 	User *		mod;
 	t_bans		ban;
 	t_ident		ident;
@@ -449,9 +448,6 @@ void	Channel::addBan(std::string banMask, int fd) {
 	ban.banMask = ident.nickname + "!" + ident.username + "@" + ident.hostname;
 	ban.banMod = mod->getNickname() + "!" + mod->getUsername() + "@" + mod->getIpAddress();
 	ban.banTimestamp = std::time(0);
-	std::cout << "nickname: " << ident.nickname << std::endl;
-	std::cout << "username: " << ident.username << std::endl;
-	std::cout << "hostname: " << ident.hostname << std::endl;
 	if (!this->isBanned(ban.banMask)) {
 		this->bans.push_back(ban);
 	}
@@ -463,7 +459,7 @@ void	Channel::addBan(std::string banMask, int fd) {
 	this->broadCastMessage(reply);
 }
 
-void	Channel::removeBan(std::string banMask, int fd) {
+void	Channel::removeBan(std::string const & banMask, int fd) {
 	User *							op;
 	std::vector<t_bans>::iterator	it;
 	t_ident							ident, ident2;
@@ -521,7 +517,7 @@ bool	Channel::isBanned(std::string banMask) {
 	return (false);
 }
 
-void	Channel::broadCastMessage(std::string & message, int fd, bool everyone) {
+void	Channel::broadCastMessage(std::string const & message, int fd, bool everyone) {
 	std::map<int, User *>::iterator	it;
 
 	if (fd != -1 && ((this->memberChatOnly && !this->getMember(fd))

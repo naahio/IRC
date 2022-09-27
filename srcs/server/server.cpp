@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 12:13:41 by ybensell         ###   ########.fr       */
+/*   Updated: 2022/09/27 10:20:05 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ Server::Server(int _port, std::string _password)
 	this->operators.insert(std::pair<std::string,std::string>("penguin","messi123"));
 	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
 	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
-	this->name = ":irc!~irc1337 ";
+	this->name = ":IRC-1337 ";
 	this->version = "1.0 ";
 
 	time_t now = time(0);
@@ -383,7 +383,7 @@ int		Server::listen_from_socket(void)
 	int	rc;
 	
 	std::cout << "Listening . . ." << std::endl;
-	rc = listen(this->socket_fd, MAX_CONN);
+	rc = listen(this->socket_fd, MAX_CONN + 1);
 	if (rc < 0)
 	{
 		std::cout << "[FAILED: " << errno << "]" << std::endl;
@@ -429,7 +429,7 @@ bool	Server::accept_connections(void)
   		hp = gethostbyaddr((const void *)&ipAddr, sizeof ipAddr, AF_INET);
 		
 		std::cout << "NEW Connection detected " << new_fd << std::endl;
-		if (this->nfds <MAX_CONN)
+		if (this->nfds <= MAX_CONN)
 		{
 			this->addGuest(new_fd,str, hp->h_name);
 			this->fds[this->nfds].fd = new_fd;
@@ -527,9 +527,9 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			ADMINcmd(msg.getSender());
 		else if (user && user->isAuth())
 		{
-			// if (!cmd[0].compare("NOTICE"))
-			// 	NOTICEcmd(msg.getSender(), cmd);
-			if (!cmd[0].compare("PRIVMSG"))
+			if (!cmd[0].compare("NOTICE"))
+				PRIVMSGcmd(msg.getSender(), cmd, true);
+			else if (!cmd[0].compare("PRIVMSG"))
 				PRIVMSGcmd(msg.getSender(), cmd);
 			else if (!cmd[0].compare("JOIN"))
 				JOINcmd(msg.getSender(), cmd);
@@ -566,7 +566,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 		sendReply(msg.getSender(), this->getName()
 			+ ft_tostring(e.getERROR_NO()) + " "
 			+ user->getNickname() + " "
-			+ cmd[0].c_str() + " "
+			+ cmd[0] + " "
 			+ e.what() + "\n");
 	}
 }
