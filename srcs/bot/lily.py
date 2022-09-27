@@ -64,7 +64,8 @@ class lily:
             for fd, nickname, post, level, status, logtime, rank, points in results:
                 playr = player()
                 playr.creat_player(fd, nickname, post, level, status, logtime, rank, points)
-                user_list[fd] = playr
+                user_list[nickname] = playr
+            print(user_list)
         return user_list
     
     def get_player(self, sender):

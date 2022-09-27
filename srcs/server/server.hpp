@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 14:42:03 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 16:22:57 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,29 +125,29 @@ class Server
 
 		//**************** Commands : 
 
-		void	USERcmd(int		fd,  std::vector<std::string> &cmd);
-		void	NICKcmd(int		fd,	std::vector<std::string> &cmd);
-		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
-		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd, bool notice = false);
-		void	INVITEcmd(int	fd,	std::vector<std::string> &cmd);
-		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
-		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);
-		void	KILLcmd(int		fd,	std::vector<std::string> &cmd);
+		void	PASScmd(int		fd, std::vector<std::string> &cmd);
+		void	NICKcmd(int		fd, std::vector<std::string> &cmd);
+		void	USERcmd(int		fd, std::vector<std::string> &cmd);
+		void	OPERcmd(int		fd, std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int	fd, std::vector<std::string> &cmd, bool notice = false);
+		void	LISTcmd(int		fd, std::vector<std::string> &cmd);
+		void	NAMEScmd(int	fd, std::vector<std::string> &cmd);
+		void	JOINcmd(int		fd, std::vector<std::string> &cmd);
+		void	PARTcmd(int		fd, std::vector<std::string> &cmd);
+		void	MODEcmd(int		fd, std::vector<std::string> &cmd);
+		void	TOPICcmd(int	fd, std::vector<std::string> &cmd);
+		void	INVITEcmd(int	fd, std::vector<std::string> &cmd);
+		void	KICKcmd(int		fd, std::vector<std::string> &cmd);
+		void	KILLcmd(int		fd, std::vector<std::string> &cmd);
+		void    HELPcmd(int		fd);
 		void	VERSIONcmd(int	fd);
 		void	TIMEcmd(int		fd);
 		void	ADMINcmd(int	fd);
+		void	QUITcmd(int		fd, std::vector<std::string> &cmd);
 		void	SENDcmd(int		fd, std::vector<std::string> &cmd);
 		void	RESPONDcmd(int	fd, std::vector<std::string> &cmd);
-		void	sendingFile(User *sender,User *reciever,size_t fileSize);
 		
-		void    kick(int fd, std::vector<std::string> &cmd);
-		void    helps(int fd);
-		void    part(int fd, std::vector<std::string> &cmd);
-		void	list(int fd, std::vector<std::string> &cmd);
-		void    mode(int fd, std::vector<std::string> &cmd);
-		void    names(int fd, std::vector<std::string> &cmd);
-		void    topic(int fd, std::vector<std::string> &cmd);
+		void	sendingFile(User *sender,User *reciever,size_t fileSize);
 
 		void	sendChannelUsers(int fd, Channel *chan,User *user,const std::string & channel);
 		void	welcomeReply(int fd);
