@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 10:20:05 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 11:37:40 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -556,8 +556,8 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 			else if (!cmd[0].compare("ACCEPT")||
 					!cmd[0].compare("DECLINE"))
 				RESPONDcmd(msg.getSender(),cmd);
-			// else if (!cmd[0].compare("PONG"))
-			//  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PING ", this->getName().c_str()));
+			else if (!cmd[0].compare("PONG"))
+			  	sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PONG ", this->getName().c_str()));
 			else
 				throw myException(ERR_UNKNOWNCOMMAND);
 
@@ -589,11 +589,11 @@ bool	Server::recv_send_msg(int fd)
 	}
 	std::cout <<  "Receiving message . . ." << std::endl;
 	buff += user->getMsgRemainder();
+	std::cout << " --------------------------- " << std::endl;
+	std::cout << "remaining : " << user->getMsgRemainder() << std::endl;
 	memset(buffer,0,BUFF_SIZE);
 	do 
 	{
-		while (buff.find_first_of("\r\n") == std::string::npos)
-		{
 			rc = recv(fd,buffer,510, 0);
 			if (rc == -1)
 			{
@@ -609,17 +609,25 @@ bool	Server::recv_send_msg(int fd)
 				std::cout << "Connection closed . . . " << std::endl;
 				return (false);
 			}
+			
 			buffer[rc] = '\0';
 			buff += buffer;
-			std::cout << "rc : " <<  rc  << std::endl;
+			std::cout << "buff : " << buff << std::endl;
+		if (buff.find_first_of("\r\n") != std::string::npos)
+		{
+			std::cout << " >>>>> "<< buff << std::endl;
+			size_t pos = buff.find_last_of("\r\n");
+			buff = buff.substr(0, pos);
+			user->setMsgRemainder(remain);
+			Msg msg = Msg(buff, fd);
+			parsExecCommands(msg);
+			return (true);
 		}
-		std::cout << " >>>>> "<< buffer << std::endl;
-		size_t pos = buff.find_last_of("\r\n");
-		buff = buff.substr(0, pos);
-		user->setMsgRemainder(remain);
-		Msg msg = Msg(buff, fd);
-		parsExecCommands(msg);
-		return (true);
+		else
+		{
+			user->setMsgRemainder(buff);
+			return (true);
+		}
 	} while (true);
 	return (true);
 }
