@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/27 13:05:25 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 16:05:57 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,36 +103,34 @@ std::vector <t_bans> &	Channel::getBans(void) {
 }
 
 void	Channel::setTopic(std::string _topic, int fd) {
-	User *		op;
+	User *		member;
 	std::string	reply;
 
-	if (!this->getMember(fd))
+	member = this->getMember(fd);
+	if (!member)
 		throw myException(ERR_NOTONCHANNEL);
-	op = this->getOperator(fd);
-	if (!this->topicSettable && !op)
+	if (!this->topicSettable && !this->getOperator(fd))
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->topic = _topic;
-	reply = ":" + op->getIdentifier() + " "
+	reply = ":" + member->getIdentifier() + " "
 		+ "TOPIC" + " "
 		+ this->getName() + " "
 		+ ":" + _topic + "\n";
 	this->broadCastMessage(reply);
 }
 
-void	Channel::setKey(std::string _key, int fd) {
+void	Channel::setKey(std::string _key, bool option, int fd) {
 	User *		op;
 	std::string	reply;
 
 	op = this->getOperator(fd);
 	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
-	if (!this->key.empty())
-		throw myException(ERR_KEYSET);
-	this->key = _key;
+	this->key = option ? _key : "";
 	reply = ":" + op->getIdentifier() + " "
 		+ "MODE" + " "
 		+ this->getName() + " "
-		+ "+k " + _key + "\n";
+		+ (option ? "+" : "-") + "k " + _key + "\n";
 	this->broadCastMessage(reply);
 }
 

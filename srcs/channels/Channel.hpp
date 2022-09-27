@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/26 16:55:32 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 16:02:44 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ class Channel {
 		std::vector <t_bans> &		getBans(void);
 
 		void	setTopic(std::string _topic, int fd);
-		void	setKey(std::string _key, int fd);
+		void	setKey(std::string _key, bool option, int fd);
 		void	setLimit(size_t limit, int fd);
 		void	setPrivate(bool option, int fd);
 		void	setSecret(bool option, int fd);
