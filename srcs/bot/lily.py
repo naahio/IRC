@@ -18,7 +18,7 @@ class player:
 	def creat_player(self, fd, nickname, post, level, status, logtime, rank, points):
 		self.fd			= fd
 		self.nickname	= nickname
-		self.post		= post;
+		self.post		= post
 		self.level		= level
 		self.status 	= status
 		self.logtime	= logtime
@@ -137,7 +137,10 @@ while True:
     if "whereis" in message:
         irc.send_msg(sender,"Looking for the USER . . .")
         w = message.split()
-        irc.fin_user(w[4], user_list, sender)
+        if len(w) <= 4:
+            irc.send_msg(sender, "(X) USER NOT FOUND ! (~_~)")
+        else:
+            irc.fin_user(w[4], user_list, sender)
     elif "profile" in message:
         irc.palyer_profile(sender)
     elif "L_DAPET" in message:
@@ -149,7 +152,7 @@ while True:
         cmd = message.split("!")
         cmd = cmd[0].split(":")
         irc.send_msg(cmd[1], "this is lily")
-        irc.send_msg(cmd[1], "|->please user >")
+        irc.send_msg(cmd[1], "|->please use > ")
         irc.send_msg(cmd[1], "|----> profile => to see your profile")
         irc.send_msg(cmd[1], "|----> whereis nickname => to find a player")
     elif "thank" in message:

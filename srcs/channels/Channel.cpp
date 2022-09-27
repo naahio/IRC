@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/27 13:05:25 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 15:38:53 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ void	Channel::setTopic(std::string _topic, int fd) {
 	if (!this->getMember(fd))
 		throw myException(ERR_NOTONCHANNEL);
 	op = this->getOperator(fd);
-	if (!this->topicSettable && !op)
+	if (!this->topicSettable || !op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->topic = _topic;
 	reply = ":" + op->getIdentifier() + " "

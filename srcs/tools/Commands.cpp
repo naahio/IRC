@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 14:49:30 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 15:46:17 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -327,7 +327,7 @@ void	Server::kick(int fd, std::vector<std::string> &cmd)
 		if (!op)
 			return throw myException(this->getName()
 				+ ft_tostring(ERR_CHANOPRIVSNEEDED) + " "
-				+ op->getNickname() + " "
+				+ this->getUser(fd)->getNickname() + " "
 				+ cmd[1] + " "
 				+ err_reply(ERR_CHANOPRIVSNEEDED) + "\n");
 		user = this->getUser(cmd[2]);
