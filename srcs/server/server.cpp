@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 16:10:58 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 14:26:47 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,7 +188,7 @@ void	Server::clientDisconnect(int fd) {
 		if (u)
 		{
 			Player *player = this->getPlayer(u->getNickname());
-			player->set_logtime(now - player->getLoged_In());
+			player->set_logtime(player->getLogtime() + (now - player->getLoged_In()));
 			player->add_Points(player->getLogtime() * 0.5);
 			std::cout << "deleting : " << u->getNickname() << std::endl;
 			this->save_data();
@@ -694,7 +694,7 @@ bool	Server::load_data()
 		std::cout << "files lanes : " << data << std::endl;
 		split(data, ' ', p_data);
 		std::cout << "found  : " << p_data[1] << std::endl;
-		Player *player = new Player(p_data[1], p_data[3], p_data[4], ft_toInt(p_data[5]), p_data[6], ft_toInt(p_data[7]));
+		Player *player = new Player(ft_toInt(p_data[0]), p_data[1], p_data[2], p_data[3], p_data[4], ft_toInt(p_data[5]), p_data[6], ft_toInt(p_data[7]));
 		this->players_list.insert(std::pair<std::string, Player *>(p_data[1], player));
 		data.clear();
 		p_data.clear();
@@ -709,15 +709,24 @@ void	Server::save_data()
 	std::ofstream file("/Users/mbabela/Desktop/IRC/user.txt");
 	std::map <std::string, Player *>::iterator	  it;
 	bot = this->getUser("/lily");
-	if (bot)
-		sendReply(bot->getFd(), " : L_DAPET");
+	int			fd;
+	std::string	post;
 	for(it = this->players_list.begin(); it != this->players_list.end(); it++)
     {
         Player *player;
         player = it->second;
-        file << player->getUser()->getFd() << " " << player->getUser()->getNickname() << " " << player->getUser()->getPostNumber() << " " << player->getLevel() << " " << player->getStatus()  << " " << player->getLogtime() << " " << player->getRank() <<  " " << player->getPoint() << std::endl;
+		fd = player->getFD();
+		post = player->getPost();
+		if (player->getUser())
+		{
+			post = player->getUser()->getPostNumber();
+			fd = player->getUser()->getFd();
+		}
+        file << fd << " " << player->getnickname() << " " << post << " " << player->getLevel() << " " << player->getStatus()  << " " << player->getLogtime() << " " << player->getRank() <<  " " << player->getPoint() << std::endl;
     }
     file.close();
+	if (bot)
+		sendReply(bot->getFd(), " : L_DAPET");
 }
 
 bool	Server::check_exist(User *user)
@@ -728,6 +737,7 @@ bool	Server::check_exist(User *user)
 	for (iter = this->players_list.begin(); iter != players_list.end(); iter++)
 	{
 		Player *player;
+		
 		player = iter->second;
 		if (player->getnickname() == user->getNickname())
 		{

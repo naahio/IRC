@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/25 09:11:58 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 16:24:15 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 08:56:36 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,9 @@ class Player
 {
 	private:
 		User*		user;
+		int			fd;
 		std::string	nick;
+		std::string	post;
 		std::string	level;
 		std::string	status;
 		int			logtime;
@@ -55,11 +57,13 @@ class Player
 	public:
 		Player();
 		Player(User *user);
-		Player(std::string nick, std::string lvl, std::string status, int logtime, std::string grad, int point);
+		Player(int fd, std::string nick, std::string post, std::string lvl, std::string status, int logtime, std::string grad, int point);
 		~Player();
 
 		User *		getUser();
+		int 		getFD();
 		std::string	getnickname();
+		std::string getPost();
 		std::string	getLevel();
 		std::string	getStatus();
 		int			getLogtime();

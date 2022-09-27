@@ -1,4 +1,4 @@
-4 /lily e2r8p5.1337.ma LEVEL_9 Fighter 221 OPERATOR 1004
-7 lime e2r8p5.1337.ma LEVEL_0 normal 0 newbie 27
+4 /lily e2r8p5.1337.ma LEVEL_0 normal 0 newbie 22
+5 lime e2r8p5.1337.ma LEVEL_0 normal 1724 newbie 42
 8 mjm e2r3p1.1337.ma LEVEL_0 normal 0 newbie 13
-5 peng e2r7p5.1337.ma LEVEL_2 normal 177 user 94
+7 peng e2r7p4.1337.ma LEVEL_0 normal 121 user 60

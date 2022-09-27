@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/24 10:07:44 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 16:27:37 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 11:28:43 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,12 @@ Player::Player(User *user)
 	this->points	= 0;
 }
 
-Player::Player(std::string nick, std::string lvl, std::string status, int logtime, std::string grad, int points)
+Player::Player(int fd, std::string nick, std::string post, std::string lvl, std::string status, int logtime, std::string grad, int points)
 {
 	this->user		= NULL;
+	this->fd		= fd;
 	this->nick		= nick;
+	this->post 		= post;
 	this->level		= lvl;
 	this->status	= status;
 	this->logtime	= logtime;
@@ -77,10 +79,20 @@ int		Player::getPoint()
 	return (this->points);
 }
 
+std::string	Player::getPost()
+{
+	return (this->post);
+}
+
 int		Player::getLoged_In()
 {
 	return (this->loged_in);
 }	
+
+int		Player::getFD()
+{
+	return (this->fd);
+}
 
 void	Player::set_Loged_In(int time)
 {
@@ -115,7 +127,7 @@ void	Player::add_Points(int point)
 void	Player::Level_Up()
 {
 	std::string current_lvl = this->level;
-
+	
 	if (this->points >= LVL10)
 		this->level = ("LEVEL_10");
 	else if (this->points >= LVL9)
@@ -142,10 +154,9 @@ void	Player::Level_Up()
 		if (this->user)
 		{
 			sendReply(this->user->getFd(), ":irc!~irc1337 NOTICE HH : ⚔️  LEVEL UP ! ⚔️ \n");
-			sendReply(this->user->getFd(), ":/lily!~bot@10.12.8.5 PRIVMSG PLAYER : ⚔️  LEVEL UP ! ⚔️ \n");
 			this->Promote();
 			this->Update_Status();
-			// this->points = 0;
+			this->points = 0;
 		}
 }
 
@@ -153,7 +164,7 @@ void	Player::Update_Status()
 {
 	if (this->points > LVL2)
 	{
-		if (this->logtime > this->points * 2)
+		if (this->logtime > this->points)
 			this->status = "LogTime_Seeker";
 		else if (this->points > this->logtime * 2)
 			this->status = "Fighter";

@@ -1,4 +1,7 @@
 import socket
+# from google_trans_new import google_translator
+# from googletrans import Translator
+# translator = Translator()
 
 class player:
 
@@ -32,7 +35,7 @@ class lily:
     def send_msg(self, reciever, msg):
         self.socket.send(bytes("PRIVMSG " + reciever + " :" + msg + "\n"))
     
-    def serv_connect(self, server, port, username, password, nickname, channel):
+    def serv_connect(self, server, port, username, password, nickname, general, random):
         print("Connecting to " + server)
         self.socket.connect((server, port))
         
@@ -40,7 +43,10 @@ class lily:
         self.socket.send(bytes("USER " + username + " *" + " *" + " *" + "\n"))
         self.socket.send(bytes("NICK " + nickname + "\n"))
         
-        self.socket.send(bytes("JOIN " + channel + "\n"))
+        self.socket.send(bytes("JOIN " + general + "\n"))
+        self.socket.send(bytes("JOIN " + random + "\n"))
+        self.socket.send(bytes("TOPIC " + general + " :Talk about all the different things .\n"))
+        self.socket.send(bytes("TOPIC " + random + " :you can troll as much as you want, disrespect = banne \n"))
         
     def serv_response(self):
         resp = self.socket.recv(1024).decode("UTF-8")
@@ -70,6 +76,7 @@ class lily:
                 return player
         if i == 1:
             self.send_msg(sender, "USER NOT FOUND !")
+            return None
 
     def pars_message(self, message):
         splt = message.split('!')
@@ -86,42 +93,47 @@ class lily:
                 self.send_msg(sender, pst[0]) 
                 break
         if i == 1:
-            self.send_msg(sender, "USER NOT FOUND !")
+            self.send_msg(sender, "(X) USER NOT FOUND ! (~_~)")
 
     def palyer_profile(self, sender):
         player = self.get_player(sender)
-        print("Nickname	: " + player.nickname)
-        print("Level    : " + player.level)
-        print("Status   : " + player.status)
-        print("LogTime  : " + player.logtime)
-        print("Rank     : " + player.rank)
-        print("Points   : " + player.points)
         if player:
-            self.send_msg(sender, ("Nickname	= " + player.nickname))
-            self.send_msg(sender, ("Level    = " + player.level))
-            self.send_msg(sender, ("Status   = " + player.status))
-            self.send_msg(sender, ("LogTime  = " + player.logtime))
-            self.send_msg(sender, ("Rank     = " + player.rank))
-            self.send_msg(sender, ("Points   = " + player.points))
+            print("Nickname	: " + player.nickname)
+            print("Level    : " + player.level)
+            print("Status   : " + player.status)
+            print("LogTime  : " + player.logtime)
+            print("Rank     : " + player.rank)
+            print("Points   : " + player.points)
+            self.send_msg(sender, "*********[Profile]*******\n")
+            self.send_msg(sender, ("***[	Nickname =	" + player.nickname) + "	]***")
+            self.send_msg(sender, ("***[	Level    =	" + player.level) + "	]*")
+            self.send_msg(sender, ("***[	Status   =	" + player.status) + "	]**")
+            self.send_msg(sender, ("***[	LogTime  =	" + player.logtime) + "	]****")
+            self.send_msg(sender, ("***[	Rank     =	" + player.rank) + "	]**")
+            self.send_msg(sender, ("***[	Points   =	" + player.points) + "	]******")
+            self.send_msg(sender, "**************************\n")
+        else :
+            self.send_msg(sender, "NO DATA ABOUT THE USER  !")
         
 IRC_SERV 	=	"10.12.8.5"
 IRC_PORT 	=	9999
-CHANNEL  	=	"#General"
+GENERAL  	=	"#General"
+RANDOM  	=	"#Random"
 BOT_USER 	=	"bot"
 BOT_NICK	=	"/lily"
 PASSWORD 	=	"1337"
 
 irc = lily()
-irc.serv_connect(IRC_SERV, IRC_PORT, BOT_USER, PASSWORD, BOT_NICK, CHANNEL)
+irc.serv_connect(IRC_SERV, IRC_PORT, BOT_USER, PASSWORD, BOT_NICK, GENERAL, RANDOM)
 user_list = {}
 playr = player()
 
 while True:
     message = irc.serv_response()
     if message:
-    	print("message : " +message)
-    if message:
+        print("message : " +message)
         sender = irc.pars_message(message)
+
     if "whereis" in message:
         irc.send_msg(sender,"Looking for the USER . . .")
         w = message.split()
@@ -136,6 +148,23 @@ while True:
     elif "help" in message:
         cmd = message.split("!")
         cmd = cmd[0].split(":")
-        irc.send_msg(cmd[1], "this is lily, please User < profile > to see your profile or < whereis + nickname >  to find a player")
+        irc.send_msg(cmd[1], "this is lily")
+        irc.send_msg(cmd[1], "|->please user >")
+        irc.send_msg(cmd[1], "|----> profile => to see your profile")
+        irc.send_msg(cmd[1], "|----> whereis nickname => to find a player")
+    elif "thank" in message:
+        irc.send_msg(sender, "you are Welcome (^_^)")
+    # elif "translate" in message:
+    #     text = message.split()
+    #     result = translator.translate(text[5], dest=text[4])
+    #     irc.send_msg(sender, result)
     if not message:
     	break
+
+
+#:lime!~limeChat@10.12.8.5   0
+# PRIVMSG					 1
+# /lily						 2
+# :translate(pattern)		 3
+# jp  						 4
+# <hello>					 5

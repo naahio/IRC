@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 09:04:59 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 11:58:20 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,10 +66,10 @@ int main(int argc, char **argv)
 		{
 			if (serv.getFds()[i].revents == 0)
 				continue;
-			if (serv.getFds()[i].revents != POLLIN)
-			{
-				std::cout << "Error ! revents : " << serv.getFds()[i].revents << std::endl;
-			}
+			// if (serv.getFds()[i].revents != POLLIN)
+			// {
+			// 	std::cout << "Error ! revents : " << serv.getFds()[i].revents << std::endl;
+			// }
 			if (serv.getFds()[i].fd == serv.getSocketFd())
 			{
 				if (!serv.accept_connections())
