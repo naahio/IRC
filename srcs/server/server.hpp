@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 16:44:08 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 10:16:30 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@
 # include "../pars/msg.hpp"
 
 # define BUFF_SIZE		512
-# define MAX_CONN		50
+# define MAX_CONN		64
 # define TIMEOUT		3 * 60 * 1000
 
 class Server
@@ -52,7 +52,7 @@ class Server
 		std::map <std::string, std::string> operators;
 		
 		int				socket_fd;
-		struct pollfd	fds[MAX_CONN];
+		struct pollfd	fds[MAX_CONN + 1];
 		int				nfds;
 		int				on;
 		int				port;
@@ -116,7 +116,7 @@ class Server
 		void	NICKcmd(int		fd,	std::vector<std::string> &cmd);
 		void	PASScmd(int		fd,	std::vector<std::string> &cmd);
 		void	JOINcmd(int		fd,	std::vector<std::string> &cmd);
-		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd);
+		void	PRIVMSGcmd(int	fd,	std::vector<std::string> &cmd, bool notice = false);
 		void	INVITEcmd(int	fd,	std::vector<std::string> &cmd);
 		void	QUITcmd(int		fd,	std::vector<std::string> &cmd);
 		void	OPERcmd(int		fd,	std::vector<std::string> &cmd);

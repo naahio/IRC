@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/25 11:14:43 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/26 16:55:32 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,13 +99,13 @@ class Channel {
 		void	removeOperator(int fd, int opFd = -1);
 		void	addModerator(int fd, int opFd = -1);
 		void	removeModerator(int fd, int opFd = -1);
-		void	addBan(std::string banMask, int fd);
-		void	removeBan(std::string banMask, int fd);
+		void	addBan(std::string const & banMask, int fd);
+		void	removeBan(std::string const & banMask, int fd);
 
 		bool	isBanned(User * user);
 		bool	isBanned(std::string banMask);
 		
-		void	broadCastMessage(std::string & message, int fd = -1, bool everyone = true);
+		void	broadCastMessage(std::string const & message, int fd = -1, bool everyone = true);
 };
 
 #endif
