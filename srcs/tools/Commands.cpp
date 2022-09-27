@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 17:46:20 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 10:19:43 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(fd);
+	user = this->getGuest(fd);
 	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
@@ -157,7 +157,7 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 	std::string reply;
-	user = this->getUser(fd);
+	user = this->getGuest(fd);
 	if (!user)
 		return ;
 	if (user->isAuth())
@@ -175,8 +175,10 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			welcomeReplay(fd);
 			user->setRegistered();
+			this->addUser(fd,user);
+			this->guests.erase(this->guests.find(fd));
+			welcomeReplay(fd);
 		}
 		else
 		{
@@ -192,7 +194,7 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 {
 	User *user;
 
-	user = this->getUser(fd);
+	user = this->getGuest(fd);
 	if (!user)
 		return;
 	if (cmd.size() < 2)
@@ -201,7 +203,7 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (!paramsChecker(cmd[1]))
 			throw myException(ERR_ERRONEUSNICKNAME);
-		else if (this->getUser(cmd[1]))
+		else if (this->getUser(cmd[1]) || this->getGuest(cmd[1]))
 			throw myException(ERR_NICKNAMEINUSE);
 		if (user->isAuth())
 			sendReply(fd,stringBuilder(7,":",user->getNickname().c_str(),"!~",this->getName().c_str(),
@@ -212,8 +214,10 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 	{
 		if (user->isConnected() && user->getPassword() == this->getPass())
 		{
-			welcomeReplay(fd);
 			user->setRegistered();
+			this->addUser(fd,user);
+			this->guests.erase(this->guests.find(fd));
+			welcomeReplay(fd);
 		}
 		else
 		{
@@ -674,7 +678,10 @@ void    Server::QUITcmd(int fd, std::vector<std::string> & cmd)
 
 	user = this->getUser(fd);
 	if (!user)
-		return ;
+	{
+		if (!(user = this->getGuest(fd)))
+			return ;
+	}
 	if (!cmd[1].empty())
 		reply = stringBuilder(5, "ERROR :Closing Link: ", user->getIpAddress().c_str(), " (Quit: ", cmd[1].c_str(), ")");
 	else

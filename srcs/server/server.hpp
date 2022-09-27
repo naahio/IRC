@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 10:16:30 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 10:20:20 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Server
 {
 	private:
 		std::map <int, User *>				users;
+		std::map <int, User *>				guests; 
 		std::map <std::string, Channel *>	channels;
 		std::map <std::string, std::string> operators;
 		
@@ -77,14 +78,18 @@ class Server
 		std::string const & getVersion(void) const;
 
 		std::map <int, User *> &			        getUsers(void);
+		std::map <int, User *> &			        getGuests(void); 
 		std::map <std::string, Channel *> &	        getChannels(void);
 		std::map <std::string, std::string> &  		getOperators(void);
 	
 		User	*	getUser(int fd);
 		User	*	getUser(std::string nickname);
+		User	*	getGuest(int fd);
+		User	*	getGuest(std::string nickname);
 		Channel	*	getChannel(std::string name);
 
-		void	addUser(int fd,char *ip, char *postname);
+		void	addUser(int fd,User *user);
+		void	addGuest(int fd,char *ip, char *postname);  
 		void	clientDisconnect(int fd);
 		void	listUserModes(User * user, int fd);
 
