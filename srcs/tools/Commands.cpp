@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/28 11:30:52 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 11:43:07 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -777,7 +777,7 @@ void	Server::VERSIONcmd(int fd)
 	sendReply(fd, this->name
 		+ ft_toString(RPL_VERSION) + " "
 		+ (user->getNickname().empty() ? "*" : user->getNickname()) + " "
-		+ this->version.substr(1) + ". "
+		+ this->version.substr(0, this->version.length() - 1) + ". "
 		+ this->name.substr(1) + ":Beta Version\n");
 }
 
