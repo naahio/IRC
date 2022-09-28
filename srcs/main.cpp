@@ -3,110 +3,89 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/19 07:50:54 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/21 14:18:52 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 09:49:21 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "./server/server.hpp"
 
+void	close_server(Server & serv, int exit_status)
+{
+	close(serv.getSocketFd());
+	serv.~Server();
+	exit(exit_status);
+}
+
 int main(int argc, char **argv)
 {
-   (void)argc;
-   (void)argv;
-	Server serv = Server();
-	int    i;
-	int    j;
-
-	if (!serv.Creat_socket())
-		exit (EXIT_FAILURE); 
-
-	if (!serv.reusable_socket())
+	if (argc != 3)
 	{
-		close (serv.get_socket_fd());
+		std::cout << "Parameter format : ./ircserv <PORT> <PASSWORD>" <<std::endl;
+		return (EXIT_FAILURE);
+	}
+	if(!isNumeric(argv[1]))
+	{
+		std::cout << "Error : Port error !" <<std::endl;
 		exit (EXIT_FAILURE);
 	}
 
-	if (!serv.nonblocking_socket())
-	{
-		close (serv.get_socket_fd());
-		exit (EXIT_FAILURE);
-	}
+	Server serv = Server(atoi(argv[1]), argv[2]);
 
-	if (!serv.bind_socket())
-	{
-		close (serv.get_socket_fd());
-		exit (EXIT_FAILURE);
-	}
-
-	if (!serv.listen_from_socket())
-	{
-		close (serv.get_socket_fd());
-		exit (EXIT_FAILURE);
-	}
+	if (!serv.Create_socket())
+		return (EXIT_FAILURE);
+	
+	if(!serv.reusable_socket()
+		|| !serv.nonblocking_socket()
+		|| !serv.bind_socket()
+		|| !serv.listen_from_socket())
+		close_server(serv, EXIT_FAILURE);
 
 	serv.poll_trait();
 
+	if (serv.getPlayers_List().empty())
+		serv.load_data();
+	std::cout << "number of existing Player : " << serv.getPlayers_List().size() << std::endl;
 	do
 	{
 		std::cout << "Waiting for a poll . . . " << std::endl;
-		serv.set_rc(poll(serv.get_fds(), serv.get_nfds(), TIMEOUT));
-		if (serv.get_rc() < 0)
+		int	rc = poll(serv.getFds(), serv.getNfds(), TIMEOUT);
+		if (rc < 0)
 		{
 			std::cout << "FAILED to poll . . . " << std::endl;
-			break;
+			close_server(serv, EXIT_FAILURE);
 		}
-		if (serv.get_rc() == 0)
+		if (rc == 0)
 		{
 			std::cout << "POLL : time out !" << std::endl;
-			break;
+			close_server(serv, EXIT_FAILURE);
 		}
-		serv.set_current_size(serv.get_nfds());
-		for (i=0; i < serv.get_current_size(); i++)
+		for (int i = 0; i < serv.getNfds(); i++)
 		{
-			if (serv.get_fds()[i].revents == 0)
+			if (serv.getFds()[i].revents == 0)
 				continue;
-			if (serv.get_fds()[i].revents != POLLIN)
+			if (serv.getFds()[i].fd == serv.getSocketFd())
 			{
-				std::cout << "Error ! revents = : " << serv.get_fds()[i].revents << std::endl;
-				serv.set_end_Server(TRUE);
-				break; 
+				if (!serv.accept_connections())
+					close_server(serv, EXIT_FAILURE);
 			}
-			if (serv.get_fds()[i].fd == serv.get_socket_fd())
-				serv.accept_connect();
 			else
 			{
-				serv.recv_send_msg(i);
-				if (serv.get_close_conn())
+				if (!serv.recv_send_msg(serv.getFds()[i].fd))
 				{
-					close (serv.get_fds()[i].fd);
-					serv.get_fds()[i].fd = -1;
-					serv.set_compress_array(TRUE);
+					serv.clientDisconnect(serv.getFds()[i].fd);
+					for (int j = i; j < serv.getNfds(); j++)
+					{
+						memcpy(&serv.getFds()[j], &serv.getFds()[j + 1], sizeof(struct pollfd));
+					}
+					serv.setNfds(serv.getNfds() - 1);
+					i --;
 				}
 			}
 		}
-		if (serv.get_compress_array())
-		{
-			serv.set_compress_array(FALSE);
-			for (i = 0; i < serv.get_nfds(); i++)
-			{
-				if (serv.get_fds()[i].fd == -1)
-				{
-					for (j = i; j < serv.get_nfds() - 1; j++)
-						serv.get_fds()[j].fd = serv.get_fds()[j + 1].fd;
-					i--;
-					serv.set_nfds(serv.get_nfds() - 1);
-				}
-			}
-		}
-	} while (serv.get_end_Server() == FALSE);
+	} while (true);
 	
-	for (i = 0; i < serv.get_nfds(); i++)
-	{
-		if (serv.get_fds()[i].fd >= 0)
-			close (serv.get_fds()[i].fd);
-	}
-	return (0);
+	return (EXIT_SUCCESS);
 }

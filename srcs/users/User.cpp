@@ -3,68 +3,237 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/18 13:24:44 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 09:51:21 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "User.hpp"
 
-User::User()
-{
-}
+/*************************[ Constructors/Destructors ]*************************/
 
-User::User(int fd)
+User::User(int _fd, char *ip, std::string post_name)
 {
-    this->fd = fd;
-    this->username = "";
-    this->nickname = "";
-    this->password = "";
-    this->is_name  = false;
-    this->is_nick  = false;
-    this->is_pass  = false;
-
-    std::cout << "user : " << fd << " added" << std::endl;
+	this->postnumber	= post_name;
+	this->fd			= _fd;
+	this->username		= "";
+	this->nickname		= "";
+	this->servName		= "";
+	this->fullName		= "";
+	this->hostName		= "";
+	this->msgRemainder	= "";
+	this->ipAddress		= ip;
+	this->registered	= false;
+	this->connected		= false;
+	this->visible		= true;
+	this->isoperator	= false;
 }
 
 User::~User()
 {
-    std::cout << "User has been deleted !" <<std::endl;
+	close(this->fd);
 }
 
-std::string User::get_username()
-{
-    return (this->username);
+/******************************[ Getters/Setters ]*****************************/
+
+int	User::getFd(void) const {
+	return (this->fd);
 }
 
-std::string User::get_nickname()
-{
-    return (this->nickname);
+std::string const &	User::getUsername(void) const {
+	return (this->username);
 }
 
-std::string User::get_password()
-{
-    return (this->password);
+std::string	const &	User::getNickname(void) const {
+	return (this->nickname);
 }
 
-void    User::set_username(std::string user_name)
+std::string const & User::getServerName(void) const
 {
-    this->username = user_name;
+	return (this->servName);
 }
 
-void    User::set_nickname(std::string nick_name)
+std::string const & User::getHostName(void) const
 {
-    this->nickname = nick_name;
+	return (this->hostName);
 }
 
-void    User::set_password(std::string password)
+std::string const & User::getFullName(void) const
 {
-    this->password = password;
+	return (this->fullName);
+}
+std::string const & User::getPostNumber(void) const
+{
+	return (this->postnumber);
 }
 
-bool User::check_auth()
+std::string	const & User::getPassword(void) const
 {
-    return ( (this->is_name && this->is_nick && this->is_pass));
+	return (this->password);
+}
+
+std::string const & User::getMsgRemainder(void) const
+{
+	return (this->msgRemainder);
+}
+
+std::map<std::string, Channel *> &	User::getChannels(void) {
+	return (this->channels);
+}
+
+std::string const & User::getIpAddress(void) const
+{
+	return (this->ipAddress);
+}
+
+std::string const	User::getIdentifier(void) const {
+	std::string	ident;
+
+	ident = this->nickname + "!" + this->username + "@" + this->ipAddress;
+	return (ident);
+}
+
+std::string const & User::getLog(void) const
+{
+	return (this->log);
+}
+
+Channel *	User::getChannel(std::string name) {
+	std::map<std::string, Channel *>::iterator it;
+
+	it = this->channels.find(name);
+	if (it != this->channels.end()) {
+		return (it->second);
+	}
+	return (NULL);
+}
+
+std::map<std::string,size_t> & User::getFiles(void)
+{
+	return (this->files);
+}
+
+void	User::setLog(std::string time)
+{
+	this->log = time;
+}
+
+void	User::setFd(int _fd) {
+	this->fd = _fd;
+}
+
+void	User::setUsername(std::string _username) {
+	this->username = _username;
+}
+
+void	User::setNickname(std::string _nickname) {
+	this->nickname = _nickname;
+}
+
+void	User::setServerName(std::string _servName)
+{
+	this->servName = _servName;
+}
+
+void	User::setHostName(std::string _hostName)
+{
+	this->hostName = _hostName;
+}
+
+void	User::setFullName(std::string _fullName)
+{
+	this->fullName = _fullName;
+}
+
+void	User::setPassword(std::string &password)
+{
+	this->password = password;
+}
+
+void	User::setMsgRemainder(std::string &remaining)
+{
+	this->msgRemainder = remaining;
+}
+
+void	User::setRegistered(void)
+{
+	this->registered = true;
+}
+
+void	User::setConnected(void)
+{
+	this->connected = true;
+}
+
+void	User::setVisibility(bool option) {
+	this->visible = option;
+}
+
+void	User::setIsOperator(void){
+	this->isoperator = true;
+}
+
+void	User::setFiles(std::string filename,size_t fileSize)
+{
+	this->files.insert(std::pair<std::string,size_t>(filename,fileSize));
+}
+/*****************************[ Member Functions ]*****************************/
+
+bool	User::isAuth(void) {
+	return (!this->username.empty() && !this->nickname.empty());
+}
+
+bool	User::isRegistered(void)
+{
+	return this->registered;
+}
+
+bool	User::isConnected(void)
+{
+	return	this->connected;
+}
+
+bool	User::isVisible(void) {
+	return	this->visible;
+}
+
+bool	User::isOperator(void){
+	return this->isoperator;
+}
+
+void	User::removeFile(std::string file)
+{
+	std::map<std::string,size_t>::iterator it;
+
+	it = this->files.find(file);
+	this->files.erase(it);
+}
+
+void	User::joinChannel(Channel & channel, std::string name) {
+	this->channels.insert(std::pair<std::string, Channel *>(ft_toLower(name), &channel));
+}
+
+void	User::leaveChannel(std::string name) {
+	std::map<std::string, Channel *>::iterator it;
+
+	it = this->channels.find(ft_toLower(name));
+	if (it == this->channels.end()) {
+		throw myException(ERR_NOTONCHANNEL);
+	}
+	this->channels.erase(it);
+}
+
+User*	User::operator = (const User& user) 
+{ 
+    this->fd			= user.fd;
+    this->username		= user.username;
+	this->nickname		= user.nickname;
+	this->hostName		= user.hostName;
+	this->ipAddress		= user.ipAddress;
+	this->postnumber	= user.postnumber;
+	this->connected		= user.connected;
+
+	return (this);
 }

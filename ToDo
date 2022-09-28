@@ -1,0 +1,47 @@
+    21-08-2022:
+        ->  server class + hpp are created and well handled 
+        ->  the basic tests are working creating multiple client send and receive   msgs is working   
+    23-08-2022"
+        ->  create User and user map.
+        ->  insert and erase a user with his ip and fd.
+    24-08-2022:
+        ->  create msg class and add check the syntaxe of the received message.
+    10/09/2022:
+        ->   *JOIN*     Commande must check in the channel has a key so that the user much give before joining. 
+        ->   *JOIN*     Check if the user is banned from the channel beforre joining .
+        ->   *channels* banned users_list needed . 
+        ->   *Commands* complete the join and PRIVMSG cmd, correct the server's answers.
+        ->   *Commands* complete the other commands .
+
+
+        CMD Lists : 
+
+        <PASS> *
+        <USER> *
+        <NICK> *
+        <JOIN>  *
+        <KICK>  *
+        <PART>  *
+        <PRIVMSG> *
+        <MODE> 
+        <USERMODES>  
+        <LIST>  
+        <INVITE>  
+        <VERSION> 
+        <TIME> 
+        <ADMIN> 
+        <INFO>  
+        <KILL> 
+
+
+        <LIST>  '<#>channel name' 'server'
+
+
+
+		message = :lime!~limeChat@10.12.8.5 PRIVMSG naahio :whereis nickname
+
+		sender_nickname : sender = split('!') + sender[0].split(':') => sender_nickname[1]
+		command.split() => command[3]
+			|
+			|
+			------> where : looking for command[5]

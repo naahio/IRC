@@ -30,9 +30,11 @@
 *.exe
 *.out
 *.app
+ircserv
+client
 
 #others
 .history
 .vscode
-
-serv
+*.dSYM/
+.DS_Store

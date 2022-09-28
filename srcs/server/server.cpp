@@ -1,333 +1,783 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Server.cpp                                           :+:      :+:    :+:   */
+/*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/08/19 10:44:25 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 11:19:52 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "server.hpp"
 
+/*************************[ Constructors/Destructors ]*************************/
 
-Server::Server()
+Server::Server(int _port, std::string _password)
 {
-    std::cout << "Creating Serverer . . . " << std::endl;
-    std::cout << "updating parameter . . . " << std::endl;
+	std::cout << "Creating Server . . . " << std::endl;
+	std::cout << "updating parameter . . . " << std::endl;
+	this->port = _port;
+	this->password = _password;
+	this->nfds = 0;
+	this->operators.insert(std::pair<std::string,std::string>("penguin","messi123"));
+	this->operators.insert(std::pair<std::string,std::string>("darkspiper","maroc2001"));
+	this->operators.insert(std::pair<std::string,std::string>("naahio","azerty12"));
+	this->name = ":IRC-1337 ";
+	this->version = "1.0 ";
 
-    this->len              = TRUE;
-    this->rc               = TRUE;
-    this->on               = TRUE;
-    this->socket_fd        = F_INIT;
-    this->new_fd           = F_INIT;
-    this->end_Server       = FALSE;
-    this->compress_array   = FALSE;
-    this-> nfds            = TRUE;
-    this->current_size     = FALSE;
+	time_t now = time(0);
+	this->creationTime = ctime(&now);
+	std::cout << "Server created, password : " << this->password << std::endl;
 }
 
-Server::~Server()
+Server::~Server(void)
 {
-    std::cout << "Server deleted " << std::endl;
+	std::map<int, User *>::iterator user;
+	for (user = this->users.begin(); user != this->users.end(); ++user) {
+		delete user->second;
+	}
+	this->users.clear();
+
+	std::map<std::string, Channel *>::iterator channel;
+	for (channel = this->channels.begin(); channel != this->channels.end(); ++channel) {
+		delete channel->second;
+	}
+	this->channels.clear();
+	
+	std::cout << "Server deleted." << std::endl;
 }
 
-std::map<int, User> Server::get_users()
-{
-    return (this->users);
+/******************************[ Getters/Setters ]*****************************/
+
+int		Server::getSocketFd(void) const {
+	return (this->socket_fd);
 }
 
-void    Server::set_users(std::map <int, User> u_map)
-{
-    this->users = u_map;
+struct pollfd *	Server::getFds(void) {
+	return (this->fds);
 }
 
-struct sockaddr_in6     Server::get_addr()
-{
-    return (this->addr);
+int		Server::getNfds(void) const {
+	return (this->nfds);
 }
 
-void    Server::set_addr(struct sockaddr_in6     addr)
-{
-    this->addr = addr;
+void	Server::setNfds(int nfds) {
+	this->nfds = nfds;
 }
 
-struct pollfd*        Server::get_fds()
-{
-    return (this->fds);
+int		Server::getPort(void) const {
+	return (this->port);
 }
 
-// void        Server::set_fds(struct pollfd fds[POLL_SIZE])
-// {
-//     this->fds = fds;
-// }
-
-int Server::get_len()
-{
-    return (this->len);
+std::string const &	Server::getPass(void) const {
+	return (this->password);
 }
 
-void    Server::set_len(int len)
-{
-    this->len = len;
+std::map<int, User *> &	Server::getUsers(void) {
+	return (this->users);
 }
 
-int Server::get_rc()
+std::map <int, User *> & Server::getGuests(void)
 {
-    return (this->rc);
+	return (this->guests);
 }
 
-void    Server::set_rc(int rc)
-{
-    this->rc = rc;
+std::map<std::string, Channel *> &	Server::getChannels(void) {
+	return (this->channels);
 }
 
-int     Server::get_socket_fd()
-{
-    return (this->socket_fd);
+std::map <std::string, std::string> &  Server::getOperators(void){
+	return (this->operators);
 }
 
-void    Server::set_socket_fd(int socket_fd)
-{
-    this->socket_fd = socket_fd;
+//----------------------------- PLAYER :
+
+std::map<std::string, Player *> &	Server::getPlayers_List(void) {
+	return (this->players_list);
 }
 
-int     Server::get_new_fd()
-{
-    return (this->new_fd);
+//----------------------------- 
+
+User *	Server::getUser(int fd) {
+	std::map<int, User *>::iterator	user;
+
+	user = this->users.find(fd);
+	if (user != this->users.end()) {
+		return (user->second);
+	}
+	return (NULL);
 }
 
-void    Server::set_new_fd(int new_fd)
-{
-    this->new_fd = new_fd;
+User *	Server::getUser(std::string nickname) {
+	std::map<int, User *>::iterator	user;
+
+	for (user = this->users.begin(); user != this->users.end(); ++user) {
+		if (ft_toLower(user->second->getNickname()) == ft_toLower(nickname)) {
+			return (user->second);
+		}
+	}
+	return (NULL);
 }
 
-int     Server::get_desc_ready()
+User	*	Server::getGuest(int fd)
 {
-    return (this->desc_ready); 
+	std::map<int, User *>::iterator	user;
+
+	user = this->guests.find(fd);
+	if (user != this->guests.end()) {
+		return (user->second);
+	}
+	return (NULL);
 }
 
-void    Server::set_desc_ready(int fd_ready)
+User	*	Server::getGuest(std::string nickname)
 {
-    this->desc_ready = fd_ready;
+	std::map<int, User *>::iterator	user;
+
+	for (user = this->guests.begin(); user != this->guests.end(); ++user) {
+		if (ft_toLower(user->second->getNickname()) == ft_toLower(nickname)) {
+			return (user->second);
+		}
+	}
+	return (NULL);
 }
 
-int     Server::get_end_Server()
-{
-    return (this->end_Server);
+Channel *	Server::getChannel(std::string name) {
+	std::map<std::string, Channel *>::iterator	channel;
+	
+	channel = this->channels.find(ft_toLower(name));
+	if (channel != this->channels.end()) {
+		return (channel->second);
+	}
+	return (NULL);
 }
 
-void    Server::set_end_Server(int end_serv)
-{
-    this->end_Server = end_serv;
+std::string const &	Server::getName(void) const {
+	return (this->name);
 }
 
-int     Server::get_compress_array()
+
+std::string const & Server::getVersion(void) const
 {
-    return (this->compress_array);
+	return (this->version);
 }
 
-void    Server::set_compress_array(int comp_arr)
-{
-    this->compress_array = comp_arr;
+/*****************************[ Users Management ]*****************************/
+
+void	Server::addUser(int fd,User *user) {
+	
+	this->users.insert(std::pair<int, User *>(fd, user));
 }
 
-int     Server::get_close_conn()
+void	Server::addGuest(int fd,char *ip, char *postname)
 {
-    return (this->close_conn);
+	User *	user;
+
+	user = new User(fd, ip, postname);
+	this->guests.insert(std::pair<int, User *>(fd, user));
 }
 
-void    Server::set_close_conn(int close_con)
-{
-    this->close_conn = close_con;
+void	Server::clientDisconnect(int fd) {
+	try {
+		std::map<int, User *>::iterator		user;
+		std::map<std::string, Channel *>	channels;
+		time_t now = time(0);
+		User *u = this->getUser(fd);
+		if (u)
+		{
+			Player *player = this->getPlayer(u->getNickname());
+			if (player) {
+				player->set_logtime(player->getLogtime() + (now - player->getLoged_In()));
+				player->add_Points(player->getLogtime() * 0.5);
+				std::cout << "deleting : " << u->getNickname() << std::endl;
+				this->save_data();
+				this->getPlayers_List().erase(u->getNickname());
+				std::cout << "deleted : " << std::endl;
+			}
+		}
+
+		user = this->users.find(fd);
+		if (user != this->users.end()) {
+			channels = user->second->getChannels();
+			while (!channels.empty()) {
+				channels.begin()->second->removeMember(fd);
+				channels = user->second->getChannels();
+			}
+			delete user->second;
+			this->users.erase(user);
+		}
+		else
+		{
+			user = this->guests.find(fd);
+			if (user != this->guests.end()) {
+				delete user->second;
+				this->guests.erase(user);
+			}
+		}
+	} catch (myException & e) {}
 }
 
-int     Server::get_timeout()
-{
-    return (this->timeout);
+void	Server::listUserModes(User * user, int fd) {
+	std::string	reply;
+	std::string	reply2;
+
+	reply = this->name + ft_toString(RPL_UMODEIS) + " " + user->getNickname() + " +";
+	if (user->isVisible())
+		reply += "i";
+	reply2 += "\n";
+	sendReply(fd, reply + reply2);
 }
 
-void    Server::set_timeout(int timeout)
-{
-    this->timeout = timeout;
+/****************************[ Channels Management ]***************************/
+
+void	Server::createChannel(std::string name, User & op) {
+	try {
+		Channel *	channel;
+
+		channel = new Channel(name);
+		if (this->channels.insert(std::pair<std::string, Channel *>(ft_toLower(name), channel)).second) {
+			channel->addMember(&op);
+			return ;
+		}
+		delete channel;
+	} catch (myException & e) {
+		throw myException(e.getERROR_NO());
+	}
 }
 
-int     Server::get_nfds()
-{
-    return (this->nfds);
+void	Server::deleteChannel(std::string name) {
+	std::map<std::string, Channel *>::iterator	channel;
+	std::map<int, User *>::iterator 			member;
+	std::map<int, User *>						channelMembers;
+	std::map<std::string, Channel *>			memberChannels;
+
+	channel = this->channels.find(ft_toLower(name));
+	if (channel == this->channels.end())
+		return ;
+	channelMembers = channel->second->getMembers();
+	for (member = channelMembers.begin(); member != channelMembers.end(); ++member) {
+		memberChannels = member->second->getChannels();
+		if (memberChannels.find(ft_toLower(name)) != memberChannels.end()) {
+			memberChannels.erase(memberChannels.find(ft_toLower(name)));
+		}
+	}
+	delete channel->second;
+	this->channels.erase(channel);
 }
 
-void    Server::set_nfds(int nfds)
-{
-    this->nfds = nfds;
+void	Server::listChannelModes(Channel * channel, int fd) {
+	User *		user;
+	std::string	reply;
+	std::string	reply2;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	reply = this->name + ft_toString(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
+	if (channel->isPrivate())
+		reply += "p";
+	if (channel->isSecret())
+		reply += "s";
+	if (channel->isInviteOnly())
+		reply += "i";
+	if (channel->isTopicSettableByOp())
+		reply += "t";
+	if (channel->isMemberChatOnly())
+		reply += "n";
+	if (channel->isModerated())
+		reply += "m";
+	if (channel->getMembersLimit() != 0) {
+		reply += "l";
+		reply2 += " " + ft_toString(channel->getMembersLimit());
+	}
+	if (channel->getKey() != "") {
+		reply += "k";
+		reply2 += " " + channel->getKey();
+	}
+	reply2 += "\n";
+	sendReply(fd, reply + reply2);
+	sendReply(fd, this->name
+		+ ft_toString(RPL_CREATIONTIME) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ ft_toString(channel->getCreationTimestamp()) + "\n");
 }
 
-int     Server::get_current_size()
-{
-    return (this->current_size);
+void	Server::listChannelBans(Channel * channel, int fd) {
+	User *							user;
+	std::string						replyMessage;
+	std::vector<t_bans>				bans;
+	std::vector<t_bans>::iterator	it;
+
+	user = this->getUser(fd);
+	if (!user)
+		return ;
+	bans = channel->getBans();
+	for (it = bans.begin(); it != bans.end(); ++it) {
+		replyMessage += this->name
+			+ ft_toString(RPL_BANLIST) + " "
+			+ user->getNickname() + " "
+			+ channel->getName() + " "
+			+ it->banMask + " "
+			+ it->banMod + " "
+			+ ft_toString(it->banTimestamp) + "\n";
+	}
+	replyMessage += this->name
+		+ ft_toString(RPL_ENDOFBANLIST) + " "
+		+ user->getNickname() + " "
+		+ channel->getName() + " "
+		+ reply(RPL_ENDOFBANLIST) + "\n";
+	sendReply(fd, replyMessage);
 }
 
-void    Server::set_current_size(int size)
+/*****************************[ Server Management ]****************************/
+
+int		Server::Create_socket(void)
 {
-    this->current_size = size;
+	std::cout << "Creating socket . . . ";
+	this->socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (this->socket_fd < 0)
+	{
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
+		return (0);
+	}
+	this->fds[0].fd = this->socket_fd;
+	this->nfds++;
+	std::cout << "[DONE]" << std::endl;
+	return (1);
 }
 
-char*   Server::get_buffer()
+int		Server::reusable_socket(void)
 {
-    return (this->buffer);
+	int	rc;
+	
+	std::cout << "Setting up socket options . . . ";
+	rc = setsockopt(this->socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
+	if (rc < 0)
+	{
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
+		return (0); 
+	}
+	std::cout << "[DONE]" << std::endl;
+	return (1);
 }
 
-// void    Server::set_buffer(char buffer[BUFF_SIZE])
-// {
-//     this->buffer = buffer;
-// }
-
-int    Server::Creat_socket()
+int		Server::nonblocking_socket(void)
 {
-    this->socket_fd = socket(AF_INET6, SOCK_STREAM, 0);
+	int	rc;
+	
+	std::cout << "Making socket non blocking . . . ";
+	rc = fcntl(this->socket_fd, F_SETFL, O_NONBLOCK);
+	if (rc < 0)
+	{
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
+		return (0);
+	}
+	std::cout << "[DONE]" << std::endl;
+	return (1);
+}
 
-    if (this->socket_fd < 0)
+int		Server::bind_socket(void)
+{
+	struct sockaddr_in	addr;
+	int					rc;
+	
+	std::cout << "Binding Socket . . . ";
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(this->port);
+	rc = bind(this->socket_fd, (struct sockaddr *)&addr, sizeof(addr));
+	if (rc < 0)
+	{
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
+		return (0);
+	}
+	std::cout << "[DONE]" << std::endl;
+	return (1);
+}
+
+int		Server::listen_from_socket(void)
+{
+	int	rc;
+	
+	std::cout << "Listening . . ." << std::endl;
+	rc = listen(this->socket_fd, MAX_CONN + 1);
+	if (rc < 0)
+	{
+		std::cout << "[FAILED: " << errno << "]" << std::endl;
+		return (0);
+	}
+	return (1);
+}
+
+void	Server::poll_trait(void)
+{
+	std::cout << "Setting up poll structure . . . ";
+	memset(this->fds, 0, sizeof(this->fds));
+	this->fds[0].fd = this->socket_fd;
+	this->fds[0].events = POLLIN;
+	std::cout << "[DONE]" << std::endl;
+}
+
+bool	Server::accept_connections(void)
+{
+	struct sockaddr_in	addr;
+	int addrlen = sizeof(addr);
+	int	new_fd = -1;
+	std::cout << "Waiting for incoming connections . . . " << std::endl;
+	do
+	{
+		new_fd = accept(this->socket_fd,(struct sockaddr*)&addr,(socklen_t*)&addrlen);
+		if (new_fd == -1)
+		{
+			if (errno != EWOULDBLOCK)
+			{
+				std::cout << "FAILED at accepting connection ! errno : " << errno << std::endl;
+				return (false);
+			}
+			break;
+		}
+		
+		struct in_addr ipAddr = addr.sin_addr; 
+		char str[INET_ADDRSTRLEN];
+		inet_ntop( AF_INET, &ipAddr, str, INET_ADDRSTRLEN);
+        struct hostent *hp;
+
+
+  		hp = gethostbyaddr((const void *)&ipAddr, sizeof ipAddr, AF_INET);
+		
+		std::cout << "NEW Connection detected " << new_fd << std::endl;
+		if (this->nfds <= MAX_CONN)
+		{
+			this->addGuest(new_fd,str, hp->h_name);
+			this->fds[this->nfds].fd = new_fd;
+			this->fds[this->nfds].events = POLLIN;
+			this->nfds++;
+			sendReply(new_fd, this->name + "NOTICE AUTH :*** Looking up your hostname...\n");
+			sendReply(new_fd, this->name + "NOTICE AUTH :*** Found your hostname\n");
+		}
+		else
+		{
+			sendReply(new_fd, this->name + "ERROR ERROR :*** SORRY ! NO SPACE LEFT ON SERVER\n");
+			std::cout << "Connection rejected : no space left ! " << new_fd << std::endl;
+			close(new_fd);
+		}
+	} while (new_fd != -1);
+	return (true);
+}	
+/********************************[ Parsing ]**********************************/
+
+bool	Server::ctcpMessage(std::string &cmd,
+					std::vector<std::string> &vec)
+{
+	split(cmd,' ',vec);
+	if (vec.size() >= 5 && vec[0][0] == 0x01 && 
+		vec[0].find("DCC") != std::string::npos 
+		&& !vec[1].compare("SEND"))
+	{
+		return true;
+	}
+	return false;
+}
+
+int		Server::splitCmd(std::string &cmd,std::vector<std::string> &oneCmdParsed)
+{
+	std::vector<std::string> collonSplit;  
+
+	split(cmd,':',collonSplit);
+	if (!collonSplit.size())
+		return 0;
+	split(collonSplit[0],' ',oneCmdParsed);
+	for (size_t i = 1 ; i < collonSplit.size(); i++)
+		oneCmdParsed.push_back(collonSplit[i]);
+	return 1;
+}
+
+void	Server::parsExecCommands(Msg &msg)
+{
+	std::vector<std::string> allCmds;
+	std::vector<std::string> oneCmdParsed;
+
+	allCmds = msg.getCommands();
+	for (size_t i = 0 ; i < allCmds.size() ;i++)
+	{
+		if (!splitCmd(allCmds[i],oneCmdParsed))
+			return ;	
+		for (size_t i = 0 ; i < oneCmdParsed.size(); i++)
+		{
+			std::cout << oneCmdParsed[i] << std::endl;
+		}
+		cmdExec(msg,oneCmdParsed);
+		oneCmdParsed.clear();
+	}
+}
+
+void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
+{
+	User	*user;
+
+	user = this->getUser(msg.getSender());
+	if (!user)
+	{
+		user = this->getGuest(msg.getSender());
+		if (!user)
+			return;
+	}
+	try {
+		for (int i = 0 ; cmd[0][i] ; i++)
+			cmd[0][i] = toupper(cmd[0][i]);
+		if (!cmd[0].compare("HELP"))
+			HELPcmd(msg.getSender());
+		else if (!cmd[0].compare("USER"))
+			USERcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("NICK"))
+			NICKcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("PASS"))
+			PASScmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("QUIT"))
+			QUITcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("VERSION"))
+			VERSIONcmd(msg.getSender());
+		else if (!cmd[0].compare("TIME"))
+			TIMEcmd(msg.getSender());
+		else if (!cmd[0].compare("ADMIN"))
+			ADMINcmd(msg.getSender());
+		else if (!cmd[0].compare("NOTICE"))
+			PRIVMSGcmd(msg.getSender(), cmd, true);
+		else if (!cmd[0].compare("PRIVMSG"))
+			PRIVMSGcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("JOIN"))
+			JOINcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("KICK"))
+			KICKcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("PART"))
+			PARTcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("MODE"))
+			MODEcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("LIST"))
+			LISTcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("NAMES"))
+			NAMEScmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("INVITE"))
+			INVITEcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("OPER"))
+			OPERcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("KILL"))
+			KILLcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("TOPIC"))
+			TOPICcmd(msg.getSender(), cmd);
+		else if (!cmd[0].compare("SEND"))
+			SENDcmd(msg.getSender(),cmd);
+		else if (!cmd[0].compare("ACCEPT") || !cmd[0].compare("DECLINE"))
+			RESPONDcmd(msg.getSender(),cmd);
+		else if (!cmd[0].compare("PONG"))
+			sendReply(msg.getSender(), stringBuilder(3, this->getName().c_str(), "PONG ", this->getName().c_str()));
+		else
+			throw myException(ERR_UNKNOWNCOMMAND);
+		if (this->getUser(msg.getSender()))
+		{
+			Player	*pl = this->getPlayer(msg.getSender());
+			pl->add_Points(COMMANDS_POINT);
+			pl->Level_Up();
+			this->save_data();
+		}
+	} catch(myException & e) {
+		sendReply(msg.getSender(), this->getName()
+			+ ft_toString(e.getERROR_NO()) + " "
+			+ user->getNickname() + " "
+			+ cmd[0] + " "
+			+ e.what() + "\n");
+	}
+}
+
+/*****************************[ Receive Message ]****************************/
+
+bool	Server::recv_send_msg(int fd)
+{
+	int	rc = 1;
+	std::string buff;
+	std::string remain;
+	char		buffer[BUFF_SIZE];
+	User *		user;
+
+	user = this->getUser(fd);
+	if (!user)
+	{
+		if (!(user = this->getGuest(fd)))
+			return false;
+	}
+	std::cout <<  "Receiving message . . ." << std::endl;
+	buff += user->getMsgRemainder();
+	memset(buffer,0,BUFF_SIZE);
+	do 
+	{
+			rc = recv(fd,buffer,510, 0);
+			if (rc == -1)
+			{
+				if (errno != EWOULDBLOCK)
+				{
+					std::cout << "FAILED at receiving a msg ! errno : " << errno << std::endl;
+					return (false);
+				}
+				continue;
+			}
+			if (rc == 0)
+			{
+				std::cout << "Connection closed . . . " << std::endl;
+				return (false);
+			}
+			buffer[rc] = '\0';
+			buff += buffer;
+		if (buff.find_first_of("\r\n") != std::string::npos)
+		{
+			std::cout << " >>>>> "<< buff << std::endl;
+			size_t pos = buff.find_last_of("\r\n");
+			buff = buff.substr(0, pos);
+			user->setMsgRemainder(remain);
+			Msg msg = Msg(buff, fd);
+			parsExecCommands(msg);
+			return (true);
+		}
+		else
+		{
+			user->setMsgRemainder(buff);
+			return (true);
+		}
+	} while (true);
+	return (true);
+}
+
+//********************* PLAYER'S FUNCTION : ********************
+
+void	Server::add_player(User *user) // first time connected
+{
+	time_t now = time(0);
+	Player *player = new Player(user);
+	player->set_Loged_In(now);
+	std::cout << "login : " << player->getLoged_In() << std::endl;
+	std::cout << "NEW PLAYER ADDED  : " << player->getnickname() << std::endl;
+	this->players_list.insert(std::pair<std::string, Player *>(user->getNickname(), player));
+	// this->save_data(players_list);
+}
+
+void	Server::link_data(User *user)
+{
+	std::cout << " getting player  " << std::endl;
+	Player *player = this->getPlayer(user->getNickname());
+	if (!player)
+		return;
+	player->set_user(user);
+	time_t now = time(0);
+	player->set_Loged_In(now);
+	std::cout << "re login : " << player->getLoged_In() << std::endl;
+	std::cout << " PLAYER LINKED  : " << player->getnickname() << std::endl;
+	this->players_list.insert(std::pair<std::string, Player *>(user->getNickname(), player));
+	std::cout << " SAVED " << std::endl;
+}
+
+bool	Server::load_data()
+{
+	std::ifstream	file;
+	std::string		data;
+	std::vector<std::string> p_data;					
+
+	std::cout << " Loading data  " << std::endl;
+	file.open("user.txt");
+	if (!file)
+	{
+		std::cout << "Error ! could not open the file " <<std::endl;
+		return (false);
+	}
+	for (int i = 0; std::getline (file, data); i++)
+	{
+		if (data.empty())
+			continue;
+		std::cout << "files lanes : " << data << std::endl;
+		split(data, ' ', p_data);
+		std::cout << "found  : " << p_data[1] << std::endl;
+		Player *player = new Player(ft_toInt(p_data[0]), p_data[1], p_data[2], p_data[3], p_data[4], ft_toInt(p_data[5]), p_data[6], ft_toInt(p_data[7]));
+		this->players_list.insert(std::pair<std::string, Player *>(p_data[1], player));
+		data.clear();
+		p_data.clear();
+	}
+	file.close();
+	return (true);
+}
+
+void	Server::save_data()
+{
+	User	*bot;
+	std::ofstream file("user.txt");
+	std::map <std::string, Player *>::iterator	  it;
+	bot = this->getUser("/lily");
+	int			fd;
+	std::string	post;
+	for(it = this->players_list.begin(); it != this->players_list.end(); it++)
     {
-        std::cout << "Failed to create socket, errno : " << errno << std::endl;
-        return (0);
+        Player *player;
+        player = it->second;
+		fd = player->getFD();
+		post = player->getPost();
+		if (player->getUser())
+		{
+			post = player->getUser()->getPostNumber();
+			fd = player->getUser()->getFd();
+		}
+        file << fd << " " << player->getnickname() << " " << post << " " << player->getLevel() << " " << player->getStatus()  << " " << player->getLogtime() << " " << player->getRank() <<  " " << player->getPoint() << std::endl;
     }
-    std::cout << "Socket Created successfully ." << std::endl;
-    return (1);
+    file.close();
+	if (bot)
+		sendReply(bot->getFd(), " : L_DAPET");
 }
 
-int     Server::reusable_socket()
+bool	Server::check_exist(User *user)
 {
-    this->rc = setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (char *)&this->on, sizeof(this->on));
+	std::map<std::string, Player *>::iterator iter;
 
-    if (this->rc < 0)
-    {
-        std::cout << "Failed at setting socket option ! errno : " << errno << std::endl;
-        return (0); 
-    }
-    std::cout << "setting socket option . . . " << std::endl;
-    std::cout << "Done ! " << std::endl;
-    return (1);
+	std::cout << "checking if the user exist " << std::endl;
+	for (iter = this->players_list.begin(); iter != players_list.end(); iter++)
+	{
+		Player *player;
+		
+		player = iter->second;
+		if (player->getnickname() == user->getNickname())
+		{
+			std::cout << "User Already Exist ! " << std::endl;
+			return (true);
+		}
+	}
+	std::cout << "User not found " << std::endl;
+	return (false);
 }
 
-int     Server::nonblocking_socket()
+Player *     Server::getPlayer(std::string nickname)
 {
-    this->rc = ioctl(this->socket_fd, FIONBIO, (char *)&this->on);
+	std::map<std::string, Player *>::iterator	it;
 
-    if (this ->rc < 0)
-    {
-        std::cout << "Failed at making the socket non_blocking ! errno : " << errno << std::endl;
-        return (0);
-    }
-    std::cout << "making socket non blocking . . . " << std::endl;
-    std::cout << "Done !" << std::endl;
-    return (1);
+	for (it = this->players_list.begin(); it != this->players_list.end(); ++it) 
+	{
+		Player *player = it->second;
+		if (player->getnickname() == nickname)
+			return (player);
+	}
+	std::cout << "Player not found nick " << std::endl;
+	return (NULL);
 }
 
-
-int     Server::bind_socket()
+Player *     Server::getPlayer(int fd)
 {
-    memset(&this->addr, 0, sizeof(this->addr));
-    this->addr.sin6_family = AF_INET6;
-    memcpy(&this->addr.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-    addr.sin6_port = htons(SER_PORT);
-    this->rc = bind(this->socket_fd, (struct sockaddr *)&this->addr, sizeof(addr));
-    if (this->rc < 0)
-    {
-        std::cout << "Failed at binding the socket ! errno : " <<  errno << std::endl;
-        return (0);
-    }
-    std::cout << "getting PORT and IP . . . " << std::endl;
-    std::cout << "Done !" << std::endl;
-    return (1);
-}
+	std::map<std::string, Player *>::iterator	it;
 
-int     Server::listen_from_socket()
-{
-    this->rc = listen(this->socket_fd, MAX_CANON);
-
-    if (this->rc < 0)
-    {
-        std::cout << "Failed at listing ! errno : " << errno << std::endl;
-        return (0);
-    }
-    std::cout << "listing . . ." << std::endl;
-    return (1);
-}
-
-void    Server::poll_trait()
-{
-    std::cout << "setting poll structure . . ." << std::endl;
-    memset(this->fds, 0, sizeof(this->fds));
-
-    this->fds[0].fd = this->socket_fd;
-    this->fds[0].events = POLLIN;
-
-    std::cout << "Done !" << std::endl;
-}
-
-void     Server::accept_connect()
-{
-    std::cout << "Waiting for connection . . . " << std::endl;
-    do
-    {
-        this->new_fd = accept(this->socket_fd, NULL, NULL);
-        if (this->new_fd < 0)
-        {
-            if (errno != EWOULDBLOCK)
-            {
-                std::cout << "FAILED at accepting connection ! errno : " << errno << std::endl;
-                this->end_Server = TRUE; 
-            }
-            break;
-        }
-        std::cout << "NEW Connection detected "<< this->new_fd << std::endl;
-        this->fds[this->nfds].fd = this->new_fd;
-        this->fds[this->nfds].events = POLLIN;
-        this->nfds++;
-    }while (this->new_fd != -1);
-}
-
-void        Server::recv_send_msg(int i)
-{
-    std::cout <<  "receiving . . ." << std::endl;
-    this->close_conn = FALSE;
-    do
-    {
-        this->rc = recv(this->fds[i].fd, this->buffer, sizeof(this->buffer), 0);
-        this->buffer[this->rc] = '\0';
-        std::cout << this->buffer;
-        if (this->rc < 0)
-        {
-            if (errno != EWOULDBLOCK)
-            {
-                std::cout << "FAILED at receiving a msg ! errno : " << errno << std::endl;
-                this->close_conn = TRUE;
-            }
-            break;
-        }
-        if (this->rc == 0)
-        {
-            std::cout << "Connection closed . . . " << std::endl;
-            this->close_conn = TRUE;
-            break;
-        }
-        this->len = this->rc;
-        std::cout << len << " bytes received " << std::endl;
-        this->rc = send(this->fds[i].fd, this->buffer, this->rc, 0);
-        if (this->rc < 0)
-        {
-            std::cout << "FAILED to send an answer to the client ! " << std::endl;
-            this->close_conn = TRUE;
-            break;
-        }
-        this->rc = send(this->fds[i].fd, "received succ >.<\n", sizeof("received succ >.<\n"), 0);
-        if (this->rc < 0)
-        {
-            std::cout << "FAILED to send an answer to the client ! " << std::endl;
-            this->close_conn = TRUE;
-            break;
-        }
-    }while (TRUE);
+	for (it = this->players_list.begin(); it != this->players_list.end(); ++it) 
+	{
+		Player *player = it->second;
+		if (player->getUser())
+			if (player->getUser()->getFd() == fd)
+				return (it->second);
+	}
+	std::cout << "Player not found fd " << std::endl;
+	return (NULL);
 }
