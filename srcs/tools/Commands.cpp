@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/28 10:13:41 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 10:19:14 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,8 +144,6 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getGuest(fd);
 	if (!user)
-		return;
-	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
@@ -162,8 +160,6 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	std::string reply;
 	user = this->getGuest(fd);
 	if (!user)
-		return ;
-	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 5)
 		throw myException(ERR_NEEDMOREPARAMS);

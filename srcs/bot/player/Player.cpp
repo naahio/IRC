@@ -6,7 +6,7 @@
 /*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/24 10:07:44 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 11:28:43 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/27 16:48:16 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,9 +154,10 @@ void	Player::Level_Up()
 		if (this->user)
 		{
 			sendReply(this->user->getFd(), ":irc!~irc1337 NOTICE HH : ⚔️  LEVEL UP ! ⚔️ \n");
+			sendReply(this->user->getFd(), stringBuilder(3, ":irc!~irc1337 NOTICE HH : ⚔️  NEW RANK ", this->level.c_str() , " ⚔️ \n"));
 			this->Promote();
 			this->Update_Status();
-			this->points = 0;
+			// this->points = 0;
 		}
 }
 

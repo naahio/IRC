@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/28 09:48:00 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 10:19:25 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,6 +188,8 @@ void	Server::clientDisconnect(int fd) {
 		if (u)
 		{
 			Player *player = this->getPlayer(u->getNickname());
+			if (!player)
+				return;
 			player->set_logtime(player->getLogtime() + (now - player->getLoged_In()));
 			player->add_Points(player->getLogtime() * 0.5);
 			std::cout << "deleting : " << u->getNickname() << std::endl;
