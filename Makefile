@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+         #
+#    By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/19 10:46:54 by mbabela           #+#    #+#              #
-#    Updated: 2022/09/26 13:00:34 by mbabela          ###   ########.fr        #
+#    Updated: 2022/09/28 11:35:05 by hel-makh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,6 +49,9 @@ $(NAME):	$(OBJS) $(HEADERS)
 
 client:
 			c++ $(FLAGS) $(CLIENT_SRCS) -o $(CLIENT_NAME)
+
+bot:
+			python srcs/bot/lily.py
 
 all:		$(NAME) client
 

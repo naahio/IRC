@@ -38,4 +38,3 @@ client
 .vscode
 *.dSYM/
 .DS_Store
-user.txt
