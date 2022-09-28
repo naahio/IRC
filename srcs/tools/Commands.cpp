@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 16:23:56 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 17:07:30 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -488,7 +488,7 @@ void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
 					channel->setInviteOnly(sign, fd);
 					break;
 				case 't':
-					channel->setTopicSettable(sign, fd);
+					channel->setTopicSettableByOp(sign, fd);
 					break;
 				case 'n':
 					channel->setMemberChatOnly(sign, fd);
@@ -741,23 +741,22 @@ void	Server::TOPICcmd(int fd, std::vector<std::string> &cmd)
 		channel = this->getChannel(cmd[1]);
 		if (!channel)
 			throw myException(ERR_NOSUCHCHANNEL);
-		if (cmd.size() == 2)
-		{
-			if (channel->getTopic().empty())
-				throw myException(RPL_NOTOPIC);
+		if (cmd.size() > 2) {
+			channel->setTopic(cmd[2], fd);
+			return ;
+		}
+		if (channel->getTopic().empty()) {
+			sendReply(fd, this->getName()
+				+ ft_tostring(RPL_NOTOPIC) + " "
+				+ op->getNickname() + " "
+				+ channel->getName() + " "
+				+ reply(RPL_NOTOPIC) + "\n");
+		} else {
 			sendReply(fd, this->getName()
 				+ ft_tostring(RPL_TOPIC) + " "
 				+ op->getNickname() + " "
 				+ channel->getName() + " :"
 				+ channel->getTopic() + "\n");
-		}
-		else
-		{
-			channel->setTopic(cmd[2], fd);
-			channel->broadCastMessage(":" + op->getIdentifier()
-				+ cmd[0] + " "
-				+ channel->getName() + " :"
-				+ cmd[2] + "\n");
 		}
 	} catch (myException &e) {
 		sendReply(fd, this->getName()

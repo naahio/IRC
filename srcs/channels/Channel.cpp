@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/27 16:05:57 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 17:05:25 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Channel::Channel(std::string _name) {
 	this->memberChatOnly = false;
 	this->inviteOnly = false;
 	this->moderated = false;
-	this->topicSettable = true;
+	this->topicSettableByOp = false;
 }
 
 /******************************[ Getters/Setters ]*****************************/
@@ -78,8 +78,8 @@ bool	Channel::isModerated(void) const {
 	return (this->moderated);
 }
 
-bool	Channel::isTopicSettable(void) const {
-	return (this->topicSettable);
+bool	Channel::isTopicSettableByOp(void) const {
+	return (this->topicSettableByOp);
 }
 
 std::map <int, User *> &	Channel::getMembers(void) {
@@ -109,11 +109,11 @@ void	Channel::setTopic(std::string _topic, int fd) {
 	member = this->getMember(fd);
 	if (!member)
 		throw myException(ERR_NOTONCHANNEL);
-	if (!this->topicSettable && !this->getOperator(fd))
+	if (!this->getOperator(fd) && this->topicSettableByOp)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->topic = _topic;
-	reply = ":" + member->getIdentifier() + " "
-		+ "TOPIC" + " "
+	reply = ":" + member->getIdentifier()
+		+ " TOPIC "
 		+ this->getName() + " "
 		+ ":" + _topic + "\n";
 	this->broadCastMessage(reply);
@@ -127,8 +127,8 @@ void	Channel::setKey(std::string _key, bool option, int fd) {
 	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->key = option ? _key : "";
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ (option ? "+" : "-") + "k " + _key + "\n";
 	this->broadCastMessage(reply);
@@ -144,8 +144,8 @@ void	Channel::setLimit(size_t limit, int fd) {
 	if (!limit)
 		return ;
 	this->membersLimit = limit;
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ "+l " + ft_tostring(limit) + "\n";
 	this->broadCastMessage(reply);
@@ -159,8 +159,8 @@ void	Channel::setPrivate(bool option, int fd) {
 	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->_private = option;
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ (option ? "+" : "-") + "p\n";
 	this->broadCastMessage(reply);
@@ -174,8 +174,8 @@ void	Channel::setSecret(bool option, int fd) {
 	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->secret = option;
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ (option ? "+" : "-") + "s\n";
 	this->broadCastMessage(reply);
@@ -189,8 +189,8 @@ void	Channel::setMemberChatOnly(bool option, int fd) {
 	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->memberChatOnly = option;
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ (option ? "+" : "-") + "n\n";
 	this->broadCastMessage(reply);
@@ -204,8 +204,8 @@ void	Channel::setInviteOnly(bool option, int fd) {
 	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->inviteOnly = option;
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ (option ? "+" : "-") + "i\n";
 	this->broadCastMessage(reply);
@@ -219,14 +219,14 @@ void	Channel::setModerated(bool option, int fd) {
 	if (!op)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	this->moderated = option;
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ (option ? "+" : "-") + "m\n";
 	this->broadCastMessage(reply);
 }
 
-void	Channel::setTopicSettable(bool option, int fd) {
+void	Channel::setTopicSettableByOp(bool option, int fd) {
 	User *		op;
 	std::string	reply;
 
@@ -235,9 +235,9 @@ void	Channel::setTopicSettable(bool option, int fd) {
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	if (!this->getOperator(fd))
 		throw myException(ERR_CHANOPRIVSNEEDED);
-	this->topicSettable = option;
-	reply = ":" + op->getIdentifier() + " "
-		+ "MODE" + " "
+	this->topicSettableByOp = option;
+	reply = ":" + op->getIdentifier()
+		+ " MODE "
 		+ this->getName() + " "
 		+ (option ? "+" : "-") + "t\n";
 	this->broadCastMessage(reply);

@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 16:18:27 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 16:38:14 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -280,7 +280,7 @@ void	Server::listChannelModes(Channel * channel, int fd) {
 		reply += "s";
 	if (channel->isInviteOnly())
 		reply += "i";
-	if (!channel->isTopicSettable())
+	if (channel->isTopicSettableByOp())
 		reply += "t";
 	if (channel->isMemberChatOnly())
 		reply += "n";
