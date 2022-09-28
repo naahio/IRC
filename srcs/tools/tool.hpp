@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/22 09:28:22 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/25 14:47:57 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 09:38:28 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,8 @@ void				split(std::string const &s1, char delim, std::vector<std::string> &out);
 int					paramsChecker(const std::string &param);
 bool				wcMatch(std::string const & pat, std::string const & target);
 t_ident				parseIdentifier(std::string identifier);
-std::string const	ft_tostring(int n);
+std::string const	ft_toLower(std::string str);
+std::string const	ft_toString(int n);
 int					ft_toInt(std::string const & str);
 std::string const	stringBuilder(int n, ...);
 void				sendReply(int fd, const std::string &reply);

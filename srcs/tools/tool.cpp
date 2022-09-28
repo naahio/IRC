@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tool.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/31 15:32:31 by ybensell          #+#    #+#             */
-/*   Updated: 2022/09/25 14:47:50 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 09:45:44 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,14 @@ t_ident	parseIdentifier(std::string identifier) {
 	return (ident);
 }
 
-std::string const	ft_tostring(int n) {
+std::string const	ft_toLower(std::string str) {
+	for (std::string::iterator it = str.begin(); it != str.end(); it++) {
+		*it = tolower(*it);
+	}
+	return (str);
+}
+
+std::string const	ft_toString(int n) {
 	std::stringstream	ss;
 
 	ss << n;

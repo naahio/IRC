@@ -1,7 +1,11 @@
-4 /lily e2r8p5.1337.ma LEVEL_9 LogTime_Seeker 4572 user 7127
-9 MOK e2r7p4.1337.ma LEVEL_0 normal 0 newbie 5
-5 extra_naahio e2r8p5.1337.ma LEVEL_0 normal 72 newbie 41
-8 helmakh e2r8p3.1337.ma LEVEL_2 normal 164 user 162
+4 /lily e2r8p3.1337.ma LEVEL_0 normal 1 newbie 15
+5 MOK localhost LEVEL_0 normal 0 newbie 14
+5 hel-makh localhost LEVEL_0 normal 0 newbie 25
+5 helmakh localhost LEVEL_2 normal 164 user 162
+10 houazzan e2r5p4.1337.ma LEVEL_0 normal 0 newbie 12
+5 khtek localhost LEVEL_0 normal 0 newbie 35
 7 lime e2r8p5.1337.ma LEVEL_9 LogTime_Seeker 3034 newbie 3000
 8 mjm e2r3p1.1337.ma LEVEL_0 normal 0 newbie 13
-4 peng e2r7p4.1337.ma LEVEL_4 Normal_Player 168 player 258
+5 mmasstou e2r7p15.1337.ma LEVEL_0 normal 0 newbie 14
+4 peng e2r7p4.1337.ma LEVEL_5 Normal_Player 168 player 274
+9 suprivada e2r10p15.1337.ma LEVEL_0 normal 0 newbie 12

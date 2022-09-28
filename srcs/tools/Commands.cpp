@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 16:27:22 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 11:30:52 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void	Server::sendChannelUsers(int fd, Channel *chan,User *user,const std::string
 		}
 	}
 	sendReply(fd, this->getName()
-		+ ft_tostring(RPL_NAMREPLY) + " "
+		+ ft_toString(RPL_NAMREPLY) + " "
 		+ user->getNickname() + " = "
 		+ channel + " :"
 		+ members + "\n");
@@ -41,8 +41,6 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	std::vector<std::string>	channels;
 	std::vector<std::string>	keys;
 	std::string					rply;
-
-	Player	*pl = this->getPlayer(fd);
 
 	user = this->getUser(fd);
 	if (!user)
@@ -61,29 +59,32 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			Channel *chan = this->getChannel(channels[i]);
 			if (chan && chan->getMember(fd))
 				continue;
+			Player	*pl = this->getPlayer(fd);
 			if (chan) {
-				pl->add_Points(CHANNEL_POINT);
+				if (pl)
+					pl->add_Points(CHANNEL_POINT);
 				chan->addMember(user, keys[i]);
 			}
 			else {
-				pl->add_Points(CREATED_CHANNEL_POINT);
+				if (pl)
+					pl->add_Points(CREATED_CHANNEL_POINT);
 				this->createChannel(channels[i], *user);
 				chan = this->getChannel(channels[i]);
 			}
 			rply = ":" + user->getIdentifier() + " "
-				+ cmd[0] + " :"
+				+ cmd[0] + " "
 				+ chan->getName() + "\n";
 			chan->broadCastMessage(rply);
 			sendChannelUsers(fd, chan, user, chan->getName());
 			sendReply(fd, this->getName()
-				+ ft_tostring(RPL_ENDOFNAMES) + " "
+				+ ft_toString(RPL_ENDOFNAMES) + " "
 				+ user->getNickname() + " "
 				+ chan->getName() + " "
 				+ reply(RPL_ENDOFNAMES) + "\n");
 		}
 		catch (myException &e) {
 			sendReply(fd, this->getName()
-				+ ft_tostring(e.getERROR_NO()) + " "
+				+ ft_toString(e.getERROR_NO()) + " "
 				+ user->getNickname() + " "
 				+ channels[i] + " "
 				+ e.what() + "\n");
@@ -130,7 +131,7 @@ void	Server::PRIVMSGcmd(int fd, std::vector<std::string> &cmd, bool notice)
 	} catch(myException & e) {
 		if (!notice || e.getERROR_NO() == ERR_NORECIPIENT || e.getERROR_NO() == ERR_NOTEXTTOSEND) {
 			sendReply(fd, this->getName()
-				+ ft_tostring(e.getERROR_NO()) + " "
+				+ ft_toString(e.getERROR_NO()) + " "
 				+ user->getNickname() + " "
 				+ (cmd.size() > 2 ? (cmd[1] + " ") : "")
 				+ e.what() + "\n");
@@ -144,8 +145,6 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getGuest(fd);
 	if (!user)
-		return;
-	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
@@ -162,8 +161,6 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	std::string reply;
 	user = this->getGuest(fd);
 	if (!user)
-		return ;
-	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 5)
 		throw myException(ERR_NEEDMOREPARAMS);
@@ -185,7 +182,7 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 		}
 		else
 		{
-			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",ft_toString(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
 			cmd[1] = "BAD PASSWORD";
 			QUITcmd(fd,cmd);
@@ -211,6 +208,10 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 			sendReply(fd,stringBuilder(7,":",user->getNickname().c_str(),"!~",this->getName().c_str(),
 											cmd[0].c_str()," :",cmd[1].c_str()));
 		user->setNickname(cmd[1]);
+		if (this->players_list.empty() || this->check_exist(user) == false)
+			this->add_player(user);
+		else
+			this->link_data(user);
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{
@@ -224,7 +225,7 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 		else
 		{
 			sendReply(fd,stringBuilder(5,this->getName().c_str()," ",
-			ft_tostring(ERR_PASSWDMISMATCH).c_str(),
+			ft_toString(ERR_PASSWDMISMATCH).c_str(),
 			" PASS ",err_reply(ERR_PASSWDMISMATCH).c_str()));
 			cmd[1] = "BAD PASSWORD";
 			QUITcmd(fd,cmd);
@@ -288,7 +289,7 @@ void	Server::INVITEcmd(int fd,std::vector<std::string> &cmd)
 		throw myException(ERR_CHANOPRIVSNEEDED);
 	channel->addInvitee(invitee);
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_INVITING) + " "
+		+ ft_toString(RPL_INVITING) + " "
 		+ inviter->getNickname() + " "
 		+ invitee->getNickname() + " "
 		+ channel->getName() + "\n");
@@ -320,21 +321,21 @@ void	Server::KICKcmd(int fd, std::vector<std::string> &cmd)
 		channel = this->getChannel(cmd[1]);
 		if (!channel)
 			return throw myException(this->getName()
-				+ ft_tostring(ERR_NOSUCHCHANNEL) + " "
+				+ ft_toString(ERR_NOSUCHCHANNEL) + " "
 				+ op->getNickname() + " "
 				+ cmd[1] + " "
 				+ err_reply(ERR_NOSUCHCHANNEL) + "\n");
 		op = channel->getOperator(fd);
 		if (!op)
 			return throw myException(this->getName()
-				+ ft_tostring(ERR_CHANOPRIVSNEEDED) + " "
+				+ ft_toString(ERR_CHANOPRIVSNEEDED) + " "
 				+ this->getUser(fd)->getNickname() + " "
 				+ cmd[1] + " "
 				+ err_reply(ERR_CHANOPRIVSNEEDED) + "\n");
 		user = this->getUser(cmd[2]);
 		if (!user || !channel->getMember(user->getFd()))
 			return throw myException(this->getName()
-				+ ft_tostring(ERR_NOSUCHNICK) + " "
+				+ ft_toString(ERR_NOSUCHNICK) + " "
 				+ op->getNickname() + " "
 				+ cmd[2] + " "
 				+ err_reply(ERR_NOSUCHNICK) + "\n");
@@ -381,7 +382,7 @@ void	Server::PARTcmd(int fd, std::vector<std::string> &cmd)
 				this->deleteChannel(channel->getName());
 		} catch(myException & e) {
 			sendReply(fd, ":" + user->getIdentifier() + " "
-				+ ft_tostring(e.getERROR_NO()) + " "
+				+ ft_toString(e.getERROR_NO()) + " "
 				+ user->getNickname() + " "
 				+ (channel ? channel->getName() : channels[i]) + " "
 				+ e.what() + "\n");
@@ -398,7 +399,7 @@ void	Server::LISTcmd(int fd, std::vector<std::string> &cmd)
 	if (!user)
 		throw myException(ERR_NOTREGISTERED);
 	sendReply(fd, this->getName()
-		+ ft_tostring(RPL_LISTSTART) + " "
+		+ ft_toString(RPL_LISTSTART) + " "
 		+ reply(RPL_LISTSTART) + "\n");
 	if (cmd.size() == 1)
 	{
@@ -406,10 +407,10 @@ void	Server::LISTcmd(int fd, std::vector<std::string> &cmd)
 		for (it = this->channels.begin(); it != this->channels.end(); ++it)
 		{
 			sendReply(fd, this->getName()
-				+ ft_tostring(RPL_LIST) + " "
+				+ ft_toString(RPL_LIST) + " "
 				+ user->getNickname() + " "
 				+ it->first + " "
-				+ ft_tostring(it->second->getMembers().size()) + " :"
+				+ ft_toString(it->second->getMembers().size()) + " :"
 				+ (it->second->isPrivate() ? "" : it->second->getTopic()) + "\n");
 		}
 	}
@@ -422,15 +423,15 @@ void	Server::LISTcmd(int fd, std::vector<std::string> &cmd)
 			if (!channel)
 				continue;
 			sendReply(fd, this->getName()
-				+ ft_tostring(RPL_LIST) + " "
+				+ ft_toString(RPL_LIST) + " "
 				+ user->getNickname() + " "
 				+ channel->getName() + " "
-				+ ft_tostring(channel->getMembers().size()) + " :"
+				+ ft_toString(channel->getMembers().size()) + " :"
 				+ (channel->isPrivate() ? "" : channel->getTopic()) + "\n");
 		}
 	}
 	sendReply(fd, this->getName()
-		+ ft_tostring(RPL_LISTEND) + " "
+		+ ft_toString(RPL_LISTEND) + " "
 		+ user->getNickname() + " "
 		+ reply(RPL_LISTEND) + "\n");
 }
@@ -468,7 +469,7 @@ void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
 					user = this->getUser(cmd[argId++]);
 					if (!user)
 						throw myException(this->name
-							+ ft_tostring(ERR_NOSUCHNICK) + " "
+							+ ft_toString(ERR_NOSUCHNICK) + " "
 							+ op->getNickname() + " "
 							+ cmd[argId - 1] + " "
 							+ err_reply(ERR_NOSUCHNICK) + "\n");
@@ -488,7 +489,7 @@ void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
 					channel->setInviteOnly(sign, fd);
 					break;
 				case 't':
-					channel->setTopicSettable(sign, fd);
+					channel->setTopicSettableByOp(sign, fd);
 					break;
 				case 'n':
 					channel->setMemberChatOnly(sign, fd);
@@ -499,7 +500,7 @@ void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
 				case 'l':
 					if (cmd.size() - 1 < argId)
 						throw myException(this->name
-							+ ft_tostring(ERR_NEEDMOREPARAMS) + " "
+							+ ft_toString(ERR_NEEDMOREPARAMS) + " "
 							+ op->getNickname() + " "
 							+ "MODE" + " "
 							+ (sign ? "+" : "-") + cmd[2][i] + " "
@@ -530,7 +531,7 @@ void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
 					user = this->getUser(cmd[argId++]);
 					if (!user)
 						throw myException(this->name
-							+ ft_tostring(ERR_NOSUCHNICK) + " "
+							+ ft_toString(ERR_NOSUCHNICK) + " "
 							+ op->getNickname() + " "
 							+ cmd[argId - 1] + " "
 							+ err_reply(ERR_NOSUCHNICK) + "\n");
@@ -547,7 +548,7 @@ void	Server::channelModes(int fd, std::vector<std::string> & cmd) {
 					break;
 				default:
 					throw myException(this->name
-						+ ft_tostring(ERR_UNKNOWNMODE) + " "
+						+ ft_toString(ERR_UNKNOWNMODE) + " "
 						+ op->getNickname() + " "
 						+ cmd[2][i] + " "
 						+ err_reply(ERR_UNKNOWNMODE) + "\n");
@@ -589,7 +590,7 @@ void	Server::userModes(int fd, std::vector<std::string> & cmd) {
 					break;
 				default:
 					throw myException(this->name
-						+ ft_tostring(ERR_UMODEUNKNOWNFLAG) + " "
+						+ ft_toString(ERR_UMODEUNKNOWNFLAG) + " "
 						+ user->getNickname() + " "
 						+ err_reply(ERR_UMODEUNKNOWNFLAG) + "\n");
 			}
@@ -612,7 +613,7 @@ void	Server::MODEcmd(int fd, std::vector<std::string> & cmd) {
 		}
 	} catch (myException & e) {
 		sendReply(fd, this->getName()
-			+ ft_tostring(e.getERROR_NO()) + " "
+			+ ft_toString(e.getERROR_NO()) + " "
 			+ this->getUser(fd)->getNickname() + " "
 			+ (e.getERROR_NO() == ERR_USERSDONTMATCH ? "" : cmd[1] + " ")
 			+ e.what() + "\n");
@@ -638,7 +639,7 @@ void	Server::NAMEScmd(int fd, std::vector<std::string> &cmd)
 			if (chan && !chan->isPrivate() && !chan->isSecret())
 				sendChannelUsers(fd, chan, user,channel[i]);
 			sendReply(fd, this->getName()
-				+ ft_tostring(RPL_ENDOFNAMES) + " "
+				+ ft_toString(RPL_ENDOFNAMES) + " "
 				+ user->getNickname() + " "
 				+ (chan && !chan->isPrivate() && !chan->isSecret() ?
 					chan->getName() : channel[i]) + " "
@@ -656,7 +657,7 @@ void	Server::NAMEScmd(int fd, std::vector<std::string> &cmd)
 				sendChannelUsers(fd, it->second, user,it->second->getName());
 		}
 		sendReply(fd, this->getName()
-			+ ft_tostring(RPL_ENDOFNAMES) + " "
+			+ ft_toString(RPL_ENDOFNAMES) + " "
 			+ user->getNickname() + " * "
 			+ reply(RPL_ENDOFNAMES) + "\n");
 	}
@@ -693,7 +694,7 @@ void	Server::OPERcmd(int fd, std::vector<std::string> &cmd)
 		throw myException(ERR_PASSWDMISMATCH);
 	user->setIsOperator();
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_YOUREOPER) + " "
+		+ ft_toString(RPL_YOUREOPER) + " "
 		+ user->getNickname() + " "
 		+ reply(RPL_YOUREOPER) + "\n");
 }
@@ -720,7 +721,7 @@ void	Server::KILLcmd(int fd, std::vector<std::string> &cmd)
 		this->clientDisconnect(user->getFd());
 	} catch (myException &e) {
 		sendReply(fd, this->getName()
-			+ ft_tostring(e.getERROR_NO()) + " "
+			+ ft_toString(e.getERROR_NO()) + " "
 			+ op->getNickname() + " "
 			+ (user ? user->getNickname() + " " : "")
 			+ e.what() + "\n");
@@ -741,27 +742,26 @@ void	Server::TOPICcmd(int fd, std::vector<std::string> &cmd)
 		channel = this->getChannel(cmd[1]);
 		if (!channel)
 			throw myException(ERR_NOSUCHCHANNEL);
-		if (cmd.size() == 2)
-		{
-			if (channel->getTopic().empty())
-				throw myException(RPL_NOTOPIC);
+		if (cmd.size() > 2) {
+			channel->setTopic(cmd[2], fd);
+			return ;
+		}
+		if (channel->getTopic().empty()) {
 			sendReply(fd, this->getName()
-				+ ft_tostring(RPL_TOPIC) + " "
+				+ ft_toString(RPL_NOTOPIC) + " "
+				+ op->getNickname() + " "
+				+ channel->getName() + " "
+				+ reply(RPL_NOTOPIC) + "\n");
+		} else {
+			sendReply(fd, this->getName()
+				+ ft_toString(RPL_TOPIC) + " "
 				+ op->getNickname() + " "
 				+ channel->getName() + " :"
 				+ channel->getTopic() + "\n");
 		}
-		else
-		{
-			channel->setTopic(cmd[2], fd);
-			channel->broadCastMessage(":" + op->getIdentifier()
-				+ cmd[0] + " "
-				+ channel->getName() + " :"
-				+ cmd[2] + "\n");
-		}
 	} catch (myException &e) {
 		sendReply(fd, this->getName()
-			+ ft_tostring(e.getERROR_NO()) + " "
+			+ ft_toString(e.getERROR_NO()) + " "
 			+ op->getNickname() + " "
 			+ (channel ? channel->getName() : cmd[1]) + " "
 			+ e.what() + "\n");
@@ -775,7 +775,7 @@ void	Server::VERSIONcmd(int fd)
 	if (!(user = this->getUser(fd)) && !(user = this->getGuest(fd)))
 		return ;
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_VERSION) + " "
+		+ ft_toString(RPL_VERSION) + " "
 		+ (user->getNickname().empty() ? "*" : user->getNickname()) + " "
 		+ this->version.substr(1) + ". "
 		+ this->name.substr(1) + ":Beta Version\n");
@@ -790,10 +790,10 @@ void	Server::TIMEcmd(int fd)
 	if (!(user = this->getUser(fd)) && !(user = this->getGuest(fd)))
 		return ;
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_TIME) + " "
+		+ ft_toString(RPL_TIME) + " "
 		+ (user->getNickname().empty() ? "*" : user->getNickname()) + " "
 		+ this->name.substr(1)
-		+ ft_tostring(now) + " :"
+		+ ft_toString(now) + " :"
 		+ dt);
 }
 
@@ -804,27 +804,26 @@ void	Server::ADMINcmd(int fd)
 	if (!(user = this->getUser(fd)) && !(user = this->getGuest(fd)))
 		return ;
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_ADMINME) + " "
+		+ ft_toString(RPL_ADMINME) + " "
 		+ (user->getNickname().empty() ? "*" : user->getNickname()) + " "
 		+ reply(RPL_ADMINME) + "\n");
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_ADMINLOC1) + " "
+		+ ft_toString(RPL_ADMINLOC1) + " "
 		+ (user->getNickname().empty() ? "*" : user->getNickname()) + " :"
 		+ this->name + "is in Khouribga, Morocco\n");
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_ADMINLOC1) + " "
+		+ ft_toString(RPL_ADMINLOC1) + " "
 		+ (user->getNickname().empty() ? "*" : user->getNickname()) + " :"
 		+ this->name + "is being hosted in 1337 school"
 		+ " and running by mbabela, hel-makh and ybensell\n");
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_ADMINEMAIL) + " "
+		+ ft_toString(RPL_ADMINEMAIL) + " "
 		+ (user->getNickname().empty() ? "*" : user->getNickname()) + " :hh@dontemailme.com\n");
 }
 
 void	Server::welcomeReply(int fd)
 {
 	User	*user;
-	Player	*player;
 
 	user = this->getUser(fd);
 	if (!user)
@@ -841,7 +840,6 @@ void	Server::welcomeReply(int fd)
 	sendReply(fd, this->name + "003 "
 		+ user->getNickname() + " :This server was created "
 		+ this->creationTime);
-	player = new Player();
 	if (user->isAuth())
 	{
 		std::cout << "looking for user " << std::endl;

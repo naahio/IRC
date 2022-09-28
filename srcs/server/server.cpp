@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/28 09:27:39 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 11:19:52 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ User *	Server::getUser(std::string nickname) {
 	std::map<int, User *>::iterator	user;
 
 	for (user = this->users.begin(); user != this->users.end(); ++user) {
-		if (user->second->getNickname() == nickname) {
+		if (ft_toLower(user->second->getNickname()) == ft_toLower(nickname)) {
 			return (user->second);
 		}
 	}
@@ -137,7 +137,7 @@ User	*	Server::getGuest(std::string nickname)
 	std::map<int, User *>::iterator	user;
 
 	for (user = this->guests.begin(); user != this->guests.end(); ++user) {
-		if (user->second->getNickname() == nickname) {
+		if (ft_toLower(user->second->getNickname()) == ft_toLower(nickname)) {
 			return (user->second);
 		}
 	}
@@ -147,7 +147,7 @@ User	*	Server::getGuest(std::string nickname)
 Channel *	Server::getChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator	channel;
 	
-	channel = this->channels.find(name);
+	channel = this->channels.find(ft_toLower(name));
 	if (channel != this->channels.end()) {
 		return (channel->second);
 	}
@@ -188,14 +188,14 @@ void	Server::clientDisconnect(int fd) {
 		if (u)
 		{
 			Player *player = this->getPlayer(u->getNickname());
-			if (!player)
-				return ;
-			player->set_logtime(player->getLogtime() + (now - player->getLoged_In()));
-			player->add_Points(player->getLogtime() * 0.5);
-			std::cout << "deleting : " << u->getNickname() << std::endl;
-			this->save_data();
-			this->getPlayers_List().erase(u->getNickname());
-			std::cout << "deleted : " << std::endl;
+			if (player) {
+				player->set_logtime(player->getLogtime() + (now - player->getLoged_In()));
+				player->add_Points(player->getLogtime() * 0.5);
+				std::cout << "deleting : " << u->getNickname() << std::endl;
+				this->save_data();
+				this->getPlayers_List().erase(u->getNickname());
+				std::cout << "deleted : " << std::endl;
+			}
 		}
 
 		user = this->users.find(fd);
@@ -223,7 +223,7 @@ void	Server::listUserModes(User * user, int fd) {
 	std::string	reply;
 	std::string	reply2;
 
-	reply = this->name + ft_tostring(RPL_UMODEIS) + " " + user->getNickname() + " +";
+	reply = this->name + ft_toString(RPL_UMODEIS) + " " + user->getNickname() + " +";
 	if (user->isVisible())
 		reply += "i";
 	reply2 += "\n";
@@ -237,7 +237,7 @@ void	Server::createChannel(std::string name, User & op) {
 		Channel *	channel;
 
 		channel = new Channel(name);
-		if (this->channels.insert(std::pair<std::string, Channel *>(name, channel)).second) {
+		if (this->channels.insert(std::pair<std::string, Channel *>(ft_toLower(name), channel)).second) {
 			channel->addMember(&op);
 			return ;
 		}
@@ -253,14 +253,14 @@ void	Server::deleteChannel(std::string name) {
 	std::map<int, User *>						channelMembers;
 	std::map<std::string, Channel *>			memberChannels;
 
-	channel = this->channels.find(name);
+	channel = this->channels.find(ft_toLower(name));
 	if (channel == this->channels.end())
 		return ;
 	channelMembers = channel->second->getMembers();
 	for (member = channelMembers.begin(); member != channelMembers.end(); ++member) {
 		memberChannels = member->second->getChannels();
-		if (memberChannels.find(name) != memberChannels.end()) {
-			memberChannels.erase(memberChannels.find(name));
+		if (memberChannels.find(ft_toLower(name)) != memberChannels.end()) {
+			memberChannels.erase(memberChannels.find(ft_toLower(name)));
 		}
 	}
 	delete channel->second;
@@ -275,14 +275,14 @@ void	Server::listChannelModes(Channel * channel, int fd) {
 	user = this->getUser(fd);
 	if (!user)
 		return ;
-	reply = this->name + ft_tostring(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
+	reply = this->name + ft_toString(RPL_CHANNELMODEIS) + " " + user->getNickname() + " " + channel->getName() + " +";
 	if (channel->isPrivate())
 		reply += "p";
 	if (channel->isSecret())
 		reply += "s";
 	if (channel->isInviteOnly())
 		reply += "i";
-	if (!channel->isTopicSettable())
+	if (channel->isTopicSettableByOp())
 		reply += "t";
 	if (channel->isMemberChatOnly())
 		reply += "n";
@@ -290,7 +290,7 @@ void	Server::listChannelModes(Channel * channel, int fd) {
 		reply += "m";
 	if (channel->getMembersLimit() != 0) {
 		reply += "l";
-		reply2 += " " + ft_tostring(channel->getMembersLimit());
+		reply2 += " " + ft_toString(channel->getMembersLimit());
 	}
 	if (channel->getKey() != "") {
 		reply += "k";
@@ -299,10 +299,10 @@ void	Server::listChannelModes(Channel * channel, int fd) {
 	reply2 += "\n";
 	sendReply(fd, reply + reply2);
 	sendReply(fd, this->name
-		+ ft_tostring(RPL_CREATIONTIME) + " "
+		+ ft_toString(RPL_CREATIONTIME) + " "
 		+ user->getNickname() + " "
 		+ channel->getName() + " "
-		+ ft_tostring(channel->getCreationTimestamp()) + "\n");
+		+ ft_toString(channel->getCreationTimestamp()) + "\n");
 }
 
 void	Server::listChannelBans(Channel * channel, int fd) {
@@ -317,15 +317,15 @@ void	Server::listChannelBans(Channel * channel, int fd) {
 	bans = channel->getBans();
 	for (it = bans.begin(); it != bans.end(); ++it) {
 		replyMessage += this->name
-			+ ft_tostring(RPL_BANLIST) + " "
+			+ ft_toString(RPL_BANLIST) + " "
 			+ user->getNickname() + " "
 			+ channel->getName() + " "
 			+ it->banMask + " "
 			+ it->banMod + " "
-			+ ft_tostring(it->banTimestamp) + "\n";
+			+ ft_toString(it->banTimestamp) + "\n";
 	}
 	replyMessage += this->name
-		+ ft_tostring(RPL_ENDOFBANLIST) + " "
+		+ ft_toString(RPL_ENDOFBANLIST) + " "
 		+ user->getNickname() + " "
 		+ channel->getName() + " "
 		+ reply(RPL_ENDOFBANLIST) + "\n";
@@ -586,7 +586,7 @@ void	Server::cmdExec(Msg &msg,std::vector<std::string> &cmd)
 		}
 	} catch(myException & e) {
 		sendReply(msg.getSender(), this->getName()
-			+ ft_tostring(e.getERROR_NO()) + " "
+			+ ft_toString(e.getERROR_NO()) + " "
 			+ user->getNickname() + " "
 			+ cmd[0] + " "
 			+ e.what() + "\n");
@@ -665,8 +665,10 @@ void	Server::add_player(User *user) // first time connected
 
 void	Server::link_data(User *user)
 {
-	std::cout << " geting player  " << std::endl;
+	std::cout << " getting player  " << std::endl;
 	Player *player = this->getPlayer(user->getNickname());
+	if (!player)
+		return;
 	player->set_user(user);
 	time_t now = time(0);
 	player->set_Loged_In(now);
@@ -683,7 +685,7 @@ bool	Server::load_data()
 	std::vector<std::string> p_data;					
 
 	std::cout << " Loading data  " << std::endl;
-	file.open("/Users/mbabela/Desktop/IRC/user.txt");
+	file.open("user.txt");
 	if (!file)
 	{
 		std::cout << "Error ! could not open the file " <<std::endl;
@@ -708,7 +710,7 @@ bool	Server::load_data()
 void	Server::save_data()
 {
 	User	*bot;
-	std::ofstream file("/Users/mbabela/Desktop/IRC/user.txt");
+	std::ofstream file("user.txt");
 	std::map <std::string, Player *>::iterator	  it;
 	bot = this->getUser("/lily");
 	int			fd;
