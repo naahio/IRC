@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 13:13:06 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 16:22:57 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 11:14:58 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,14 @@
 # include <sys/stat.h>
 # include <netdb.h>
 
-// # include "../users/User.hpp"
 # include "../channels/Channel.hpp"
 # include "../tools/tool.hpp"
 # include "../pars/msg.hpp"
 # include "../bot/player/Player.hpp"
 
-
 # define BUFF_SIZE		512
 # define MAX_CONN		64
-# define TIMEOUT		3 * 60 * 1000
+# define TIMEOUT		30 * 60 * 1000
 
 class Server
 {

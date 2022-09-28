@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/28 10:19:14 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 11:00:39 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -819,7 +819,6 @@ void	Server::ADMINcmd(int fd)
 void	Server::welcomeReply(int fd)
 {
 	User	*user;
-	Player	*player;
 
 	user = this->getUser(fd);
 	if (!user)
@@ -836,7 +835,6 @@ void	Server::welcomeReply(int fd)
 	sendReply(fd, this->name + "003 "
 		+ user->getNickname() + " :This server was created "
 		+ this->creationTime);
-	player = new Player();
 	if (user->isAuth())
 	{
 		std::cout << "looking for user " << std::endl;
