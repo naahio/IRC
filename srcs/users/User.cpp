@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
+/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/18 11:25:31 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/26 13:00:08 by mbabela          ###   ########.fr       */
+/*   Updated: 2022/09/28 09:51:21 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -212,13 +212,13 @@ void	User::removeFile(std::string file)
 }
 
 void	User::joinChannel(Channel & channel, std::string name) {
-	this->channels.insert(std::pair<std::string, Channel *>(name, &channel));
+	this->channels.insert(std::pair<std::string, Channel *>(ft_toLower(name), &channel));
 }
 
 void	User::leaveChannel(std::string name) {
 	std::map<std::string, Channel *>::iterator it;
 
-	it = this->channels.find(name);
+	it = this->channels.find(ft_toLower(name));
 	if (it == this->channels.end()) {
 		throw myException(ERR_NOTONCHANNEL);
 	}

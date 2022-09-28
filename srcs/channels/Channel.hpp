@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:35 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/27 16:02:44 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/27 16:34:13 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class Channel {
 		bool					memberChatOnly;
 		bool					inviteOnly;
 		bool					moderated;
-		bool					topicSettable;
+		bool					topicSettableByOp;
 
 		std::map <int, User *>	members;
 		std::map <int, User *>	invitees;
@@ -68,7 +68,7 @@ class Channel {
 		bool						isMemberChatOnly(void) const;
 		bool						isInviteOnly(void) const;
 		bool						isModerated(void) const;
-		bool						isTopicSettable(void) const;
+		bool						isTopicSettableByOp(void) const;
 		
 		std::map <int, User *> &	getMembers(void);
 		std::map <int, User *> &	getInvitees(void);
@@ -84,7 +84,7 @@ class Channel {
 		void	setMemberChatOnly(bool option, int fd);
 		void	setInviteOnly(bool option, int fd);
 		void	setModerated(bool option, int fd);
-		void	setTopicSettable(bool option, int fd);
+		void	setTopicSettableByOp(bool option, int fd);
 		
 		User *	getMember(int fd);
 		User *	getInvitee(int fd);
