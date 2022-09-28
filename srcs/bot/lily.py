@@ -18,7 +18,7 @@ class player:
 	def creat_player(self, fd, nickname, post, level, status, logtime, rank, points):
 		self.fd			= fd
 		self.nickname	= nickname
-		self.post		= post;
+		self.post		= post
 		self.level		= level
 		self.status 	= status
 		self.logtime	= logtime

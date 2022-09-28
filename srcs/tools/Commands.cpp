@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Commands.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: ybensell <ybensell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 16:23:56 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 09:21:23 by ybensell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,8 +144,6 @@ void	Server::PASScmd(int fd, std::vector<std::string> &cmd)
 
 	user = this->getGuest(fd);
 	if (!user)
-		return;
-	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 2)
 		throw myException(ERR_NEEDMOREPARAMS);
@@ -162,8 +160,6 @@ void	Server::USERcmd(int fd, std::vector<std::string> &cmd)
 	std::string reply;
 	user = this->getGuest(fd);
 	if (!user)
-		return ;
-	if (user->isAuth())
 		throw myException(ERR_ALREADYREGISTRED);
 	else if (cmd.size() < 5)
 		throw myException(ERR_NEEDMOREPARAMS);
