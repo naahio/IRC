@@ -1,5 +1,6 @@
-5 /lily e2r8p5.1337.ma LEVEL_9 LogTime_Seeker 4572 user 7100
+4 /lily e2r8p5.1337.ma LEVEL_9 LogTime_Seeker 4572 user 7127
 9 MOK e2r7p4.1337.ma LEVEL_0 normal 0 newbie 5
+5 extra_naahio e2r8p5.1337.ma LEVEL_0 normal 72 newbie 41
 8 helmakh e2r8p3.1337.ma LEVEL_2 normal 164 user 162
 7 lime e2r8p5.1337.ma LEVEL_9 LogTime_Seeker 3034 newbie 3000
 8 mjm e2r3p1.1337.ma LEVEL_0 normal 0 newbie 13
