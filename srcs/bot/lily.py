@@ -56,7 +56,7 @@ class lily:
 
     def read_file(self):
         user_list = {}
-        with open("/Users/mbabela/Desktop/IRC/user.txt") as csv_file:
+        with open("user.txt") as csv_file:
             results = []
             for line in csv_file:
                 words = line.split()
@@ -115,14 +115,15 @@ class lily:
             self.send_msg(sender, "**************************\n")
         else :
             self.send_msg(sender, "NO DATA ABOUT THE USER  !")
-        
-IRC_SERV 	=	"10.12.8.5"
-IRC_PORT 	=	9999
+
+HOSTNAME    =   socket.gethostname()   
+IRC_SERV    =   socket.gethostbyname(HOSTNAME)
+IRC_PORT 	=	6667
 GENERAL  	=	"#General"
 RANDOM  	=	"#Random"
 BOT_USER 	=	"bot"
 BOT_NICK	=	"/lily"
-PASSWORD 	=	"1337"
+PASSWORD 	=	"123"
 
 irc = lily()
 irc.serv_connect(IRC_SERV, IRC_PORT, BOT_USER, PASSWORD, BOT_NICK, GENERAL, RANDOM)
