@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/10 10:13:49 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/28 11:00:39 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 11:30:52 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,8 +42,6 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 	std::vector<std::string>	keys;
 	std::string					rply;
 
-	Player	*pl = this->getPlayer(fd);
-
 	user = this->getUser(fd);
 	if (!user)
 		throw myException(ERR_NOTREGISTERED);
@@ -61,12 +59,15 @@ void	Server::JOINcmd(int fd, std::vector<std::string> &cmd)
 			Channel *chan = this->getChannel(channels[i]);
 			if (chan && chan->getMember(fd))
 				continue;
+			Player	*pl = this->getPlayer(fd);
 			if (chan) {
-				pl->add_Points(CHANNEL_POINT);
+				if (pl)
+					pl->add_Points(CHANNEL_POINT);
 				chan->addMember(user, keys[i]);
 			}
 			else {
-				pl->add_Points(CREATED_CHANNEL_POINT);
+				if (pl)
+					pl->add_Points(CREATED_CHANNEL_POINT);
 				this->createChannel(channels[i], *user);
 				chan = this->getChannel(channels[i]);
 			}
@@ -207,6 +208,10 @@ void	Server::NICKcmd(int fd, std::vector<std::string> &cmd)
 			sendReply(fd,stringBuilder(7,":",user->getNickname().c_str(),"!~",this->getName().c_str(),
 											cmd[0].c_str()," :",cmd[1].c_str()));
 		user->setNickname(cmd[1]);
+		if (this->players_list.empty() || this->check_exist(user) == false)
+			this->add_player(user);
+		else
+			this->link_data(user);
 	}
 	if (!user->isRegistered() && user->isAuth())
 	{

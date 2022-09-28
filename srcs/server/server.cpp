@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/28 10:57:45 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 11:19:52 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -665,8 +665,10 @@ void	Server::add_player(User *user) // first time connected
 
 void	Server::link_data(User *user)
 {
-	std::cout << " geting player  " << std::endl;
+	std::cout << " getting player  " << std::endl;
 	Player *player = this->getPlayer(user->getNickname());
+	if (!player)
+		return;
 	player->set_user(user);
 	time_t now = time(0);
 	player->set_Loged_In(now);
@@ -683,7 +685,7 @@ bool	Server::load_data()
 	std::vector<std::string> p_data;					
 
 	std::cout << " Loading data  " << std::endl;
-	file.open("/Users/mbabela/Desktop/IRC/user.txt");
+	file.open("user.txt");
 	if (!file)
 	{
 		std::cout << "Error ! could not open the file " <<std::endl;
@@ -708,7 +710,7 @@ bool	Server::load_data()
 void	Server::save_data()
 {
 	User	*bot;
-	std::ofstream file("/Users/mbabela/Desktop/IRC/user.txt");
+	std::ofstream file("user.txt");
 	std::map <std::string, Player *>::iterator	  it;
 	bot = this->getUser("/lily");
 	int			fd;
