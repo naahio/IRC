@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: mbabela <mbabela@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/16 10:53:11 by mbabela           #+#    #+#             */
-/*   Updated: 2022/09/27 16:18:27 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 09:27:39 by mbabela          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,6 +188,8 @@ void	Server::clientDisconnect(int fd) {
 		if (u)
 		{
 			Player *player = this->getPlayer(u->getNickname());
+			if (!player)
+				return ;
 			player->set_logtime(player->getLogtime() + (now - player->getLoged_In()));
 			player->add_Points(player->getLogtime() * 0.5);
 			std::cout << "deleting : " << u->getNickname() << std::endl;
