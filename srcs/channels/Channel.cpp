@@ -6,7 +6,7 @@
 /*   By: hel-makh <hel-makh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/27 14:19:45 by hel-makh          #+#    #+#             */
-/*   Updated: 2022/09/27 17:05:25 by hel-makh         ###   ########.fr       */
+/*   Updated: 2022/09/28 10:08:51 by hel-makh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,7 @@ void	Channel::setLimit(size_t limit, int fd) {
 	reply = ":" + op->getIdentifier()
 		+ " MODE "
 		+ this->getName() + " "
-		+ "+l " + ft_tostring(limit) + "\n";
+		+ "+l " + ft_toString(limit) + "\n";
 	this->broadCastMessage(reply);
 }
 
@@ -471,14 +471,14 @@ void	Channel::removeBan(std::string const & banMask, int fd) {
 	ident = parseIdentifier(banMask);
 	for (it = this->bans.begin(); it != this->bans.end(); ++it) {
 		ident2 = parseIdentifier(it->banMask);
-		if (ident.nickname == ident2.nickname
-			&& ident.username == ident2.username
-			&& ident.hostname == ident2.hostname) {
+		if (ft_toLower(ident.nickname) == ft_toLower(ident2.nickname)
+			&& ft_toLower(ident.username) == ft_toLower(ident2.username)
+			&& ft_toLower(ident.hostname) == ft_toLower(ident2.hostname)) {
 			this->bans.erase(it);
 			reply = ":" + op->getIdentifier() + " "
 				+ "MODE" + " "
 				+ this->getName() + " "
-				+ "+b" + " "
+				+ "-b" + " "
 				+ banMask + "\n";
 			this->broadCastMessage(reply);
 			break ;
@@ -492,7 +492,7 @@ bool	Channel::isBanned(User * user) {
 
 	for (it = this->bans.begin(); it != this->bans.end(); ++it) {
 		ident = parseIdentifier(it->banMask);
-		if (wcMatch(ident.nickname, user->getNickname())
+		if (wcMatch(ft_toLower(ident.nickname), ft_toLower(user->getNickname()))
 			&& wcMatch(ident.username, user->getUsername())
 			&& wcMatch(ident.hostname, user->getHostName())) {
 			return (true);
@@ -508,7 +508,7 @@ bool	Channel::isBanned(std::string banMask) {
 	ident = parseIdentifier(banMask);
 	for (it = this->bans.begin(); it != this->bans.end(); ++it) {
 		ident2 = parseIdentifier(it->banMask);
-		if (wcMatch(ident2.nickname, ident.nickname)
+		if (wcMatch(ft_toLower(ident2.nickname), ft_toLower(ident.nickname))
 			&& wcMatch(ident2.username, ident.username)
 			&& wcMatch(ident2.hostname, ident.hostname)) {
 			return (true);
