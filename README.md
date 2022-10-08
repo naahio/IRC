@@ -40,4 +40,31 @@
     <p align="center">
     ![diag](https://user-images.githubusercontent.com/60394951/194701310-c6ebb270-b36e-4c8d-b929-b35547102603.png)
     </p>
+  - With this the Server is ready to go.
     
+  > Client :
+   - At this point we are waiting for any connection from a Client.
+   - Several IRC clients exist. You have to choose one of them as a reference (`for 1337-kh students there is the LimeChat `).
+   - Using your reference client with your server must be similar to using it with any official IRC server,
+      which means the replays must be displayed correctly and clearly .
+   - each action in made by the Client has it's reaply/result in the server like an asnwer to the request to which could be and error or a command's result .
+   - While building the replays it would be better to use the terminal as a client, it makes the follow of the commands much better,
+      you can use the `nc -c` command with the server IP_Adresse and PORT : 
+      </p>
+       <p align="center">
+         <img width="272" alt="Screen Shot 2022-10-08 at 11 37 28 AM" src="https://user-images.githubusercontent.com/60394951/194703357-26d3780a-9200-44f2-ac4b-161df108818c.png">
+      </p>
+   - Using the terminal make it more easy when it comes to the what the Server sends and what the Client receives
+   </p>
+   <img width="1448" alt="Screen Shot 2022-10-08 at 11 41 25 AM" src="https://user-images.githubusercontent.com/60394951/194704210-453b5859-9c68-4c9c-b982-c79dc4587ae9.png">   
+   <p align="right">
+      <img width="606" alt="Screen Shot 2022-10-08 at 11 43 09 AM" src="https://user-images.githubusercontent.com/60394951/194703941-788f1782-4517-404b-a916-3fe7e783e97c.png">
+   </p>
+  - And that's it, it's up to you now, using the [RFC](https://www.rfc-editor.org/rfc/rfc1459.html#section-1), you will find everything you need to know and to do, so you can create your own IRC server.<br>
+ - Following the subject, there are some specific things that much be done as a mandaroty parts: <br>
+ > - You must be able to authenticate, set a nickname, a username, join a channel,
+       send and receive private messages using your reference client.
+   - All the messages sent from one client to a channel have to be forwarded to
+      every other client that joined the channel.
+   - You must have operators and regular users.
+    - Then, you have to implement the commands that are specific to operators.
